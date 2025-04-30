@@ -1,0 +1,26 @@
+[project]
+name = "sourcerer"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3==1.37.7",
+    "cryptography==44.0.2",
+    "dependency-injector==4.45.0",
+    "google-cloud-storage==3.1.0",
+    "humanize==4.12.1",
+    "sqlalchemy==2.0.38",
+    "sqlalchemy-utils>=0.41.2",
+    "textual[syntax]==3.1.0",
+]
+
+[dependency-groups]
+dev = [
+    "bandit>=1.8.3",
+    "mkdocs-material>=9.6.12",
+    "pylint>=3.3.6",
+    "pyright>=1.1.400",
+    "ruff>=0.11.7",
+    "textual-dev>=1.7.0",
+]

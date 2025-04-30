@@ -1,0 +1,44 @@
+
+FileSystemNavigationModal {
+  align: center middle;
+  content-align: center top;
+
+  & > #file_system_view_container {
+    padding: 1 2 0 2;
+    margin: 0 0;
+    width: 90;
+    height: auto;
+    background: $surface;
+
+    & > #active-path {
+      margin-bottom: 1;
+      width: 1fr;
+      border: solid $block-cursor-blurred-background;
+
+    }
+
+    & >  #controls {
+      align: center middle;
+      content-align: center top;
+      padding: 1 0 0 0;
+      height: 4;
+      width: 100%;
+    }
+  }
+
+  .dir-listing-folder {
+    padding: 0 0 0 0;
+    height: auto;
+    layout: grid;
+
+    & > .folder-name {
+      content-align: left middle;
+    }
+  }
+
+  .dir-listing-file {
+    padding: 0 0 0 0;
+    height: auto;
+
+  }
+}

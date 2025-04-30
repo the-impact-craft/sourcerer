@@ -1,0 +1,32 @@
+
+StorageListSidebar {
+  width: 20%;
+}
+
+StorageContent {
+  width: 80%;
+}
+
+#controls {
+  height: auto;
+  align-horizontal: center;
+
+  & > Button {
+    border: solid $primary;
+    width: 10;
+    content-align-horizontal: center;
+  }
+}
+
+#header {
+  height: 3;
+  width: 100%;
+  color: white;
+  padding: 1 1 0 1;
+}
+
+Rule {
+  color: $background-lighten-3;
+  padding: 0 0;
+  margin: 0 0;
+}

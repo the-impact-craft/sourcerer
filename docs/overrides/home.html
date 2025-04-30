@@ -1,0 +1,294 @@
+{% extends "main.html" %}
+{% block tabs %}
+{{ super() }}
+
+<style>
+    :root {
+        --bg-dark: #0f0f0f;
+        --accent: #8be9fd;
+        --text: #f8f8f2;
+    }
+
+    header.md-header, header > .md-tabs {
+        background-color: transparent;
+        backdrop-filter: blur(10px);
+        z-index: 10;
+        position: absolute;
+    }
+
+    .md-main {
+        display: none;
+    }
+
+    .hero {
+        position: relative;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        background: linear-gradient(to top, #1e1e1e, #2c2c2c);
+        overflow: hidden;
+        scroll-behavior: smooth;
+    }
+
+    .layer {
+        position: absolute;
+        width: 100%;
+        height: 100vh;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        transition: transform 0.1s ease-out;
+    }
+
+    .layer-1 {
+        background-image: url('assets/layer-1.png');
+        z-index: 1;
+    }
+
+    .layer-2 {
+        background-image: url('assets/layer-2.png');
+        z-index: 2;
+    }
+
+    .layer-3 {
+        background-image: url('assets/layer-3.png');
+        z-index: 3;
+    }
+
+    .layer-4 {
+        background-image: url('assets/layer-4.png');
+        z-index: 4;
+    }
+
+    .layer-5 {
+        background-image: url('assets/layer-5.png');
+        z-index: 2;
+        background-blend-mode: lighten;
+        opacity: 0.7
+    }
+
+    .hero-content {
+        z-index: 10;
+        position: relative;
+    }
+
+    .hero h1 {
+        font-size: 3rem;
+        margin: 0;
+        color: var(--accent);
+    }
+
+    .hero p {
+        font-size: 1rem;
+        margin: 1rem 0 2rem;
+    }
+
+    .demo {
+        background-color: #111;
+        text-align: center;
+        padding: 2rem 1rem;
+    }
+
+    .demo_images {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .demo img {
+        max-width: 48%;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .footer {
+        text-align: center;
+        font-size: 0.9rem;
+        color: #666;
+        padding-top: 2em;
+    }
+
+    .copy-button {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        color: #58a6ff;
+        cursor: pointer;
+        font-size: 1.2rem;
+    }
+
+    .copy-button:hover {
+        color: #8a2be2;
+    }
+
+    pre {
+        background-color: #161b22;
+        padding: 15px;
+        border-radius: 8px;
+        overflow-x: auto;
+        color: #c9d1d9;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        position: relative;
+        display: inline-block;
+        width: 300px;
+    }
+
+    .features {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        background: linear-gradient(to bottom, #16181d, #1b1b1b);
+        padding: 4rem 1rem;
+        gap: 2rem;
+    }
+
+    .feature-box {
+        flex: 1 1 250px;
+        max-width: 300px;
+        padding: 2rem;
+        background: radial-gradient(circle at top left, #493e81, #966da8), url('assets/billie-holiday.png');
+        background-blend-mode: overlay;
+        background-size: cover, auto;
+        background-repeat: no-repeat, repeat;
+
+        border-radius: 16px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        color: #e0e0e0;
+        position: relative;
+        z-index: 5;
+    }
+
+    .feature-box:hover {
+        transform: translateY(-5px) scale(1.02);
+        box-shadow: 0 0 25px #e9b59960;
+        border-color: #e9b599;
+    }
+
+    .feature-box h3 {
+        color: #e7935b;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .feature-box p {
+        font-size: 0.95rem;
+        line-height: 1.5;
+        color: #ccc;
+    }
+
+    @keyframes pulse-glow {
+        0% {
+            box-shadow: 0 0 0px rgba(138, 255, 219, 0.5);
+        }
+        50% {
+            box-shadow: 0 0 12px rgba(138, 255, 219, 0.8);
+        }
+        100% {
+            box-shadow: 0 0 0px rgba(138, 255, 219, 0.5);
+        }
+    }
+
+    .cta-button {
+        position: relative;
+        background-color: var(--accent);
+        color: #000;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        cursor: pointer;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: background 0.3s;
+        animation: pulse-glow 2s infinite;
+    }
+
+    .cta-button::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.15) 10%, transparent 60%);
+        animation: shimmer 3s linear infinite;
+        pointer-events: none;
+    }
+
+    .cta-button:hover {
+        background-color: #6dd6f2;
+    ]
+    }
+
+    @keyframes shimmer {
+        0% {
+            transform: rotate(0deg) translate(-50%, -50%);
+        }
+        100% {
+            transform: rotate(360deg) translate(-50%, -50%);
+        }
+    }
+</style>
+
+
+<div id="app">
+    <section class="hero">
+        <div class="layer layer-1"></div>
+        <div class="layer layer-2"></div>
+        <div class="layer layer-3"></div>
+        <div class="layer layer-4"></div>
+        <div class="layer layer-5"></div>
+        <div class="hero-content">
+            <h1>Sourcerer</h1>
+            <p>Your unified cloud storages interface</p>
+            <button class="cta-button">Try the Demo</button>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="feature-box">
+            <h3>Multi-Cloud View</h3>
+            <p>Browse GCP and S3-compatible storage in one unified place.</p>
+        </div>
+        <div class="feature-box">
+            <h3>No Switching</h3>
+            <p>No need to login to each service with separate credentials.</p>
+        </div>
+        <div class="feature-box">
+            <h3>Effortless Access</h3>
+            <p>Jump right into your files with a clean and intuitive UI.</p>
+        </div>
+    </section>
+
+    <section class="demo">
+        <h2>Install</h2>
+        <pre>
+      <button class="copy-button" onclick="copyToClipboard()">🧙</button>
+      <code id="install-code">
+pip install sourcerer
+      </code>
+    </pre>
+    </section>
+
+    <section class="demo">
+        <h2>See it in action</h2>
+        <div class="demo_images">
+            <img src="assets/creds_registration.gif" alt="Sourcerer Demo Preview">
+            <img src="assets/keys_operations.gif" alt="Sourcerer Demo Preview">
+        </div>
+    </section>
+
+    <footer class="footer">
+        &copy; 2025 Sourcerer. All rights reserved.
+    </footer>
+
+</div>
+
+
+{% endblock %}
+{% block content %}
+{% endblock %}
+{% block footer %}
+{% endblock %}

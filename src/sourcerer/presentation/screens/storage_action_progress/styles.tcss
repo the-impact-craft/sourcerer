@@ -1,0 +1,43 @@
+
+Container {
+  height: auto;
+}
+
+
+StorageActionProgressScreen {
+  align: center middle;
+  content-align: center top;
+
+
+  & > #StorageActionProgress {
+    padding: 1 2 0 2;
+    margin: 0 0;
+    width: 70;
+    height: 25;
+    border: solid $secondary-background;
+    border-title-color: $primary-lighten-2;
+
+    #progress_files {
+      padding-top: 1;
+    }
+
+    .progress_file_details {
+        align-horizontal: right;
+        color: $panel-lighten-3;
+        padding-right: 2;
+    }
+
+    .progress_file {
+      height: auto;
+
+      Label {
+        width: 30;
+        text-overflow: ellipsis;
+        text-wrap: nowrap;
+        padding-right: 1;
+      }
+    }
+
+  }
+}
+

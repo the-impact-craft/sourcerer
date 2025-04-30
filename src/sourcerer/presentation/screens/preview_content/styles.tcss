@@ -1,0 +1,26 @@
+
+Container {
+  height: auto;
+}
+
+
+PreviewContentScreen {
+  align: center middle;
+  content-align: center top;
+
+
+  & > #PreviewContentScreen {
+    padding: 1 2 0 2;
+    margin: 0 0;
+    width: 90;
+    height: 40;
+    border: solid $secondary-background;
+    border-title-color: $primary-lighten-2;
+
+    RichLog {
+      background: transparent;
+    }
+
+  }
+}
+

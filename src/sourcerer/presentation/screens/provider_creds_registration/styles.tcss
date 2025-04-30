@@ -1,0 +1,42 @@
+
+Container {
+  height: auto;
+}
+
+Label {
+  padding-left: 1;
+}
+
+ProviderCredsRegistrationScreen {
+  align: center middle;
+  content-align: center top;
+
+  & > #ProviderCredsRegistrationScreen {
+    padding: 1 2 0 2;
+    margin: 0 0;
+    width: 70;
+    height: 25;
+    border: solid $secondary-background;
+
+    & > #settings {
+      width: 100%;
+      height: 18;
+
+      & > .form_label {
+        padding-left: 1;
+        margin-bottom: 1;
+
+      }
+
+      & > #credentials_fields_container {
+        margin-top: 2;
+        padding-left: 2;
+      }
+
+      & > Select {
+         margin-bottom: 1;
+      }
+    }
+  }
+}
+

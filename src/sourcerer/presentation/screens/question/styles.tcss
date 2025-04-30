@@ -1,0 +1,33 @@
+QuestionScreen {
+  align: center middle;
+  content-align: center top;
+
+
+
+  & > Container {
+    padding: 1 2 0 2;
+    margin: 0 0;
+    width: 50;
+    height: 8;
+    border: solid $warning-darken-1;
+
+    & > Label {
+      margin: 1;
+      text-align: center;
+      column-span: 2;
+      width: auto;
+    }
+
+    & > Horizontal {
+      align: center bottom;
+       & > Button {
+        width: 5;
+       }
+    }
+
+  }
+
+}
+
+
+
