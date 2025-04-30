@@ -6,12 +6,12 @@ theme:
   name: material
   palette:
     # Palette toggle for dark mode
-    - media: "(prefers-color-scheme: dark)"
-      scheme: slate
-
+    media: "(prefers-color-scheme: dark)"
+    scheme: slate
+    primary: deep purple
   custom_dir: docs/overrides
   icon:
-    logo: fontawesome/solid/mountain-sun
+    logo: material/wizard-hat
   font:
     text: Open Sans
   features:
