@@ -15,7 +15,6 @@ engineers to view and manage files across multiple cloud providers like
 - 🗂️ Explore buckets and objects seamlessly  
 - 🔄 Upload, download, and delete files  
 - 🔐 Secure credential management via local **SQLite database**  
-- 🌈 Mystical, animated interface with fantasy charm  
 
 ---
 
