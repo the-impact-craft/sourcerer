@@ -11,3 +11,5 @@ The application is structured using a clean architecture approach with:
 - Infrastructure layer: Implementation details and external services
 - Presentation layer: User interface components
 """
+
+__version__ = "0.1.0"

@@ -1,3 +1,4 @@
+import traceback
 from pathlib import Path
 
 from textual import work, on
@@ -12,6 +13,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
     ListStorageItemsException,
 )
 from sourcerer.infrastructure.utils import generate_uuid
+from sourcerer.presentation.screens.critical_error.main import CriticalErrorScreen
 from sourcerer.presentation.screens.file_system_finder.main import (
     FileSystemNavigationModal,
 )
@@ -107,6 +109,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             )
             yield self.storage_content
         yield Footer()
+
+    def _handle_exception(self, error: Exception) -> None:
+        self.push_screen(CriticalErrorScreen(str(error), traceback.format_exc()))
 
     def on_mount(self):
         """

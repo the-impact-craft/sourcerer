@@ -1,0 +1,41 @@
+CriticalErrorScreen {
+  align: center middle;
+  content-align: center top;
+
+
+  & > Container {
+    padding: 1 2 0 2;
+    margin: 0 0;
+    width: 75%;
+    height: 25;
+    border: solid $text-secondary;
+    border-title-color: $text-secondary;
+
+    background: $background-lighten-1;
+
+    & > Label {
+      margin: 1;
+      text-align: center;
+      column-span: 2;
+      width: auto;
+    }
+
+    & > RichLog {
+      height: 16;
+    }
+
+    & > Horizontal {
+      align: center bottom;
+
+      & > Button {
+        width: auto;
+        margin-right: 2;
+        color: $text-secondary;
+      }
+    }
+  }
+
+}
+
+
+
