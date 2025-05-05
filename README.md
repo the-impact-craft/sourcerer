@@ -21,7 +21,14 @@ engineers to view and manage files across multiple cloud providers like
 ## 🪄 Installation
 
 ```bash
-pip install sourcerer
+pip install data-sourcerer
+```
+--
+
+## 🪄 Run
+
+```bash
+sourcerer
 ```
 
 

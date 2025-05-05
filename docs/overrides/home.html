@@ -265,11 +265,18 @@
     <section class="demo" id="install">
         <h2>Install</h2>
         <pre>
-      <button class="copy-button" onclick="copyToClipboard()">🧙</button>
-      <code id="install-code">
-pip install sourcerer
-      </code>
-    </pre>
+          <button class="copy-button" onclick="copyToClipboard()">🧙</button>
+          <code id="install-code">
+pip install data-sourcerer
+          </code>
+        </pre>
+        <h2>Run</h2>
+        <pre>
+          <button class="copy-button" onclick="copyToClipboard()">🧙</button>
+          <code id="run-code">
+sourcerer
+          </code>
+        </pre>
     </section>
 
     <section class="demo">
@@ -291,6 +298,10 @@ pip install sourcerer
             behavior: 'smooth'
         });
     });
+    function copyToClipboard() {
+        const codeBlock = document.getElementById("install-code").innerText.trim();
+        navigator.clipboard.writeText(codeBlock).catch(err => console.error('Error copying text:', err))
+    }
 </script>
 
 {% endblock %}
