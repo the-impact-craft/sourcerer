@@ -243,7 +243,7 @@
         <div class="hero-content">
             <h1>Sourcerer</h1>
             <p>Your unified cloud storages interface</p>
-            <button class="cta-button">Try the Demo</button>
+            <button class="cta-button">Try it out</button>
         </div>
     </section>
 
@@ -262,7 +262,7 @@
         </div>
     </section>
 
-    <section class="demo">
+    <section class="demo" id="install">
         <h2>Install</h2>
         <pre>
       <button class="copy-button" onclick="copyToClipboard()">🧙</button>
@@ -285,7 +285,13 @@ pip install sourcerer
     </footer>
 
 </div>
-
+<script>
+    document.querySelector('.cta-button').addEventListener('click', () => {
+        document.getElementById('install').scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
+</script>
 
 {% endblock %}
 {% block content %}
