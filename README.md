@@ -27,5 +27,6 @@ pip install sourcerer
 
 ## 🔮 See in action
 
-![creds_registration.gif](media/creds_registration.gif)
-![keys_operations.gif](media/keys_operations.gif)
+![creds_registration.gif](https://github.com/the-impact-craft/sourcerer/blob/main/media/creds_registration.gif?raw=true)
+
+![keys_operations.gif](https://github.com/the-impact-craft/sourcerer/blob/main/media/keys_operations.gif?raw=true)
