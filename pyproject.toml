@@ -1,19 +1,36 @@
 [project]
-name = "sourcerer"
+
+name = "data-sourcerer"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "boto3==1.37.7",
-    "cryptography==44.0.2",
-    "dependency-injector==4.45.0",
-    "google-cloud-storage==3.1.0",
-    "humanize==4.12.1",
-    "sqlalchemy==2.0.38",
-    "sqlalchemy-utils>=0.41.2",
-    "textual[syntax]==3.1.0",
+description = "Sourcerer is a terminal cloud storage navigator."
+requires-python = ">=3.8"
+
+keywords = ["cloud", "s3", "gcp", "cli", "termanal", "storage", "textual", "ui"]
+license = {text = "MIT"}
+
+authors = [
+  {name = "Bohdana Kuzmenko", email = "bohdana.kuzmenko.dev@gmail.com"},
 ]
+
+readme = {file = "README.md", content-type = "text/markdown"}
+
+dependencies = [
+    "boto3>=1.26.0,<2.0.0",
+    "cryptography>=44.0.2,<45.0.0",
+    "dependency-injector>=4.43.0,<5.0.0",
+    "google-cloud-storage>=3.1.0,<4.0.0",
+    "humanize>=4.12.1,<5.0.0",
+    "sqlalchemy>=2.0.38,<3.0.0",
+    "sqlalchemy-utils>=0.41.2,<1.0.0",
+    "textual[syntax]>=2.0.0,<4.0.0",
+]
+
+[project.scripts]
+sourcerer = "sourcerer.presentation.app:main"
+
+[build-system]
+requires = ["setuptools >= 61.0",  "setuptools-scm"]
+build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 dev = [
