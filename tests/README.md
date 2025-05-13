@@ -28,7 +28,7 @@ This will make the `sourcerer` package importable in your Python environment.
 To run coverage:
 
 ```bash
-coverage run -m unittest discover
+coverage run -m unittest
 ```
 
 To export coverage report:

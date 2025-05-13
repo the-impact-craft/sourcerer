@@ -16,3 +16,4 @@ class StorageProvider:
 
     S3 = "S3"
     GoogleCloudStorage = "Google Cloud Storage"
+    AzureStorage = "Azure Storage"

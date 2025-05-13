@@ -14,6 +14,7 @@ from textual.screen import ModalScreen
 from textual.widgets import ProgressBar, Label, Rule
 
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
+from sourcerer.infrastructure.storage_provider.exceptions import UploadStorageItemsException
 from sourcerer.presentation.screens.question.main import QuestionScreen
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.settings import MAX_PARALLEL_DOWNLOADS
@@ -401,12 +402,19 @@ class StorageActionProgressScreen(ModalScreen):
         for key in self.keys:
             source_path = Path(key.path)
             if source_path.is_file():
-                self.provider_service.upload_storage_item(
-                    storage=self.storage_name,
-                    source_path=key.path,
-                    dest_path=str(Path(self.path) / key.dest_path) if self.path else key.dest_path,  # type: ignore
-                )
-                self.files_has_been_processed = True
+                try:
+                    self.provider_service.upload_storage_item(
+                        storage=self.storage_name,
+                        storage_path=self.path,
+                        source_path=key.path,
+                        dest_path=key.dest_path,  # type: ignore
+                    )
+                    progress_bar = self.query_one(f"#progress_bar_{key.uuid}")
+                    progress_bar.advance(1)  # type: ignore
+                except UploadStorageItemsException as e:
+                    self.notify(f"Failed to upload {key.path}: {e}", severity="error")
+                finally:
+                    self.files_has_been_processed = True
             elif source_path.is_dir():
 
                 files_n = len([i for i in source_path.rglob("*") if i.is_file()])
@@ -419,10 +427,7 @@ class StorageActionProgressScreen(ModalScreen):
                             self.upload_file,
                             obj,
                             Path(obj).relative_to(source_path),
-                            os.path.join(
-                                source_path.name,
-                                str(Path(obj).relative_to(source_path)),
-                            ),
+                            os.path.join(source_path.name, str(Path(obj).relative_to(source_path))),
                             key.uuid,
                         )
                         for obj in source_path.rglob("*")
@@ -466,11 +471,10 @@ class StorageActionProgressScreen(ModalScreen):
         try:
             self.provider_service.upload_storage_item(
                 storage=self.storage_name,
+                storage_path=self.path,
                 source_path=source,
-                dest_path=(
-                    str(Path(self.path) / destination) if self.path else destination
-                ),
+                dest_path=destination,
             )
             progress_bar.advance(1)  # type: ignore
-        except Exception:
-            self.notify(f"Failed to upload {source}", severity="error")
+        except UploadStorageItemsException as e:
+            self.notify(f"Failed to upload {source}: {e}", severity="error")

@@ -182,7 +182,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                     credentials.uuid: storages,
                     **self.storage_list_sidebar.storages,
                 }
-            except Exception:
+            except Exception as e:
                 self.notify(
                     f"Could not get storages list for {credentials.name}!",
                     severity="error",

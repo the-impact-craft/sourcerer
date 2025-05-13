@@ -9,10 +9,11 @@ import json
 from abc import ABC
 
 import boto3
+from azure.identity import ClientSecretCredential
 from dependency_injector.wiring import Provide
 from google.cloud import storage
 
-from sourcerer.domain.access_credentials.entities import Credentials, Boto3Credentials
+from sourcerer.domain.access_credentials.entities import Credentials, Boto3Credentials, AzureCredentials
 from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository
 from sourcerer.domain.access_credentials.services import (
     BaseAccessCredentialsService,
@@ -37,10 +38,10 @@ class CredentialsService:
     """
 
     def __init__(
-        self,
-        credentials_repo: BaseCredentialsRepository = Provide[
-            DiContainer.credentials_repository
-        ],
+            self,
+            credentials_repo: BaseCredentialsRepository = Provide[
+                DiContainer.credentials_repository
+            ],
     ):
         """
         Initialize the service with a credentials repository.
@@ -103,10 +104,10 @@ class AccessCredentialsService(BaseAccessCredentialsService, ABC):
     """
 
     def __init__(
-        self,
-        credentials_repo: BaseCredentialsRepository = Provide[
-            DiContainer.credentials_repository
-        ],
+            self,
+            credentials_repo: BaseCredentialsRepository = Provide[
+                DiContainer.credentials_repository
+            ],
     ):
         """
         Initialize the service with a credentials repository.
@@ -176,23 +177,26 @@ class S3AccessKeySecretKeyPair(S3AccessCredentialsService):
         Returns:
             boto3.Session: Authenticated boto3 session
         """
-        credentials: dict = json.loads(credentials)
+        try:
+            credentials: dict = json.loads(credentials)
 
-        session_args = {
-            "aws_access_key_id": credentials.get("aws_access_key_id"),
-            "aws_secret_access_key": credentials.get("aws_secret_access_key"),
-        }
+            session_args = {
+                "aws_access_key_id": credentials.get("aws_access_key_id"),
+                "aws_secret_access_key": credentials.get("aws_secret_access_key"),
+            }
 
-        if region := credentials.get("region"):
-            session_args["region_name"] = region
+            if region := credentials.get("region"):
+                session_args["region_name"] = region
 
-        session = boto3.Session(**session_args)
+            session = boto3.Session(**session_args)
 
-        return Boto3Credentials(
-            session=session,
-            endpoint_url=credentials.get("endpoint_url", None),
-            signature_version=credentials.get("signature_version", None),
-        )
+            return Boto3Credentials(
+                session=session,
+                endpoint_url=credentials.get("endpoint_url", None),
+                signature_version=credentials.get("signature_version", None),
+            )
+        except Exception as e:
+            raise CredentialsAuthError("Failed to authenticate") from e
 
     @classmethod
     def auth_fields(cls):
@@ -260,12 +264,15 @@ class S3ProfileName(S3AccessCredentialsService):
         Returns:
             boto3.Session: Authenticated boto3 session
         """
-        credentials: dict = json.loads(credentials)
-        session = boto3.Session(profile_name=credentials.get("profile_name"))
-        return Boto3Credentials(
-            session=session,
-            endpoint_url=credentials.get("endpoint_url"),
-        )
+        try:
+            credentials: dict = json.loads(credentials)
+            session = boto3.Session(profile_name=credentials.get("profile_name"))
+            return Boto3Credentials(
+                session=session,
+                endpoint_url=credentials.get("endpoint_url"),
+            )
+        except Exception as e:
+            raise CredentialsAuthError("Failed to authenticate") from e
 
     @classmethod
     def auth_fields(cls):
@@ -286,15 +293,15 @@ class S3ProfileName(S3AccessCredentialsService):
 )
 class GCPCredentialsService(AccessCredentialsService):
     """
-    Google Cloud Platform test credentials service.
+    Google Cloud Platform json credentials service.
 
     This class provides methods for storing, retrieving, and authenticating
-    with GCP using test credentials.
+    with GCP using credentials.
     """
 
     def store(self, name, credentials: dict):
         """
-        Store GCP test credentials.
+        Store GCP json credentials.
 
         Args:
             name (str): Name identifier for the credentials
@@ -357,22 +364,6 @@ class GCPCredentialsService(AccessCredentialsService):
             except json.JSONDecodeError as e:
                 raise ValueError("Invalid service account JSON format") from e
 
-            # Validate required fields for service account
-            required_fields = [
-                "type",
-                "project_id",
-                "private_key_id",
-                "private_key",
-                "client_email",
-            ]
-            missing_fields = [
-                field for field in required_fields if field not in service_acc_info
-            ]
-            if missing_fields:
-                raise ValueError(
-                    f"Service account missing required fields: {', '.join(missing_fields)}"
-                )
-
             # Create and return the authenticated client
             return storage.Client.from_service_account_info(service_acc_info)
 
@@ -393,4 +384,83 @@ class GCPCredentialsService(AccessCredentialsService):
         """
         return [
             AuthField("service_acc", "Service acc", True, True),
+        ]
+
+
+@access_credentials_method(
+    AccessCredentialsMethod(StorageProvider.AzureStorage, "Client Secret Credentials")
+)
+class AzureClientSecretCredentialsService(AccessCredentialsService):
+
+    def store(self, name, credentials: dict):
+        """
+        Store Azure client_id and secret_key_pair credentials.
+
+        Args:
+            name (str): Name identifier for the credentials
+            credentials (dict): Dictionary containing Azure application credential information
+        """
+        self.credentials_repo.create(
+            Credentials(
+                uuid=generate_uuid(),
+                name=name,
+                provider=StorageProvider.AzureStorage,
+                credentials_type="Client Secret Credentials",
+                credentials=json.dumps(credentials),
+                active=True,
+            )
+        )
+
+    def extract(self, uuid):
+        """
+        Extract credentials by UUID.
+
+        Args:
+            uuid (str): UUID of the credentials to extract
+
+        Returns:
+            Credentials: The credentials object
+        """
+        return self.credentials_repo.get(uuid)
+
+    def authenticate(self, credentials: str):  # type: ignore
+        try:
+            # Parse the outer JSON structure
+            parsed_credentials = json.loads(credentials)
+            subscription_id = parsed_credentials.get("subscription_id")
+            cloud_suffix = parsed_credentials.get("cloud_suffix", "blob.core.windows.net")
+
+            client_credentials = ClientSecretCredential(
+                tenant_id=parsed_credentials.get("tenant_id"),
+                client_id=parsed_credentials.get("client_id"),
+                client_secret=parsed_credentials.get("client_secret"),
+            )
+
+            return AzureCredentials(
+                credentials=client_credentials,
+                subscription_id=subscription_id,
+                cloud_suffix=cloud_suffix,
+            )
+
+        except json.JSONDecodeError as e:
+            raise CredentialsAuthError(f"Invalid credentials format: {str(e)}") from e
+        except Exception as e:
+            raise CredentialsAuthError(
+                f"Failed to authenticate with Azure: {str(e)}"
+            ) from e
+
+    @classmethod
+    def auth_fields(cls):
+        """
+        Get list of authentication fields.
+
+        Returns:
+            List[AuthField]: List of authentication field definitions
+        """
+        return [
+            AuthField("subscription_id", "Subscription Id", True),
+            AuthField("tenant_id", "Tenant Id", True),
+            AuthField("client_id", "Client Id", True),
+            AuthField("client_secret", "Client Secret", True),
+            AuthField("cloud_suffix", "Cloud Suffix (default blob.core.windows.net)", False),
         ]

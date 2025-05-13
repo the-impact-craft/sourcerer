@@ -3,9 +3,9 @@
 name = "data-sourcerer"
 version = "0.1.1"
 description = "Sourcerer is a terminal cloud storage navigator."
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
-keywords = ["cloud", "s3", "gcp", "cli", "termanal", "storage", "textual", "ui"]
+keywords = ["cloud", "s3", "gcp", "cli", "terminal", "storage", "textual", "ui"]
 license = {text = "MIT"}
 
 authors = [
@@ -24,6 +24,9 @@ dependencies = [
     "sqlalchemy-utils>=0.41.2,<1.0.0",
     "textual[syntax]>=2.0.0,<4.0.0",
     "pyOpenSSL>=22.1.0; sys_platform == 'linux'",
+    "azure-storage-blob>=12.25.1,<13.0.0",
+    "azure-identity>=1.22.0,<2.0.0",
+    "azure-mgmt-storage>=22.2.0,<23.0.0",
 ]
 
 [project.scripts]
@@ -36,9 +39,30 @@ build-backend = "setuptools.build_meta"
 [dependency-groups]
 dev = [
     "bandit>=1.8.3",
+    "coverage>=7.8.0",
     "mkdocs-material>=9.6.12",
     "pylint>=3.3.6",
     "pyright>=1.1.400",
     "ruff>=0.11.7",
     "textual-dev>=1.7.0",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "bandit>=1.8.3",
+    "coverage>=7.8.0",
+    "mkdocs-material>=9.6.12",
+    "pylint>=3.3.6",
+    "pyright>=1.1.400",
+    "ruff>=0.11.7",
+    "textual-dev>=1.7.0",
+]
+
+[tool.coverage.run]
+branch = true
+source = [
+    "src/sourcerer/infrastructure",
+]
+
+[tool.coverage.report]
+fail_under = 75
