@@ -25,7 +25,7 @@ from sourcerer.presentation.screens.main.widgets.gradient import GradientWidget
 STORAGE_ICONS = {
     StorageProvider.S3: "🟠",
     StorageProvider.GoogleCloudStorage: "🔵",
-    "azure": "⚪️",
+    StorageProvider.AzureStorage: "⚪️",
 }
 """Mapping of storage provider types to their display icons."""
 

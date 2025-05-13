@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from datetime import datetime
 
 import boto3
+from azure.identity import ClientSecretCredential
 
 
 @dataclass
@@ -51,3 +52,14 @@ class Boto3Credentials:
     session: boto3.Session
     endpoint_url: str | None = None
     signature_version: str | None = None
+
+
+@dataclass
+class AzureCredentials:
+    """
+    Represents Azure credentials.
+    """
+
+    credentials: ClientSecretCredential
+    subscription_id: str
+    cloud_suffix: str

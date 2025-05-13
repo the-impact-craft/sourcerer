@@ -6,6 +6,7 @@ particularly for retrieving and initializing storage provider services.
 """
 
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
+from sourcerer.infrastructure.access_credentials.exceptions import CredentialsAuthError
 from sourcerer.infrastructure.access_credentials.registry import (
     access_credential_method_registry,
 )
@@ -57,13 +58,16 @@ def get_provider_service_by_access_credentials(
     )
 
     if not credentials_service:
-        return
+        return None
 
     provider_service_class = storage_provider_registry.get_by_provider(
         credentials.provider
     )
     if not provider_service_class:
-        return
+        return None
 
-    auth_credentials = credentials_service().authenticate(credentials.credentials)
+    try:
+        auth_credentials = credentials_service().authenticate(credentials.credentials)
+    except CredentialsAuthError:
+        return None
     return provider_service_class(auth_credentials)

@@ -1,4 +1,3 @@
-import traceback
 from pathlib import Path
 
 from textual import work, on
@@ -13,7 +12,6 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
     ListStorageItemsException,
 )
 from sourcerer.infrastructure.utils import generate_uuid
-from sourcerer.presentation.screens.critical_error.main import CriticalErrorScreen
 from sourcerer.presentation.screens.file_system_finder.main import (
     FileSystemNavigationModal,
 )
@@ -110,8 +108,8 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             yield self.storage_content
         yield Footer()
 
-    def _handle_exception(self, error: Exception) -> None:
-        self.push_screen(CriticalErrorScreen(str(error), traceback.format_exc()))
+    # def _handle_exception(self, error: Exception) -> None:
+    #     self.push_screen(CriticalErrorScreen(str(error), traceback.format_exc()))
 
     def on_mount(self):
         """
@@ -172,7 +170,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             provider_service = get_provider_service_by_access_credentials(credentials)
             if not provider_service:
                 self.notify(
-                    f"Could not get storages list for {credentials.name}!",
+                    f"1Could not get storages list for {credentials.name}!",
                     severity="error",
                 )
                 continue
@@ -182,9 +180,11 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                     credentials.uuid: storages,
                     **self.storage_list_sidebar.storages,
                 }
-            except Exception:
+            except Exception as e:
+                print("!!" * 20)
+                print(e)
                 self.notify(
-                    f"Could not get storages list for {credentials.name}!",
+                    f"2Could not get storages list for {credentials.name}!",
                     severity="error",
                 )
 

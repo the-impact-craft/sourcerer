@@ -89,13 +89,14 @@ class BaseStorageProviderService(ABC):
 
     @abstractmethod
     def upload_storage_item(
-        self, storage: str, source_path: Path, dest_path: str | None = None
+        self, storage: str, storage_path:str, source_path: Path, dest_path: str | None = None
     ) -> None:
         """
         Upload a file to the specified storage path.
 
         Args:
             storage (str): The storage identifier
+            storage_path (str): The path within the storage to upload
             source_path (Path): Local file path to upload
             dest_path (str, optional): Destination path in storage. Defaults to None.
         """
@@ -117,7 +118,7 @@ class BaseStorageProviderService(ABC):
         """
 
     @abstractmethod
-    def get_file_size(self, storage: str, key: str) -> dict:
+    def get_file_size(self, storage: str, key: str) -> int:
         """
         Get metadata for a storage item without downloading content.
 
@@ -126,5 +127,5 @@ class BaseStorageProviderService(ABC):
             key (str): The key/path of the item
 
         Returns:
-            dict: Metadata for the specified item
+            int: Size of the storage item in bytes
         """
