@@ -2,11 +2,7 @@ import json
 import unittest
 from unittest.mock import MagicMock, patch
 
-import boto3
-from azure.identity import ClientSecretCredential
-from google.cloud import storage
-
-from sourcerer.domain.access_credentials.entities import Credentials, Boto3Credentials, AzureCredentials
+from sourcerer.domain.access_credentials.entities import Credentials, AzureCredentials
 from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository
 from sourcerer.domain.shared.entities import StorageProvider
 from sourcerer.infrastructure.access_credentials.exceptions import CredentialsAuthError
@@ -33,7 +29,7 @@ class TestCredentialsService(unittest.TestCase):
             name="test-name",
             provider="test-provider",
             credentials_type="key_pair",
-            credentials={"key": "value"},
+            credentials=json.dumps({"key": "value"}),
             active=True
         )
 

@@ -58,6 +58,11 @@ class Boto3Credentials:
 class AzureCredentials:
     """
     Represents Azure credentials.
+
+    Attributes:
+        credentials (ClientSecretCredential): Azure identity credential object for authentication.
+        subscription_id (str): The Azure subscription ID.
+        cloud_suffix (str): The Azure cloud storage suffix (e.g., blob.core.windows.net).
     """
 
     credentials: ClientSecretCredential

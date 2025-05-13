@@ -160,7 +160,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             key (str): The key/path of the item to read
 
         Returns:
-            bytes: The content of the GCP object
+            str: The UTF-8 decoded content of the GCP object
 
         Raises:
             ReadStorageItemsException: If an error occurs while reading the item

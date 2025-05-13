@@ -108,8 +108,8 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             yield self.storage_content
         yield Footer()
 
-    # def _handle_exception(self, error: Exception) -> None:
-    #     self.push_screen(CriticalErrorScreen(str(error), traceback.format_exc()))
+    def _handle_exception(self, error: Exception) -> None:
+        self.push_screen(CriticalErrorScreen(str(error), traceback.format_exc()))
 
     def on_mount(self):
         """
@@ -170,7 +170,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             provider_service = get_provider_service_by_access_credentials(credentials)
             if not provider_service:
                 self.notify(
-                    f"1Could not get storages list for {credentials.name}!",
+                    f"Could not get storages list for {credentials.name}!",
                     severity="error",
                 )
                 continue
@@ -181,10 +181,8 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                     **self.storage_list_sidebar.storages,
                 }
             except Exception as e:
-                print("!!" * 20)
-                print(e)
                 self.notify(
-                    f"2Could not get storages list for {credentials.name}!",
+                    f"Could not get storages list for {credentials.name}!",
                     severity="error",
                 )
 

@@ -462,5 +462,5 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
             AuthField("tenant_id", "Tenant Id", True),
             AuthField("client_id", "Client Id", True),
             AuthField("client_secret", "Client Secret", True),
-            AuthField("cloud_suffix", "Cloud Suffix (default blob.core.windows.net)", True),
+            AuthField("cloud_suffix", "Cloud Suffix (default blob.core.windows.net)", False),
         ]

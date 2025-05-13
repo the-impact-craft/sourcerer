@@ -24,4 +24,4 @@ jobs:
       - name: Analysing the code with bandit
         run: |
           echo $PWD
-          bandit -a file $(git ls-files 'src/*.py') 
+          bandit -a file $(git ls-files 'src/*.py')
