@@ -432,9 +432,7 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
             # Parse the outer JSON structure
             parsed_credentials = json.loads(credentials)
             subscription_id = parsed_credentials.get("subscription_id")
-            cloud_suffix = parsed_credentials.get(
-                "cloud_suffix", "blob.core.windows.net"
-            )
+            cloud_suffix = parsed_credentials.get("cloud_suffix") or  "blob.core.windows.net"
 
             client_credentials = ClientSecretCredential(
                 tenant_id=parsed_credentials.get("tenant_id"),
