@@ -144,7 +144,7 @@ class TestS3AccessKeySecretKeyPair(unittest.TestCase):
         self.assertEqual(json.loads(result.credentials).get('endpoint_url'), "https://test-endpoint.com")
 
 
-    @patch('boto3.Session')
+    @patch('sourcerer.infrastructure.access_credentials.services.boto3.Session')
     def test_authenticate_success(self, mock_session_class):
         """Test successful authentication."""
         # Arrange
@@ -160,7 +160,7 @@ class TestS3AccessKeySecretKeyPair(unittest.TestCase):
             aws_secret_access_key="test-secret-key"
         )
 
-    @patch('boto3.Session')
+    @patch('sourcerer.infrastructure.access_credentials.services.boto3.Session')
     def test_authenticate_error(self, mock_session_class):
         """Test authentication error."""
         # Arrange
@@ -249,7 +249,7 @@ class TestS3ProfileName(unittest.TestCase):
             # Assert
             mock_session_class.assert_called_once_with(profile_name="test-profile")
 
-    @patch('boto3.Session')
+    @patch('sourcerer.infrastructure.access_credentials.services.boto3.Session')
     def test_authenticate_error(self, mock_session_class):
         """Test authentication error."""
         # Arrange
@@ -322,7 +322,7 @@ class TestGCPCredentialsService(unittest.TestCase):
         self.assertEqual(result.credentials_type, "service_account")
         self.assertEqual(json.loads(json.loads(result.credentials)['service_acc'])["project_id"], "test-project")
 
-    @patch('google.cloud.storage.Client')
+    @patch('sourcerer.infrastructure.access_credentials.services.storage.Client')
     def test_authenticate_success(self, mock_client_class):
         """Test successful authentication."""
         # Arrange
@@ -336,7 +336,7 @@ class TestGCPCredentialsService(unittest.TestCase):
         mock_client_class.from_service_account_info.assert_called_once()
         self.assertEqual(result, mock_client)
 
-    @patch('google.cloud.storage.Client')
+    @patch('sourcerer.infrastructure.access_credentials.services.storage.Client')
     def test_authenticate_error(self, mock_client_class):
         """Test authentication error."""
         # Arrange

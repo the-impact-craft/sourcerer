@@ -764,7 +764,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
             self.assertIn("container2", [i.key for i in result1.folders])
 
             # Act - Test listing blobs in a container
-            result2 = self.service.list_storage_items(self.test_storage, self.test_container, "")
+            self.service.list_storage_items(self.test_storage, self.test_container, "")
 
             # Assert
             self.mock_blob_service_client.get_container_client.assert_called_with(self.test_container)
