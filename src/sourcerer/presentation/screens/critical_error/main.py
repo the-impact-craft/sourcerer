@@ -30,7 +30,6 @@ class CriticalErrorScreen(ModalScreen[bool]):
             with Horizontal():
                 yield Button("Report", name="report")
                 yield Button("Dismiss", name="dismiss")
-                
 
     def on_mount(self) -> None:
         """
@@ -40,7 +39,7 @@ class CriticalErrorScreen(ModalScreen[bool]):
         try:
             text_log = self.query_one(RichLog)
         except NoMatches:
-            return 
+            return
 
         text_log.write(self.traceback)
 

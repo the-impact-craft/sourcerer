@@ -13,7 +13,11 @@ from azure.identity import ClientSecretCredential
 from dependency_injector.wiring import Provide
 from google.cloud import storage
 
-from sourcerer.domain.access_credentials.entities import Credentials, Boto3Credentials, AzureCredentials
+from sourcerer.domain.access_credentials.entities import (
+    Credentials,
+    Boto3Credentials,
+    AzureCredentials,
+)
 from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository
 from sourcerer.domain.access_credentials.services import (
     BaseAccessCredentialsService,
@@ -38,10 +42,10 @@ class CredentialsService:
     """
 
     def __init__(
-            self,
-            credentials_repo: BaseCredentialsRepository = Provide[
-                DiContainer.credentials_repository
-            ],
+        self,
+        credentials_repo: BaseCredentialsRepository = Provide[
+            DiContainer.credentials_repository
+        ],
     ):
         """
         Initialize the service with a credentials repository.
@@ -104,10 +108,10 @@ class AccessCredentialsService(BaseAccessCredentialsService, ABC):
     """
 
     def __init__(
-            self,
-            credentials_repo: BaseCredentialsRepository = Provide[
-                DiContainer.credentials_repository
-            ],
+        self,
+        credentials_repo: BaseCredentialsRepository = Provide[
+            DiContainer.credentials_repository
+        ],
     ):
         """
         Initialize the service with a credentials repository.
@@ -428,7 +432,9 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
             # Parse the outer JSON structure
             parsed_credentials = json.loads(credentials)
             subscription_id = parsed_credentials.get("subscription_id")
-            cloud_suffix = parsed_credentials.get("cloud_suffix", "blob.core.windows.net")
+            cloud_suffix = parsed_credentials.get(
+                "cloud_suffix", "blob.core.windows.net"
+            )
 
             client_credentials = ClientSecretCredential(
                 tenant_id=parsed_credentials.get("tenant_id"),
@@ -462,5 +468,7 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
             AuthField("tenant_id", "Tenant Id", True),
             AuthField("client_id", "Client Id", True),
             AuthField("client_secret", "Client Secret", True),
-            AuthField("cloud_suffix", "Cloud Suffix (default blob.core.windows.net)", False),
+            AuthField(
+                "cloud_suffix", "Cloud Suffix (default blob.core.windows.net)", False
+            ),
         ]

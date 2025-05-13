@@ -39,6 +39,7 @@ build-backend = "setuptools.build_meta"
 [dependency-groups]
 dev = [
     "bandit>=1.8.3",
+    "black>=25.1.0",
     "coverage>=7.8.0",
     "mkdocs-material>=9.6.12",
     "pylint>=3.3.6",
@@ -50,6 +51,7 @@ dev = [
 [project.optional-dependencies]
 dev = [
     "bandit>=1.8.3",
+    "black>=25.1.0",
     "coverage>=7.8.0",
     "mkdocs-material>=9.6.12",
     "pylint>=3.3.6",

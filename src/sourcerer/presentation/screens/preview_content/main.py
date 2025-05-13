@@ -48,7 +48,7 @@ class PreviewContentScreen(ModalScreen):
         self.query_one("#loading").remove()
         if content is None:
             self.notify("Empty file", severity="warning")
-            return 
+            return
 
         text_log = self.query_one(RichLog)
         lexer = Syntax.guess_lexer(self.key, content)

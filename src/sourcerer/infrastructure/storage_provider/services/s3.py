@@ -135,7 +135,7 @@ class S3ProviderService(BaseStorageProviderService):
         ]
 
     def list_storage_items(
-            self, storage: str, path: str = "", prefix: str = ""
+        self, storage: str, path: str = "", prefix: str = ""
     ) -> StorageContent:
         """
         List items in the specified S3 bucket path with the given prefix.
@@ -218,7 +218,11 @@ class S3ProviderService(BaseStorageProviderService):
             raise DeleteStorageItemsException(str(ex)) from ex
 
     def upload_storage_item(
-            self, storage: str, storage_path: str, source_path: Path, dest_path: str | None = None
+        self,
+        storage: str,
+        storage_path: str,
+        source_path: Path,
+        dest_path: str | None = None,
     ) -> None:
         """
         Upload a file to the specified S3 bucket path.
@@ -233,13 +237,13 @@ class S3ProviderService(BaseStorageProviderService):
             UploadStorageItemsException: If an error occurs while uploading the item
         """
         try:
-            dest_path = str(Path(storage_path or '') / (dest_path or source_path.name))
+            dest_path = str(Path(storage_path or "") / (dest_path or source_path.name))
             self.client.upload_file(source_path, storage, dest_path)
         except Exception as ex:
             raise UploadStorageItemsException(str(ex)) from ex
 
     def download_storage_item(
-            self, storage: str, key: str, progress_callback: Callable | None = None
+        self, storage: str, key: str, progress_callback: Callable | None = None
     ) -> str:
         """
         Download a file from S3 to local filesystem.

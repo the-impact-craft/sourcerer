@@ -100,7 +100,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             raise StoragePermissionException(str(ex)) from ex
 
     def list_storage_items(
-            self, storage: str, path: str = "", prefix: str = ""
+        self, storage: str, path: str = "", prefix: str = ""
     ) -> StorageContent:
         """
         List items in the specified GCP bucket path with the given prefix.
@@ -133,7 +133,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
                 files.append(
                     File(
                         generate_uuid(),
-                        blob.name[len(path):],
+                        blob.name[len(path) :],
                         size=humanize.naturalsize(blob.size),
                         date_modified=blob.updated.date(),
                         is_text=is_text_file(blob.name),
@@ -141,7 +141,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
                 )
 
             for folder in blobs.prefixes:
-                relative_path = folder[len(path):]
+                relative_path = folder[len(path) :]
                 folders.append(Folder(relative_path))
 
             return StorageContent(files=files, folders=folders)
@@ -196,7 +196,11 @@ class GCPStorageProviderService(BaseStorageProviderService):
             raise DeleteStorageItemsException(str(ex)) from ex
 
     def upload_storage_item(
-            self, storage: str, storage_path: str, source_path: Path, dest_path: str | None = None
+        self,
+        storage: str,
+        storage_path: str,
+        source_path: Path,
+        dest_path: str | None = None,
     ) -> None:
         """
         Upload a file to the specified GCP bucket path.
@@ -212,13 +216,15 @@ class GCPStorageProviderService(BaseStorageProviderService):
         """
         try:
             bucket = self.client.bucket(storage)
-            storage_path = str(Path(storage_path or "") / (dest_path or source_path.name))
+            storage_path = str(
+                Path(storage_path or "") / (dest_path or source_path.name)
+            )
             bucket.blob(storage_path).upload_from_filename(source_path)
         except Exception as ex:
             raise UploadStorageItemsException(str(ex)) from ex
 
     def download_storage_item(
-            self, storage: str, key: str, progress_callback: Callable | None = None
+        self, storage: str, key: str, progress_callback: Callable | None = None
     ) -> str:
         """
         Download a file from GCP to the local filesystem.

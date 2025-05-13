@@ -14,7 +14,9 @@ from textual.screen import ModalScreen
 from textual.widgets import ProgressBar, Label, Rule
 
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
-from sourcerer.infrastructure.storage_provider.exceptions import UploadStorageItemsException
+from sourcerer.infrastructure.storage_provider.exceptions import (
+    UploadStorageItemsException,
+)
 from sourcerer.presentation.screens.question.main import QuestionScreen
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.settings import MAX_PARALLEL_DOWNLOADS
@@ -427,7 +429,10 @@ class StorageActionProgressScreen(ModalScreen):
                             self.upload_file,
                             obj,
                             Path(obj).relative_to(source_path),
-                            os.path.join(source_path.name, str(Path(obj).relative_to(source_path))),
+                            os.path.join(
+                                source_path.name,
+                                str(Path(obj).relative_to(source_path)),
+                            ),
                             key.uuid,
                         )
                         for obj in source_path.rglob("*")

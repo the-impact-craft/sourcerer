@@ -89,7 +89,11 @@ class BaseStorageProviderService(ABC):
 
     @abstractmethod
     def upload_storage_item(
-        self, storage: str, storage_path: str, source_path: Path, dest_path: str | None = None
+        self,
+        storage: str,
+        storage_path: str,
+        source_path: Path,
+        dest_path: str | None = None,
     ) -> None:
         """
         Upload a file to the specified storage path.

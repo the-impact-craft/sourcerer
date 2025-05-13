@@ -4,6 +4,7 @@ Implementation of Azure storage provider services.
 This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
+
 import os.path
 from pathlib import Path
 from typing import List, Any, Callable
@@ -17,11 +18,16 @@ from sourcerer.domain.shared.entities import StorageProvider
 from sourcerer.domain.storage_provider.entities import (
     StoragePermissions,
     StorageContent,
-    Storage, Folder, File,
+    Storage,
+    Folder,
+    File,
 )
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
 from sourcerer.infrastructure.storage_provider.exceptions import (
-    ListStoragesException, ListStorageItemsException, ReadStorageItemsException, DeleteStorageItemsException,
+    ListStoragesException,
+    ListStorageItemsException,
+    ReadStorageItemsException,
+    DeleteStorageItemsException,
     UploadStorageItemsException,
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
@@ -55,7 +61,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
         account_url = "https://{account}.{cloud_suffix}"
         return BlobServiceClient(
             account_url.format(account=storage, cloud_suffix=self.cloud_suffix),
-            credential=self.credentials
+            credential=self.credentials,
         )
 
     def list_storages(self) -> List[Storage]:
@@ -80,7 +86,9 @@ class AzureStorageProviderService(BaseStorageProviderService):
     def get_storage_permissions(self, storage: str) -> List[StoragePermissions]:
         raise NotImplementedError("Not implemented")
 
-    def list_storage_items(self, storage: str, path: str, prefix: str) -> StorageContent:
+    def list_storage_items(
+        self, storage: str, path: str, prefix: str
+    ) -> StorageContent:
         """
         List items in the specified Azure container path with the given prefix.
 
@@ -95,16 +103,16 @@ class AzureStorageProviderService(BaseStorageProviderService):
 
             folders = set()
             if not path:
-                folders.update(
-                    [i.name for i in containers_client.list_containers()]
-                )
+                folders.update([i.name for i in containers_client.list_containers()])
             else:
                 path_parts = path.split("/", 1)
                 if len(path_parts) > 1:
                     path, prefix = path_parts[0], path_parts[1] + "/" + prefix
                 blobs_client = containers_client.get_container_client(path)
-                for blob in blobs_client.walk_blobs(name_starts_with=prefix, delimiter='/'):
-                    remaining_path = blob.name[len(prefix):]
+                for blob in blobs_client.walk_blobs(
+                    name_starts_with=prefix, delimiter="/"
+                ):
+                    remaining_path = blob.name[len(prefix) :]
                     if "/" in remaining_path:
                         folder_name = remaining_path.split("/")[0]
                         if folder_name not in folders:
@@ -138,7 +146,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             container, blob_name = path_parts
             blobs_client = containers_client.get_container_client(container)
             content = blobs_client.download_blob(blob_name).readall()
-            return content.decode('utf-8')
+            return content.decode("utf-8")
         except Exception as ex:
             raise ReadStorageItemsException(str(ex)) from ex
 
@@ -160,10 +168,11 @@ class AzureStorageProviderService(BaseStorageProviderService):
             raise DeleteStorageItemsException(str(ex)) from ex
 
     def upload_storage_item(
-            self, storage: str,
-            storage_path: str,
-            source_path: Path,
-            dest_path: str | None = None
+        self,
+        storage: str,
+        storage_path: str,
+        source_path: Path,
+        dest_path: str | None = None,
     ) -> None:
         """
         Upload a file to the specified Azure container path.
@@ -187,11 +196,15 @@ class AzureStorageProviderService(BaseStorageProviderService):
 
             blob_client = containers_client.get_container_client(container)
             with open(source_path, "rb") as file_handle:
-                blob_client.upload_blob(blob_name or source_path.name, file_handle, overwrite=True)
+                blob_client.upload_blob(
+                    blob_name or source_path.name, file_handle, overwrite=True
+                )
         except Exception as ex:
             raise UploadStorageItemsException(str(ex)) from ex
 
-    def download_storage_item(self, storage: str, key: str, progress_callback: Callable | None = None) -> str:
+    def download_storage_item(
+        self, storage: str, key: str, progress_callback: Callable | None = None
+    ) -> str:
         """
         Download a file from Azure to the local filesystem.
 
@@ -201,7 +214,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             progress_callback (Callable, optional): Callback function for progress updates. Defaults to None.
         """
         try:
-            download_path = Path(user_downloads_dir()) / 'abc' / Path(key).name
+            download_path = Path(user_downloads_dir()) / "abc" / Path(key).name
 
             containers_client = self.get_containers_client(storage)
             path_parts = key.split("/", 1)
