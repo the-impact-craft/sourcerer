@@ -168,6 +168,8 @@ class GCPStorageProviderService(BaseStorageProviderService):
         try:
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
+            if not blob:
+                raise Exception("Blob not found")
             content = blob.download_as_bytes()
             return content.decode("utf-8")
         except Exception as ex:
@@ -187,6 +189,8 @@ class GCPStorageProviderService(BaseStorageProviderService):
         try:
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
+            if not blob:
+                raise Exception("Blob not found")
             blob.delete()
         except Exception as ex:
             raise DeleteStorageItemsException(str(ex)) from ex
@@ -233,6 +237,8 @@ class GCPStorageProviderService(BaseStorageProviderService):
         try:
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
+            if not blob:
+                raise Exception("Blob not found")
             download_path = Path(user_downloads_dir()) / Path(key).name
             blob.download_to_filename(str(download_path))
             return str(download_path)
@@ -256,6 +262,8 @@ class GCPStorageProviderService(BaseStorageProviderService):
         try:
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
+            if not blob:
+                raise Exception("Blob not found")
             return blob.size
         except Exception as ex:
             raise ReadStorageItemsException(str(ex)) from ex
