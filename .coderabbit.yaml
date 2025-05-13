@@ -1,0 +1,49 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en"
+early_access: true
+reviews:
+    profile: "chill"
+    request_changes_workflow: false
+    high_level_summary: true
+    poem: false
+    review_status: true
+    collapse_walkthrough: false
+    path_instructions:
+        - path: "src/sourcerer/domain/**/*.py"
+          instructions: |
+            - Ensure domain models are immutable and follow DDD principles
+            - Verify that domain services are interface-driven
+            - Check for proper exception handling and domain-specific exceptions
+            - Validate that domain logic is independent of infrastructure
+            - Ensure pythonic codestyle and best practices are followed
+        - path: "src/sourcerer/infrastructure/**/*.py"
+          instructions: |
+            - Verify proper implementation of domain interfaces
+            - Check for appropriate error handling and mapping to domain exceptions
+            - Ensure infrastructure concerns are properly isolated
+            - Validate dependency injection usage
+            - Ensure pythonic codestyle and best practices are followed
+        - path: "src/sourcerer/presentation/**/*.py"
+          instructions: |
+            - Review UI component separation and responsibility
+            - Check proper use of dependency injection
+            - Verify error handling and user feedback
+            - Ensure presentation logic doesn't contain business rules
+            - Ensure pythonic codestyle and best practices are followed
+        - path: "tests/**/*"
+          instructions: |
+            - Assess the integration and e2e test code assessing sufficient code coverage for the changes associated in the pull request
+            - Ensure pythonic codestyle and best practices are followed
+        - path: "**/*.md"
+          instructions: |
+              "Assess the documentation for misspellings, grammatical errors, missing documentation and correctness"
+    auto_review:
+        enabled: false
+        ignore_title_keywords:
+            - "WIP"
+            - "DO NOT MERGE"
+        drafts: false
+        base_branches:
+            - "main"
+chat:
+    auto_reply: true
