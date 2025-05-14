@@ -885,7 +885,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
                 self.mock_container_client.download_blob.assert_called_with(self.test_blob_name)
                 mock_file.assert_called_once()
                 mock_file().write.assert_called_once_with(b"test content")
-                self.assertTrue("/test/downloads/abc/file.txt" in result)
+                self.assertTrue("/test/downloads/file.txt" in result)
 
     def test_get_file_size(self):
         """Test get_file_size method."""

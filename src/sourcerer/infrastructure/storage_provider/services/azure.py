@@ -226,7 +226,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             progress_callback (Callable, optional): Callback function for progress updates. Defaults to None.
         """
         try:
-            download_path = Path(user_downloads_dir()) / "abc" / Path(key).name
+            download_path = Path(user_downloads_dir()) / Path(key).name
 
             containers_client = self.get_containers_client(storage)
             path_parts = key.split("/", 1)
