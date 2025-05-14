@@ -488,7 +488,5 @@ class StorageActionProgressScreen(ModalScreen):
 
     def watch_files_has_been_processed(self):
         if self.files_has_been_processed:
-            self.notify(
-                f"{self.action.capitalize()} operation has been successfully performed"
-            )
+            self.notify(f"{self.action.capitalize()} operation is completed")
             self.query_one("#StorageActionProgress").add_class("success")
