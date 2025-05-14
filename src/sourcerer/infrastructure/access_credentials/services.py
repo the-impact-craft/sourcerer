@@ -7,6 +7,7 @@ interface for various cloud providers and authentication methods.
 
 import json
 from abc import ABC
+from typing import List
 
 import boto3
 from azure.identity import ClientSecretCredential
@@ -24,7 +25,10 @@ from sourcerer.domain.access_credentials.services import (
     AuthField,
 )
 from sourcerer.domain.shared.entities import StorageProvider
-from sourcerer.infrastructure.access_credentials.exceptions import CredentialsAuthError
+from sourcerer.infrastructure.access_credentials.exceptions import (
+    CredentialsAuthError,
+    MissingAuthFieldsError,
+)
 from sourcerer.infrastructure.access_credentials.registry import (
     access_credentials_method,
     AccessCredentialsMethod,
@@ -120,6 +124,22 @@ class AccessCredentialsService(BaseAccessCredentialsService, ABC):
             credentials_repo (BaseCredentialsRepository): Repository for storing credentials
         """
         super().__init__(credentials_repo)
+
+    @classmethod
+    def validate_auth_fields_values(cls, auth_fields: dict) -> None:
+        """
+        Validate authentication fields.
+
+        Args:
+            auth_fields (dict): Dictionary containing authentication field,
+                                where keys are field names and values are field values
+
+        Raises:
+            MissingAuthFieldsError: If any required authentication fields are missing
+        """
+        for field in cls.auth_fields():
+            if field.required and field.key not in auth_fields:
+                raise MissingAuthFieldsError(f"Missing required field: {field.key}")
 
 
 class S3AccessCredentialsService(AccessCredentialsService, ABC):
@@ -279,7 +299,7 @@ class S3ProfileName(S3AccessCredentialsService):
             raise CredentialsAuthError("Failed to authenticate") from e
 
     @classmethod
-    def auth_fields(cls):
+    def auth_fields(cls) -> List[AuthField]:
         """
         Get list of authentication fields.
 
@@ -379,7 +399,7 @@ class GCPCredentialsService(AccessCredentialsService):
             ) from e
 
     @classmethod
-    def auth_fields(cls):
+    def auth_fields(cls) -> List[AuthField]:
         """
         Get list of authentication fields.
 
@@ -432,7 +452,9 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
             # Parse the outer JSON structure
             parsed_credentials = json.loads(credentials)
             subscription_id = parsed_credentials.get("subscription_id")
-            cloud_suffix = parsed_credentials.get("cloud_suffix") or  "blob.core.windows.net"
+            cloud_suffix = (
+                parsed_credentials.get("cloud_suffix") or "blob.core.windows.net"
+            )
 
             client_credentials = ClientSecretCredential(
                 tenant_id=parsed_credentials.get("tenant_id"),
@@ -454,7 +476,7 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
             ) from e
 
     @classmethod
-    def auth_fields(cls):
+    def auth_fields(cls) -> List[AuthField]:
         """
         Get list of authentication fields.
 
