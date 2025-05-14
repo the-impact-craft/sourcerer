@@ -12,6 +12,7 @@ from textual.containers import Container, VerticalScroll, Horizontal, Center
 from textual.css.query import NoMatches
 from textual.screen import ModalScreen
 from textual.widgets import ProgressBar, Label, Rule
+from textual.reactive import reactive
 
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
 from sourcerer.infrastructure.storage_provider.exceptions import (
@@ -99,6 +100,8 @@ class StorageActionProgressScreen(ModalScreen):
 
     CSS_PATH = "styles.tcss"
 
+    files_has_been_processed = reactive(False)
+
     def __init__(
         self,
         storage_name: str,
@@ -127,7 +130,6 @@ class StorageActionProgressScreen(ModalScreen):
         self.action = action
         self.path = path
         self.keys = keys
-        self.files_has_been_processed = False
         self.active_worker = None
         self.active_executor = None
 
@@ -483,3 +485,10 @@ class StorageActionProgressScreen(ModalScreen):
             progress_bar.advance(1)  # type: ignore
         except UploadStorageItemsException as e:
             self.notify(f"Failed to upload {source}: {e}", severity="error")
+
+    def watch_files_has_been_processed(self):
+        if self.files_has_been_processed:
+            self.notify(
+                f"{self.action.capitalize()} operation has been successfully performed"
+            )
+            self.query_one("#StorageActionProgress").add_class("success")

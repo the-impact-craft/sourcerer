@@ -9,6 +9,17 @@ StorageActionProgressScreen {
   content-align: center top;
 
 
+  & > #StorageActionProgress.success {
+    border: solid $success;
+
+    #controls {
+      Button {
+        border: solid $success;
+      }
+
+    }
+  }
+
   & > #StorageActionProgress {
     padding: 1 2 0 2;
     margin: 0 0;
