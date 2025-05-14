@@ -13,6 +13,9 @@ from sourcerer.domain.access_credentials.services import (
     BaseAccessCredentialsService,
     AuthField,
 )
+from sourcerer.infrastructure.access_credentials.exceptions import (
+    MissingAuthFieldsError,
+)
 from sourcerer.presentation.di_container import DiContainer
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.shared.widgets.labeled_input import LabeledInput
@@ -178,11 +181,22 @@ class ProviderCredsRegistrationScreen(ModalScreen):
         if event.action == ControlsEnum.CANCEL.name:
             self.dismiss()
         elif event.action == ControlsEnum.CREATE.name:
+            if not self.auth_method:
+                self.notify("Please select provider and auth method", severity="error")
+                return
+
             auth_fields = self._get_auth_fields()
             if not auth_fields:
                 self.notify("Please select provider and auth method", severity="error")
-            else:
-                self.dismiss(auth_fields)
+                return
+
+            try:
+                self.auth_method.validate_auth_fields_values(auth_fields.fields)
+            except MissingAuthFieldsError as e:
+                self.notify(str(e), severity="error")
+                return
+
+            self.dismiss(auth_fields)
 
     def _get_auth_fields(self) -> ProviderCredentialsEntry | None:
         """
@@ -193,13 +207,15 @@ class ProviderCredsRegistrationScreen(ModalScreen):
         """
         if not self.auth_method:
             return
+
         fields = {
             input_field.get().name: input_field.get().value
             for input_field in self.query_one(
                 f"#{self.CREDENTIALS_FIELDS_CONTAINER_ID}"
             ).children
-            if isinstance(input_field, LabeledInput)
+            if isinstance(input_field, LabeledInput) and input_field.get().value
         }
+
         auth_name = self.query_one("#auth_name").get().value or "default"  # type: ignore
 
         return ProviderCredentialsEntry(
