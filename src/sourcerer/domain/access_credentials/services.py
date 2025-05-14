@@ -84,21 +84,17 @@ class BaseAccessCredentialsService:
     @abstractmethod
     def auth_fields(cls) -> List[AuthField]:
         """
-        Get list of authentication fields.
-
+        Returns the list of authentication fields required by the service.
+        
         Returns:
-            List[AuthField]: List of authentication field definitions
+            List[AuthField]: Authentication field definitions specifying required input for authentication.
         """
 
     @classmethod
     def validate_auth_fields_values(cls, auth_fields: dict) -> None:
         """
-        Validate authentication fields.
-
-        Args:
-            auth_fields (dict): Dictionary containing authentication field,
-                                where keys are field names and values are field values
-
+        Validates that all required authentication fields are present in the provided dictionary.
+        
         Raises:
-            MissingAuthFieldsError: If any required authentication fields are missing
+            MissingAuthFieldsError: If any required authentication fields are missing.
         """

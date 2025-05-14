@@ -164,19 +164,9 @@ class ProviderCredsRegistrationScreen(ModalScreen):
     @on(Button.Click)
     def on_control_button_click(self, event: Button.Click):
         """
-        Handle click events for control buttons on the registration screen.
-
-        Depending on the action associated with the button click event, either dismiss
-        the screen or gather authentication fields and then dismiss the screen with
-        the collected data.
-
-        Args:
-            event (Button.Click): The click event containing the action to be performed.
-
-        Flow:
-            1. Check if the event.action is ControlsEnum.cancel.name. If true, dismiss the screen.
-            2. If event.action is ControlsEnum.create.name, gather authentication fields. Dismiss the screen with the
-               collected authentication fields.
+        Handles clicks on the Cancel and Create buttons, validating input and dismissing the screen.
+        
+        If Cancel is clicked, the screen is dismissed without saving data. If Create is clicked, ensures a provider and authentication method are selected, collects and validates credential fields, and dismisses the screen with the credentials if validation succeeds. Displays error notifications for missing selections or invalid input.
         """
         if event.action == ControlsEnum.CANCEL.name:
             self.dismiss()
@@ -200,10 +190,11 @@ class ProviderCredsRegistrationScreen(ModalScreen):
 
     def _get_auth_fields(self) -> ProviderCredentialsEntry | None:
         """
-        Collects authentication fields from the UI and returns a ProviderCredentialsEntry.
-
+        Collects and returns the entered authentication fields as a ProviderCredentialsEntry.
+        
         Returns:
-            ProviderCredentialsEntry: An object containing the authentication name, method, and fields.
+            A ProviderCredentialsEntry with the entered label, selected authentication method,
+            and non-empty credential fields, or None if no authentication method is selected.
         """
         if not self.auth_method:
             return

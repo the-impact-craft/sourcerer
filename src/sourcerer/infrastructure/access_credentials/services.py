@@ -118,24 +118,20 @@ class AccessCredentialsService(BaseAccessCredentialsService, ABC):
         ],
     ):
         """
-        Initialize the service with a credentials repository.
-
+        Initializes the service with a credentials repository.
+        
         Args:
-            credentials_repo (BaseCredentialsRepository): Repository for storing credentials
+            credentials_repo: The repository used for storing and retrieving credentials.
         """
         super().__init__(credentials_repo)
 
     @classmethod
     def validate_auth_fields_values(cls, auth_fields: dict) -> None:
         """
-        Validate authentication fields.
-
-        Args:
-            auth_fields (dict): Dictionary containing authentication field,
-                                where keys are field names and values are field values
-
+        Validates that all required authentication fields are present in the provided dictionary.
+        
         Raises:
-            MissingAuthFieldsError: If any required authentication fields are missing
+            MissingAuthFieldsError: If any required authentication field is missing.
         """
         for field in cls.auth_fields():
             if field.required and field.key not in auth_fields:
@@ -280,13 +276,12 @@ class S3ProfileName(S3AccessCredentialsService):
 
     def authenticate(self, credentials: str):  # type: ignore
         """
-        Authenticate using stored profile name.
-
-        Args:
-            credentials (str): Dictionary containing profile name information
-
-        Returns:
-            boto3.Session: Authenticated boto3 session
+        Authenticates AWS credentials using a stored profile name.
+        
+        Parses the provided JSON string to extract the profile name and optional endpoint URL, then creates and returns a Boto3Credentials object with an authenticated boto3 session.
+        
+        Raises:
+            CredentialsAuthError: If authentication fails or the input is invalid.
         """
         try:
             credentials: dict = json.loads(credentials)
@@ -301,10 +296,10 @@ class S3ProfileName(S3AccessCredentialsService):
     @classmethod
     def auth_fields(cls) -> List[AuthField]:
         """
-        Get list of authentication fields.
-
+        Returns the list of authentication fields required for AWS S3 profile-based credentials.
+        
         Returns:
-            List[AuthField]: List of authentication field definitions
+            List[AuthField]: Authentication fields including required profile name and optional endpoint URL.
         """
         return [
             AuthField("profile_name", "Profile Name", True),
@@ -356,22 +351,20 @@ class GCPCredentialsService(AccessCredentialsService):
 
     def authenticate(self, credentials: str):  # type: ignore
         """
-        Authenticate with Google Cloud Platform using service account credentials.
-
-        This method parses the stored credentials JSON string, extracts the service account
-        information, and creates a Google Cloud Storage client authenticated with those
-        credentials.
-
+        Authenticates and returns a Google Cloud Storage client using service account credentials.
+        
+        Parses a JSON string containing a "service_acc" field with embedded service account JSON,
+        then creates and returns an authenticated `storage.Client` instance. Raises
+        `CredentialsAuthError` if the credentials are invalid or authentication fails.
+        
         Args:
-            credentials (str): JSON string containing the service account credentials
-
+            credentials: JSON string with a "service_acc" field containing service account credentials.
+        
         Returns:
-            storage.Client: Authenticated Google Cloud Storage client
-
+            An authenticated `storage.Client` for Google Cloud Storage.
+        
         Raises:
-            ValueError: If the credentials are missing required fields
-            json.JSONDecodeError: If the credentials are not valid JSON
-            Exception: If authentication fails for any other reason
+            CredentialsAuthError: If the credentials are invalid or authentication fails.
         """
         try:
             # Parse the outer JSON structure
@@ -401,10 +394,10 @@ class GCPCredentialsService(AccessCredentialsService):
     @classmethod
     def auth_fields(cls) -> List[AuthField]:
         """
-        Get list of authentication fields.
-
+        Returns the list of required authentication fields for GCP service account credentials.
+        
         Returns:
-            List[AuthField]: List of authentication field definitions
+            List[AuthField]: A list containing the required 'service_acc' authentication field.
         """
         return [
             AuthField("service_acc", "Service acc", True, True),
@@ -448,6 +441,22 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
         return self.credentials_repo.get(uuid)
 
     def authenticate(self, credentials: str):  # type: ignore
+        """
+        Authenticates Azure client secret credentials from a JSON string.
+        
+        Parses the provided JSON string to extract Azure authentication fields, creates a
+        ClientSecretCredential, and returns an AzureCredentials object. Raises
+        CredentialsAuthError if the credentials are invalid or authentication fails.
+        
+        Args:
+            credentials: A JSON string containing Azure authentication fields.
+            
+        Returns:
+            An AzureCredentials object with authenticated client credentials.
+        
+        Raises:
+            CredentialsAuthError: If the credentials are malformed or authentication fails.
+        """
         try:
             # Parse the outer JSON structure
             parsed_credentials = json.loads(credentials)
@@ -478,10 +487,9 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
     @classmethod
     def auth_fields(cls) -> List[AuthField]:
         """
-        Get list of authentication fields.
-
-        Returns:
-            List[AuthField]: List of authentication field definitions
+        Returns the list of authentication fields required for Azure client secret credentials.
+        
+        Each field specifies its name, display label, and whether it is required.
         """
         return [
             AuthField("subscription_id", "Subscription Id", True),
