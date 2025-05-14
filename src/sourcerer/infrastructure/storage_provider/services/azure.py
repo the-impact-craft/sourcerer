@@ -29,6 +29,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
     ReadStorageItemsException,
     DeleteStorageItemsException,
     UploadStorageItemsException,
+    AzureMissingContainerException,
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
@@ -58,6 +59,17 @@ class AzureStorageProviderService(BaseStorageProviderService):
         return StorageManagementClient(self.credentials, self.subscription_id)
 
     def get_containers_client(self, storage: str):
+        """
+        Retrieves a BlobServiceClient instance for interacting with a specific Azure Blob
+        Storage account.
+
+        Parameters:
+            storage (str): The name of the Azure storage account to connect to.
+
+        Returns:
+            BlobServiceClient: An instance of the BlobServiceClient, configured with the
+            account URL and credentials.
+        """
         account_url = "https://{account}.{cloud_suffix}"
         return BlobServiceClient(
             account_url.format(account=storage, cloud_suffix=self.cloud_suffix),
@@ -185,7 +197,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
         try:
             containers_client = self.get_containers_client(storage)
             if not storage_path:
-                raise Exception("Container is required for Azure blob upload")
+                raise AzureMissingContainerException()
 
             storage_path_parts = storage_path.split("/", 1)
 

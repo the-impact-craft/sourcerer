@@ -38,11 +38,11 @@ class FileSystemNavigationModal(ModalScreen):
 
     def __init__(
         self,
+        *args,
         file_system_service: FileSystemService = Provide[
             DiContainer.file_system_service
         ],
         validation_rules: List[FileSystemSelectionValidationRule] | None = None,
-        *args,
         **kwargs,
     ):
         """

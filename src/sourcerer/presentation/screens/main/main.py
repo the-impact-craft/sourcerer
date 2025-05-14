@@ -399,8 +399,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             self.storage_content.storage_content = provider_service.list_storage_items(**params)  # type: ignore
         except ListStorageItemsException as e:
             self.notify(
-                f"""Could not extract storage content 
-{str(e)}""",
+                f"""Could not extract storage content \n{str(e)}""",
                 severity="error",
             )
 

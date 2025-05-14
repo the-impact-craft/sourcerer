@@ -75,7 +75,6 @@ class BaseStorageProviderService(ABC):
         Returns:
             bytes: The content of the storage item
         """
-        pass
 
     @abstractmethod
     def delete_storage_item(self, storage: str, key: str) -> None:

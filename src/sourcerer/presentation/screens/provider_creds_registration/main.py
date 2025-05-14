@@ -47,10 +47,10 @@ class ProviderCredsRegistrationScreen(ModalScreen):
 
     def __init__(
         self,
+        *args,
         credentials_type_registry=Provide[
             DiContainer.config.access_credential_method_registry
         ],
-        *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)

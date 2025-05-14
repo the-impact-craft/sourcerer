@@ -27,6 +27,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
     ReadStorageItemsException,
     DeleteStorageItemsException,
     UploadStorageItemsException,
+    BlobNotFoundException,
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
@@ -169,7 +170,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
             if not blob:
-                raise Exception("Blob not found")
+                raise BlobNotFoundException(key)
             content = blob.download_as_bytes()
             return content.decode("utf-8")
         except Exception as ex:
@@ -190,7 +191,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
             if not blob:
-                raise Exception("Blob not found")
+                raise BlobNotFoundException(key)
             blob.delete()
         except Exception as ex:
             raise DeleteStorageItemsException(str(ex)) from ex
@@ -244,7 +245,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
             if not blob:
-                raise Exception("Blob not found")
+                raise BlobNotFoundException(key)
             download_path = Path(user_downloads_dir()) / Path(key).name
             blob.download_to_filename(str(download_path))
             return str(download_path)
@@ -269,7 +270,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
             if not blob:
-                raise Exception("Blob not found")
+                raise BlobNotFoundException(key)
             return blob.size
         except Exception as ex:
             raise ReadStorageItemsException(str(ex)) from ex

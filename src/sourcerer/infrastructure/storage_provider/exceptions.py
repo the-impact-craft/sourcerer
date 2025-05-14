@@ -47,6 +47,16 @@ class ListStorageItemsException(BaseStorageProviderException):
     """
 
 
+class BlobNotFoundException(BaseStorageProviderException):
+    """
+    Exception raised when a blob (file) is not found in cloud storage.
+
+    This exception is a specific case of BaseStorageProviderException
+    and should be used to indicate that the requested blob could not
+    be located in the specified cloud storage service.
+    """
+
+
 class ReadStorageItemsException(BaseStorageProviderException):
     """
     Exception raised for errors encountered while reading items from cloud storage.
@@ -75,4 +85,14 @@ class UploadStorageItemsException(BaseStorageProviderException):
     This exception is a specific case of BaseStorageProviderException
     and is used to signal issues encountered while uploading data to
     cloud storage services.
+    """
+
+
+class AzureMissingContainerException(BaseStorageProviderException):
+    """
+    Exception raised when a container is not found in Azure cloud storage.
+
+    This exception is a specific case of BaseStorageProviderException
+    and should be used to indicate that the requested container could not
+    be located in the specified Azure cloud storage service.
     """

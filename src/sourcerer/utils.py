@@ -17,7 +17,7 @@ def get_encryption_key(path: Path):
 
     # If key file exists, read the key from it
     if os.path.exists(key_file_path):
-        with open(key_file_path, "r") as f:
+        with open(key_file_path, "r", encoding="utf-8") as f:
             return f.read().strip()
 
     # Otherwise, generate a new key and store it
@@ -26,7 +26,7 @@ def get_encryption_key(path: Path):
     os.makedirs(os.path.dirname(key_file_path), exist_ok=True)
 
     new_key = str(uuid.uuid4())
-    with open(key_file_path, "w") as f:
+    with open(key_file_path, "w", encoding="utf-8") as f:
         f.write(new_key)
 
     return new_key
