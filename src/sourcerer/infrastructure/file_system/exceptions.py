@@ -5,10 +5,10 @@ This module defines exception classes for handling errors that occur
 during interactions with the local file system.
 """
 
-from sourcerer.domain.file_system.exceptions import BaseFileSystemException
+from sourcerer.domain.file_system.exceptions import BaseFileSystemError
 
 
-class FileSystemGrepException(BaseFileSystemException):
+class FileSystemGrepError(BaseFileSystemError):
     """
     Custom exception for errors occurring during a file system search operation.
 
@@ -18,7 +18,7 @@ class FileSystemGrepException(BaseFileSystemException):
     """
 
 
-class ReadFileException(BaseFileSystemException):
+class ReadFileError(BaseFileSystemError):
     """
     Custom exception for errors occurring during a file system read operation.
 
@@ -28,7 +28,7 @@ class ReadFileException(BaseFileSystemException):
     """
 
 
-class CreateFileException(BaseFileSystemException):
+class CreateFileError(BaseFileSystemError):
     """
     Custom exception for errors occurring during a file system create file operation.
 
@@ -38,7 +38,7 @@ class CreateFileException(BaseFileSystemException):
     """
 
 
-class CreateDirException(BaseFileSystemException):
+class CreateDirError(BaseFileSystemError):
     """
     Custom exception for errors occurring during a file system create directory operation.
 
@@ -48,7 +48,7 @@ class CreateDirException(BaseFileSystemException):
     """
 
 
-class MoveFileException(BaseFileSystemException):
+class MoveFileError(BaseFileSystemError):
     """
     Exception raised for errors during file move operation.
 
@@ -59,7 +59,7 @@ class MoveFileException(BaseFileSystemException):
     """
 
 
-class ListDirException(BaseFileSystemException):
+class ListDirError(BaseFileSystemError):
     """
     Custom exception for errors occurring during a file system list directory operation.
 
@@ -69,7 +69,7 @@ class ListDirException(BaseFileSystemException):
     """
 
 
-class DeleteFileException(BaseFileSystemException):
+class DeleteFileError(BaseFileSystemError):
     """
     Custom exception for errors occurring during a file system delete file operation.
 
@@ -79,7 +79,7 @@ class DeleteFileException(BaseFileSystemException):
     """
 
 
-class DeleteDirException(BaseFileSystemException):
+class DeleteDirError(BaseFileSystemError):
     """
     Custom exception for errors occurring during a file system delete directory operation.
 

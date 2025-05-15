@@ -6,7 +6,7 @@ file system operations.
 """
 
 
-class BaseFileSystemException(Exception):
+class BaseFileSystemError(Exception):
     """
     Base exception class for filesystem-related errors.
 

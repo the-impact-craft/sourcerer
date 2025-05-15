@@ -1,9 +1,9 @@
 from sourcerer.domain.access_credentials.exceptions import (
-    BaseAccessCredentialsException,
+    BaseAccessCredentialsError,
 )
 
 
-class CredentialsAuthError(BaseAccessCredentialsException):
+class CredentialsAuthError(BaseAccessCredentialsError):
     """
     Exception raised when there is an error parsing access credentials.
 

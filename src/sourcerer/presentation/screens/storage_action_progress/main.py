@@ -16,7 +16,7 @@ from textual.widgets import Label, ProgressBar, Rule
 
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
 from sourcerer.infrastructure.storage_provider.exceptions import (
-    UploadStorageItemsException,
+    UploadStorageItemsError,
 )
 from sourcerer.presentation.screens.question.main import QuestionScreen
 from sourcerer.presentation.screens.shared.widgets.button import Button
@@ -415,7 +415,7 @@ class StorageActionProgressScreen(ModalScreen):
                     )
                     progress_bar = self.query_one(f"#progress_bar_{key.uuid}")
                     progress_bar.advance(1)  # type: ignore
-                except UploadStorageItemsException as e:
+                except UploadStorageItemsError as e:
                     self.notify(f"Failed to upload {key.path}: {e}", severity="error")
                 finally:
                     self.files_has_been_processed = True
@@ -483,7 +483,7 @@ class StorageActionProgressScreen(ModalScreen):
                 dest_path=destination,
             )
             progress_bar.advance(1)  # type: ignore
-        except UploadStorageItemsException as e:
+        except UploadStorageItemsError as e:
             self.notify(f"Failed to upload {source}: {e}", severity="error")
 
     def watch_files_has_been_processed(self):

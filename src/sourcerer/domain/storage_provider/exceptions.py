@@ -6,7 +6,7 @@ cloud storage provider operations.
 """
 
 
-class BaseStorageProviderException(Exception):
+class BaseStorageProviderError(Exception):
     """
     Base exception class for cloud storage provider-related errors.
 

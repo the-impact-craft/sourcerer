@@ -13,7 +13,7 @@ from textual.reactive import reactive
 from textual.widget import Widget
 from textual.widgets import Label, Rule
 
-from sourcerer.infrastructure.file_system.exceptions import ListDirException
+from sourcerer.infrastructure.file_system.exceptions import ListDirError
 from sourcerer.infrastructure.file_system.services import FileSystemService
 from sourcerer.infrastructure.utils import generate_uuid
 from sourcerer.presentation.screens.shared.containers import (
@@ -496,7 +496,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         """
         try:
             dir_list = self.file_system_service.list_dir(path, relative_paths=False)
-        except ListDirException as e:
+        except ListDirError as e:
             self.notify(str(e), markup=False)
             return
 

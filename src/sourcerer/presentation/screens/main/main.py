@@ -10,7 +10,7 @@ from textual.widgets import Footer
 
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
 from sourcerer.infrastructure.storage_provider.exceptions import (
-    ListStorageItemsException,
+    ListStorageItemsError,
 )
 from sourcerer.infrastructure.utils import generate_uuid
 from sourcerer.presentation.screens.critical_error.main import CriticalErrorScreen
@@ -397,7 +397,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         params = {"storage": storage_name, "path": path or "", "prefix": prefix or ""}
         try:
             self.storage_content.storage_content = provider_service.list_storage_items(**params)  # type: ignore
-        except ListStorageItemsException as e:
+        except ListStorageItemsError as e:
             self.notify(
                 f"""Could not extract storage content \n{str(e)}""",
                 severity="error",

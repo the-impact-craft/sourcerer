@@ -24,12 +24,12 @@ from sourcerer.domain.storage_provider.entities import (
 )
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
 from sourcerer.infrastructure.storage_provider.exceptions import (
-    AzureMissingContainerException,
-    DeleteStorageItemsException,
-    ListStorageItemsException,
-    ListStoragesException,
-    ReadStorageItemsException,
-    UploadStorageItemsException,
+    AzureMissingContainerError,
+    DeleteStorageItemsError,
+    ListStorageItemsError,
+    ListStoragesError,
+    ReadStorageItemsError,
+    UploadStorageItemsError,
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
@@ -84,7 +84,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             List[Storage]: List of storage objects representing Azure containers
 
         Raises:
-            ListStoragesException: If an error occurs while listing buckets
+            ListStoragesError: If an error occurs while listing buckets
         """
         try:
             accounts_client = self.get_accounts_client()
@@ -93,7 +93,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
                 for i in accounts_client.storage_accounts.list()
             ]
         except Exception as ex:
-            raise ListStoragesException(str(ex)) from ex
+            raise ListStoragesError(str(ex)) from ex
 
     def get_storage_permissions(self, storage: str) -> List[StoragePermissions]:
         raise NotImplementedError("Not implemented")
@@ -142,7 +142,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
                     )
             return StorageContent(files=files, folders=[Folder(key) for key in folders])
         except Exception as ex:
-            raise ListStorageItemsException(str(ex)) from ex
+            raise ListStorageItemsError(str(ex)) from ex
 
     def read_storage_item(self, storage: str, key: str) -> str:
         """
@@ -160,7 +160,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             content = blobs_client.download_blob(blob_name).readall()
             return content.decode("utf-8")
         except Exception as ex:
-            raise ReadStorageItemsException(str(ex)) from ex
+            raise ReadStorageItemsError(str(ex)) from ex
 
     def delete_storage_item(self, storage: str, key: str) -> None:
         """
@@ -177,7 +177,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             blob_client = containers_client.get_container_client(container)
             blob_client.delete_blob(blob_name)
         except Exception as ex:
-            raise DeleteStorageItemsException(str(ex)) from ex
+            raise DeleteStorageItemsError(str(ex)) from ex
 
     def upload_storage_item(
         self,
@@ -197,7 +197,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
         try:
             containers_client = self.get_containers_client(storage)
             if not storage_path:
-                raise AzureMissingContainerException()
+                raise AzureMissingContainerError()
 
             storage_path_parts = storage_path.split("/", 1)
 
@@ -212,7 +212,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
                     blob_name or source_path.name, file_handle, overwrite=True
                 )
         except Exception as ex:
-            raise UploadStorageItemsException(str(ex)) from ex
+            raise UploadStorageItemsError(str(ex)) from ex
 
     def download_storage_item(
         self, storage: str, key: str, progress_callback: Callable | None = None
@@ -237,7 +237,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
                 file.write(download_stream.readall())
             return str(download_path)
         except Exception as ex:
-            raise ReadStorageItemsException(str(ex)) from ex
+            raise ReadStorageItemsError(str(ex)) from ex
 
     def get_file_size(self, storage: str, key: str) -> int:
         """
@@ -255,4 +255,4 @@ class AzureStorageProviderService(BaseStorageProviderService):
             props = blob_client.get_blob_properties()
             return props.size
         except Exception as ex:
-            raise ReadStorageItemsException(str(ex)) from ex
+            raise ReadStorageItemsError(str(ex)) from ex

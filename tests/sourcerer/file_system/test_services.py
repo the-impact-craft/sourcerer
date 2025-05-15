@@ -4,14 +4,14 @@ from pathlib import Path
 
 from sourcerer.infrastructure.file_system.services import FileSystemService
 from sourcerer.infrastructure.file_system.exceptions import (
-    FileSystemGrepException,
-    ReadFileException,
-    ListDirException,
-    CreateFileException,
-    CreateDirException,
-    DeleteFileException,
-    DeleteDirException,
-    MoveFileException,
+    FileSystemGrepError,
+    ReadFileError,
+    ListDirError,
+    CreateFileError,
+    CreateDirError,
+    DeleteFileError,
+    DeleteDirError,
+    MoveFileError,
 )
 
 
@@ -48,7 +48,7 @@ class TestFileSystemService(unittest.TestCase):
         mock_file.side_effect = Exception("File not found")
         
         # Act & Assert
-        with self.assertRaises(ReadFileException):
+        with self.assertRaises(ReadFileError):
             self.service.read(test_path)
 
     @patch("sourcerer.infrastructure.file_system.services.Path.is_dir")
@@ -91,7 +91,7 @@ class TestFileSystemService(unittest.TestCase):
         mock_is_dir.side_effect = Exception("Directory not found")
         
         # Act & Assert
-        with self.assertRaises(ListDirException):
+        with self.assertRaises(ListDirError):
             self.service.list_dir(test_path)
 
 

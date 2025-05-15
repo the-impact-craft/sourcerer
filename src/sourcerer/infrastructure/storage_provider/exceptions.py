@@ -5,10 +5,10 @@ This module defines exception classes for handling errors that occur
 during interactions with cloud storage providers.
 """
 
-from sourcerer.domain.storage_provider.exceptions import BaseStorageProviderException
+from sourcerer.domain.storage_provider.exceptions import BaseStorageProviderError
 
 
-class CredentialsNotFoundException(BaseStorageProviderException):
+class CredentialsNotFoundError(BaseStorageProviderError):
     """
     Exception raised when credentials are not found for a cloud storage provider.
 
@@ -18,7 +18,7 @@ class CredentialsNotFoundException(BaseStorageProviderException):
     """
 
 
-class ListStoragesException(BaseStorageProviderException):
+class ListStoragesError(BaseStorageProviderError):
     """
     Exception raised for errors that occur during the listing of cloud storage services.
 
@@ -28,7 +28,7 @@ class ListStoragesException(BaseStorageProviderException):
     """
 
 
-class StoragePermissionException(BaseStorageProviderException):
+class StoragePermissionError(BaseStorageProviderError):
     """
     Exception raised for permission-related errors in cloud storage operations.
 
@@ -37,7 +37,7 @@ class StoragePermissionException(BaseStorageProviderException):
     """
 
 
-class ListStorageItemsException(BaseStorageProviderException):
+class ListStorageItemsError(BaseStorageProviderError):
     """
     Exception raised when an error occurs while listing items in cloud storage.
 
@@ -47,7 +47,7 @@ class ListStorageItemsException(BaseStorageProviderException):
     """
 
 
-class BlobNotFoundException(BaseStorageProviderException):
+class BlobNotFoundError(BaseStorageProviderError):
     """
     Exception raised when a blob (file) is not found in cloud storage.
 
@@ -57,7 +57,7 @@ class BlobNotFoundException(BaseStorageProviderException):
     """
 
 
-class ReadStorageItemsException(BaseStorageProviderException):
+class ReadStorageItemsError(BaseStorageProviderError):
     """
     Exception raised for errors encountered while reading items from cloud storage.
 
@@ -67,7 +67,7 @@ class ReadStorageItemsException(BaseStorageProviderException):
     """
 
 
-class DeleteStorageItemsException(BaseStorageProviderException):
+class DeleteStorageItemsError(BaseStorageProviderError):
     """
     Exception raised for errors that occur during the deletion of storage items.
 
@@ -77,7 +77,7 @@ class DeleteStorageItemsException(BaseStorageProviderException):
     """
 
 
-class UploadStorageItemsException(BaseStorageProviderException):
+class UploadStorageItemsError(BaseStorageProviderError):
     """
     Exception raised for errors that occur during the upload of items
     to cloud storage.
@@ -88,7 +88,7 @@ class UploadStorageItemsException(BaseStorageProviderException):
     """
 
 
-class AzureMissingContainerException(BaseStorageProviderException):
+class AzureMissingContainerError(BaseStorageProviderError):
     """
     Exception raised when a container is not found in Azure cloud storage.
 

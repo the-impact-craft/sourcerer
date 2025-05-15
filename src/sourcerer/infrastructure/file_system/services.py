@@ -10,8 +10,8 @@ from pathlib import Path
 from sourcerer.domain.file_system.entities import ListDirOutput
 from sourcerer.domain.file_system.services import BaseFileSystemService
 from sourcerer.infrastructure.file_system.exceptions import (
-    ListDirException,
-    ReadFileException,
+    ListDirError,
+    ReadFileError,
 )
 from sourcerer.infrastructure.utils import custom_sort_key
 
@@ -56,18 +56,18 @@ class FileSystemService(BaseFileSystemService):
             str: The processed data extracted from the file.
 
         Raises:
-            ReadFileException: An error occurred during the file read operation.
+            ReadFileError: An error occurred during the file read operation.
         """
 
         if not isinstance(path, Path):
-            raise ReadFileException("file_path must be a Path object")
+            raise ReadFileError("file_path must be a Path object")
         if not path.exists():
-            raise ReadFileException(f"File not found: {path}")
-        self.validate_path_within_work_dir(path, ReadFileException)
+            raise ReadFileError(f"File not found: {path}")
+        self.validate_path_within_work_dir(path, ReadFileError)
         try:
             return path.read_text()
         except Exception as e:
-            raise ReadFileException(f"Error reading file: {e}") from e
+            raise ReadFileError(f"Error reading file: {e}") from e
 
     def list_dir(
         self,
@@ -91,19 +91,19 @@ class FileSystemService(BaseFileSystemService):
                 - directories (list[Path]): Sorted list of directory paths
 
         Raises:
-            ListDirException: If the path is invalid, directory doesn't exist, or path is not a directory.
+            ListDirError: If the path is invalid, directory doesn't exist, or path is not a directory.
 
         """
         if not isinstance(path, Path):
-            raise ListDirException("Path must be a Path object")
+            raise ListDirError("Path must be a Path object")
         if not path.exists():
-            raise ListDirException(f"Directory not found: {path}")
+            raise ListDirError(f"Directory not found: {path}")
         if not path.is_dir():
-            raise ListDirException(f"Path is not a directory: {path}")
+            raise ListDirError(f"Path is not a directory: {path}")
         try:
             path.relative_to(self.work_dir)
         except ValueError as e:
-            raise ListDirException("Access denied: Path outside work directory") from e
+            raise ListDirError("Access denied: Path outside work directory") from e
         try:
             files = []
             directories = []
@@ -112,7 +112,7 @@ class FileSystemService(BaseFileSystemService):
             items = 0
             for entry in entries:
                 if max_items and items > max_items:
-                    raise ListDirException(
+                    raise ListDirError(
                         f"Too many items, max processable dir size: {max_items}"
                     )
                 items += 1
@@ -123,9 +123,9 @@ class FileSystemService(BaseFileSystemService):
                 directories=sorted(directories, key=custom_sort_key),
             )
         except PermissionError as e:
-            raise ListDirException(f"Access denied: {e}") from e
+            raise ListDirError(f"Access denied: {e}") from e
         except Exception as e:
-            raise ListDirException(f"Error listing directory: {e}") from e
+            raise ListDirError(f"Error listing directory: {e}") from e
 
     def validate_path_within_work_dir(self, path: Path, exception_class: type) -> None:
         """

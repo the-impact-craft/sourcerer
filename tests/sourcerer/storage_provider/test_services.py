@@ -5,12 +5,12 @@ from unittest.mock import MagicMock, patch
 from sourcerer.domain.shared.entities import StorageProvider
 from sourcerer.domain.storage_provider.entities import Folder, File, StorageContent
 from sourcerer.infrastructure.storage_provider.exceptions import (
-    ListStoragesException,
-    StoragePermissionException,
-    ListStorageItemsException,
-    ReadStorageItemsException,
-    DeleteStorageItemsException,
-    UploadStorageItemsException
+    ListStoragesError,
+    StoragePermissionError,
+    ListStorageItemsError,
+    ReadStorageItemsError,
+    DeleteStorageItemsError,
+    UploadStorageItemsError
 )
 from sourcerer.infrastructure.storage_provider.services.gcp import GCPStorageProviderService
 from sourcerer.infrastructure.storage_provider.services.s3 import S3ProviderService
@@ -128,7 +128,7 @@ class TestS3ProviderService(unittest.TestCase):
         self.mock_client.list_buckets.side_effect = Exception("Connection error")
 
         # Act & Assert
-        with self.assertRaises(ListStoragesException):
+        with self.assertRaises(ListStoragesError):
             self.service.list_storages()
 
     def test_get_storage_permissions(self):
@@ -160,7 +160,7 @@ class TestS3ProviderService(unittest.TestCase):
         self.mock_client.get_bucket_acl.side_effect = Exception("Access denied")
 
         # Act & Assert
-        with self.assertRaises(StoragePermissionException):
+        with self.assertRaises(StoragePermissionError):
             self.service.get_storage_permissions(self.test_bucket)
 
     def test_list_storage_items(self):
@@ -201,7 +201,7 @@ class TestS3ProviderService(unittest.TestCase):
         self.mock_client.list_objects_v2.side_effect = Exception("Access denied")
 
         # Act & Assert
-        with self.assertRaises(ListStorageItemsException):
+        with self.assertRaises(ListStorageItemsError):
             self.service.list_storage_items(self.test_bucket, "test/", "")
 
     def test_read_storage_item(self):
@@ -234,7 +234,7 @@ class TestS3ProviderService(unittest.TestCase):
         self.mock_resource.Object.return_value = mock_object
 
         # Act & Assert
-        with self.assertRaises(ReadStorageItemsException):
+        with self.assertRaises(ReadStorageItemsError):
             self.service.read_storage_item(self.test_bucket, self.test_key)
 
     def test_delete_storage_item(self):
@@ -259,7 +259,7 @@ class TestS3ProviderService(unittest.TestCase):
         self.mock_resource.Object.return_value = mock_object
 
         # Act & Assert
-        with self.assertRaises(DeleteStorageItemsException):
+        with self.assertRaises(DeleteStorageItemsError):
             self.service.delete_storage_item(self.test_bucket, self.test_key)
 
     def test_upload_storage_item(self):
@@ -292,7 +292,7 @@ class TestS3ProviderService(unittest.TestCase):
         self.mock_client.upload_file.side_effect = Exception("Upload failed")
 
         # Act & Assert
-        with self.assertRaises(UploadStorageItemsException):
+        with self.assertRaises(UploadStorageItemsError):
             self.service.upload_storage_item(self.test_bucket, '', source_path)
 
     @patch('sourcerer.infrastructure.storage_provider.services.s3.user_downloads_dir')
@@ -331,7 +331,7 @@ class TestS3ProviderService(unittest.TestCase):
         self.mock_client.head_object.side_effect = Exception("File not found")
 
         # Act & Assert
-        with self.assertRaises(ReadStorageItemsException):
+        with self.assertRaises(ReadStorageItemsError):
             self.service.get_file_size(self.test_bucket, self.test_key)
 
 
@@ -381,7 +381,7 @@ class TestGCPStorageProviderService(unittest.TestCase):
         self.mock_client.list_buckets.side_effect = Exception("Connection error")
 
         # Act & Assert
-        with self.assertRaises(ListStoragesException):
+        with self.assertRaises(ListStoragesError):
             self.service.list_storages()
 
     def test_get_storage_permissions(self):
@@ -420,7 +420,7 @@ class TestGCPStorageProviderService(unittest.TestCase):
         self.mock_client.get_bucket.side_effect = Exception("Access denied")
 
         # Act & Assert
-        with self.assertRaises(StoragePermissionException):
+        with self.assertRaises(StoragePermissionError):
             self.service.get_storage_permissions(self.test_bucket)
 
     def test_list_storage_items(self):
@@ -456,7 +456,7 @@ class TestGCPStorageProviderService(unittest.TestCase):
         self.mock_client.bucket.side_effect = Exception("Access denied")
 
         # Act & Assert
-        with self.assertRaises(ListStorageItemsException):
+        with self.assertRaises(ListStorageItemsError):
             self.service.list_storage_items(self.test_bucket, "test/", "")
 
     def test_read_storage_item(self):
@@ -487,7 +487,7 @@ class TestGCPStorageProviderService(unittest.TestCase):
         self.mock_client.bucket.return_value = mock_bucket
 
         # Act & Assert
-        with self.assertRaises(ReadStorageItemsException):
+        with self.assertRaises(ReadStorageItemsError):
             self.service.read_storage_item(self.test_bucket, self.test_key)
 
     def test_delete_storage_item(self):
@@ -518,7 +518,7 @@ class TestGCPStorageProviderService(unittest.TestCase):
         mock_bucket.get_blob.return_value = mock_blob
 
         # Act & Assert
-        with self.assertRaises(DeleteStorageItemsException):
+        with self.assertRaises(DeleteStorageItemsError):
             self.service.delete_storage_item(self.test_bucket, self.test_key)
 
     def test_upload_storage_item(self):
@@ -573,7 +573,7 @@ class TestGCPStorageProviderService(unittest.TestCase):
         mock_bucket.blob.return_value = mock_blob
 
         # Act & Assert
-        with self.assertRaises(UploadStorageItemsException):
+        with self.assertRaises(UploadStorageItemsError):
             self.service.upload_storage_item(self.test_bucket, '', source_path)
 
     @patch('sourcerer.infrastructure.storage_provider.services.gcp.user_downloads_dir')
@@ -623,7 +623,7 @@ class TestGCPStorageProviderService(unittest.TestCase):
         self.mock_client.bucket.return_value = mock_bucket
 
         # Act & Assert
-        with self.assertRaises(ReadStorageItemsException):
+        with self.assertRaises(ReadStorageItemsError):
             self.service.get_file_size(self.test_bucket, self.test_key)
 
 
@@ -727,7 +727,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
 
         with patch.object(self.service, 'get_accounts_client', return_value=self.mock_storage_management_client):
             # Act & Assert
-            with self.assertRaises(ListStoragesException):
+            with self.assertRaises(ListStoragesError):
                 self.service.list_storages()
 
     def test_list_storage_items(self):
@@ -775,7 +775,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
         # Arrange
         with patch.object(self.service, 'get_containers_client', side_effect=Exception("Access denied")):
             # Act & Assert
-            with self.assertRaises(ListStorageItemsException):
+            with self.assertRaises(ListStorageItemsError):
                 self.service.list_storage_items(self.test_storage, "", "")
 
     def test_read_storage_item(self):
@@ -801,7 +801,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
 
         with patch.object(self.service, 'get_containers_client', return_value=self.mock_blob_service_client):
             # Act & Assert
-            with self.assertRaises(ReadStorageItemsException):
+            with self.assertRaises(ReadStorageItemsError):
                 self.service.read_storage_item(self.test_storage, self.test_key)
 
     def test_delete_storage_item(self):
@@ -822,7 +822,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
 
         with patch.object(self.service, 'get_containers_client', return_value=self.mock_blob_service_client):
             # Act & Assert
-            with self.assertRaises(DeleteStorageItemsException):
+            with self.assertRaises(DeleteStorageItemsError):
                 self.service.delete_storage_item(self.test_storage, self.test_key)
 
     def test_upload_storage_item(self):
@@ -863,7 +863,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
         with patch.object(self.service, 'get_containers_client', return_value=self.mock_blob_service_client):
             with patch('builtins.open', unittest.mock.mock_open(read_data=b'test content')):
                 # Act & Assert
-                with self.assertRaises(UploadStorageItemsException):
+                with self.assertRaises(UploadStorageItemsError):
                     self.service.upload_storage_item(self.test_storage, self.test_container, source_path)
 
     @patch('sourcerer.infrastructure.storage_provider.services.azure.user_downloads_dir')
@@ -910,7 +910,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
 
         with patch.object(self.service, 'get_containers_client', return_value=self.mock_blob_service_client):
             # Act & Assert
-            with self.assertRaises(ReadStorageItemsException):
+            with self.assertRaises(ReadStorageItemsError):
                 self.service.get_file_size(self.test_storage, self.test_key)
 
 

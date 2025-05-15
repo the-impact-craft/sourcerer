@@ -21,13 +21,13 @@ from sourcerer.domain.storage_provider.entities import (
 )
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
 from sourcerer.infrastructure.storage_provider.exceptions import (
-    BlobNotFoundException,
-    DeleteStorageItemsException,
-    ListStorageItemsException,
-    ListStoragesException,
-    ReadStorageItemsException,
-    StoragePermissionException,
-    UploadStorageItemsException,
+    BlobNotFoundError,
+    DeleteStorageItemsError,
+    ListStorageItemsError,
+    ListStoragesError,
+    ReadStorageItemsError,
+    StoragePermissionError,
+    UploadStorageItemsError,
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
@@ -60,7 +60,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             List[Storage]: List of storage objects representing GCP buckets
 
         Raises:
-            ListStoragesException: If an error occurs while listing buckets
+            ListStoragesError: If an error occurs while listing buckets
         """
         try:
             return [
@@ -68,7 +68,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
                 for i in self.client.list_buckets()
             ]
         except Exception as ex:
-            raise ListStoragesException(str(ex)) from ex
+            raise ListStoragesError(str(ex)) from ex
 
     def get_storage_permissions(self, storage: str) -> List[StoragePermissions]:
         """
@@ -81,7 +81,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             List[StoragePermissions]: List of permission objects for the bucket
 
         Raises:
-            StoragePermissionException: If an error occurs while getting permissions
+            StoragePermissionError: If an error occurs while getting permissions
         """
         try:
             bucket = self.client.get_bucket(storage)
@@ -98,7 +98,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
                 StoragePermissions(member, roles) for member, roles in result.items()
             ]
         except Exception as ex:
-            raise StoragePermissionException(str(ex)) from ex
+            raise StoragePermissionError(str(ex)) from ex
 
     def list_storage_items(
         self, storage: str, path: str = "", prefix: str = ""
@@ -115,7 +115,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             StorageContent: Object containing files and folders at the specified location
 
         Raises:
-            ListStorageItemsException: If an error occurs while listing items
+            ListStorageItemsError: If an error occurs while listing items
         """
         try:
 
@@ -148,7 +148,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             return StorageContent(files=files, folders=folders)
 
         except Exception as ex:
-            raise ListStorageItemsException(
+            raise ListStorageItemsError(
                 f"Failed to list items in {storage}: {str(ex)}"
             ) from ex
 
@@ -164,17 +164,17 @@ class GCPStorageProviderService(BaseStorageProviderService):
             str: The UTF-8 decoded content of the GCP object
 
         Raises:
-            ReadStorageItemsException: If an error occurs while reading the item
+            ReadStorageItemsError: If an error occurs while reading the item
         """
         try:
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
             if not blob:
-                raise BlobNotFoundException(key)
+                raise BlobNotFoundError(key)
             content = blob.download_as_bytes()
             return content.decode("utf-8")
         except Exception as ex:
-            raise ReadStorageItemsException(str(ex)) from ex
+            raise ReadStorageItemsError(str(ex)) from ex
 
     def delete_storage_item(self, storage: str, key: str) -> None:
         """
@@ -185,16 +185,16 @@ class GCPStorageProviderService(BaseStorageProviderService):
             key (str): The key/path of the item to delete
 
         Raises:
-            DeleteStorageItemsException: If an error occurs while deleting the item
+            DeleteStorageItemsError: If an error occurs while deleting the item
         """
         try:
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
             if not blob:
-                raise BlobNotFoundException(key)
+                raise BlobNotFoundError(key)
             blob.delete()
         except Exception as ex:
-            raise DeleteStorageItemsException(str(ex)) from ex
+            raise DeleteStorageItemsError(str(ex)) from ex
 
     def upload_storage_item(
         self,
@@ -213,7 +213,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             dest_path (str, optional): Destination path in GCP. Defaults to None.
 
         Raises:
-            UploadStorageItemsException: If an error occurs while uploading the item
+            UploadStorageItemsError: If an error occurs while uploading the item
         """
         try:
             bucket = self.client.bucket(storage)
@@ -222,7 +222,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             )
             bucket.blob(storage_path).upload_from_filename(source_path)
         except Exception as ex:
-            raise UploadStorageItemsException(str(ex)) from ex
+            raise UploadStorageItemsError(str(ex)) from ex
 
     def download_storage_item(
         self, storage: str, key: str, progress_callback: Callable | None = None
@@ -239,18 +239,18 @@ class GCPStorageProviderService(BaseStorageProviderService):
             str: Path to the downloaded file
 
         Raises:
-            ReadStorageItemsException: If an error occurs while downloading the item
+            ReadStorageItemsError: If an error occurs while downloading the item
         """
         try:
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
             if not blob:
-                raise BlobNotFoundException(key)
+                raise BlobNotFoundError(key)
             download_path = Path(user_downloads_dir()) / Path(key).name
             blob.download_to_filename(str(download_path))
             return str(download_path)
         except Exception as ex:
-            raise ReadStorageItemsException(str(ex)) from ex
+            raise ReadStorageItemsError(str(ex)) from ex
 
     def get_file_size(self, storage: str, key: str) -> int:
         """
@@ -264,13 +264,13 @@ class GCPStorageProviderService(BaseStorageProviderService):
             int: Size of the storage item in bytes
 
         Raises:
-            ReadStorageItemsException: If an error occurs while getting metadata
+            ReadStorageItemsError: If an error occurs while getting metadata
         """
         try:
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
             if not blob:
-                raise BlobNotFoundException(key)
+                raise BlobNotFoundError(key)
             return blob.size
         except Exception as ex:
-            raise ReadStorageItemsException(str(ex)) from ex
+            raise ReadStorageItemsError(str(ex)) from ex

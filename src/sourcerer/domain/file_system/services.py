@@ -37,7 +37,7 @@ class BaseFileSystemService(metaclass=abc.ABCMeta):
             str: The processed data extracted from the file.
 
         Raises:
-            ReadFileException: An error occurred during the file read operation.
+            ReadFileError: An error occurred during the file read operation.
         """
         raise NotImplementedError
 
@@ -59,6 +59,6 @@ class BaseFileSystemService(metaclass=abc.ABCMeta):
                 - directories (list[Path]): Sorted list of directory paths
 
         Raises:
-            ListDirException: If the path is invalid, directory doesn't exist, or path is not a directory.
+            ListDirError: If the path is invalid, directory doesn't exist, or path is not a directory.
         """
         raise NotImplementedError

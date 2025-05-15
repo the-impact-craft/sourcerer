@@ -6,7 +6,7 @@ access credentials operations.
 """
 
 
-class BaseAccessCredentialsException(Exception):
+class BaseAccessCredentialsError(Exception):
     """
     Base exception class for access credentials-related errors.
 

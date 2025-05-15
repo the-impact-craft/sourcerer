@@ -7,7 +7,7 @@ from textual.widgets import LoadingIndicator, RichLog
 
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
 from sourcerer.infrastructure.storage_provider.exceptions import (
-    ReadStorageItemsException,
+    ReadStorageItemsError,
 )
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.utils import get_provider_service_by_access_uuid
@@ -42,7 +42,7 @@ class PreviewContentScreen(ModalScreen):
             return
         try:
             content = provider_service.read_storage_item(self.storage_name, self.key)
-        except ReadStorageItemsException:
+        except ReadStorageItemsError:
             self.notify("Could not read file :(", severity="error")
             return
         self.query_one("#loading").remove()
