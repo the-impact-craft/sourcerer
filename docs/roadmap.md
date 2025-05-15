@@ -8,7 +8,7 @@ Our roadmap unveils the features, improvements, and integrations designed to emp
 
 ## 🗺️ The Roadmap
 
-- [ ] **Initial release** 
+- ✅ **Initial release** 
 
 - ✅ **Multi-cloud storage viewing** – Navigate files and folders from:
   - ✅ Google Cloud Storage (GCS)
