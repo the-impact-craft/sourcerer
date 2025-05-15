@@ -691,7 +691,8 @@ class TestAzureStorageProviderService(unittest.TestCase):
         # Assert
         mock_blob_service_client_class.assert_called_once_with(
             f"https://{self.test_storage}.blob.core.windows.net", 
-            credential=self.mock_credentials.credentials
+            credential=self.mock_credentials.credentials,
+            retry_connect=0,
         )
         self.assertEqual(result, self.mock_blob_service_client)
 

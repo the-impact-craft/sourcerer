@@ -75,6 +75,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
         return BlobServiceClient(
             account_url.format(account=storage, cloud_suffix=self.cloud_suffix),
             credential=self.credentials,
+            retry_connect=0,
         )
 
     def list_storages(self) -> list[Storage]:
