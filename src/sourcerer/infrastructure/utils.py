@@ -60,9 +60,7 @@ def is_text_file(file_name):
     ext = Path(file_name).suffix.lower()
     if ext in TEXT_EXTENSIONS:
         return True
-    if is_text_mime(file_name):
-        return True
-    return False
+    return bool(is_text_mime(file_name))
 
 
 def custom_sort_key(s: str | Path):

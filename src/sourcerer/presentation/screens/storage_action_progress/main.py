@@ -1,3 +1,4 @@
+import contextlib
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
@@ -468,10 +469,8 @@ class StorageActionProgressScreen(ModalScreen):
             return
         progress_bar = self.query_one(f"#progress_bar_{uuid}")
         details_container = None
-        try:
+        with contextlib.suppress(NoMatches):
             details_container = self.query_one(f"#progress_file_details_{uuid}")
-        except NoMatches:
-            pass
         if details_container:
             details_container.update(Text(f"({rel_source})", overflow="ellipsis"))  # type: ignore
         try:

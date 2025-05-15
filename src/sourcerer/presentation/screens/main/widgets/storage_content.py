@@ -4,7 +4,7 @@ This module provides widgets for displaying and interacting with storage content
 including files and folders. It handles file selection, navigation, and content
 display with search functionality.
 """
-
+import contextlib
 import os.path
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -273,10 +273,9 @@ class FileItem(Horizontal):
     def on_click(self, event: events.Click) -> None:
         """Handle click events to toggle file selection."""
         preview_button = None
-        try:
+        with contextlib.suppress(NoMatches):
             preview_button = self.query_one(Button)
-        except NoMatches:
-            pass
+
         if event.widget is preview_button:
             self.post_message(self.Preview(self.file.key))
             return
@@ -491,8 +490,7 @@ class StorageContentContainer(Vertical):
         if not self.storage_content or (
             not self.storage_content.files and not self.storage_content.folders
         ):
-            with Middle():
-                with Center():
+            with Middle(), Center():
                     yield Static(NO_DATA_LOGO)
             return
         with Horizontal(classes="file_list_header"):

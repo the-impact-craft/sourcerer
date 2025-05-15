@@ -70,11 +70,11 @@ class FileSystemService(BaseFileSystemService):
             raise ReadFileError(f"Error reading file: {e}") from e
 
     def list_dir(
-        self,
-        path: Path,
-        relative_paths: bool = False,
-        recursively=False,
-        max_items: int | None = None,
+            self,
+            path: Path,
+            relative_paths: bool = False,
+            recursively=False,
+            max_items: int | None = None,
     ) -> ListDirOutput:
         """
         List all files and directories within the specified directory.
@@ -115,7 +115,7 @@ class FileSystemService(BaseFileSystemService):
                     raise ListDirError(
                         f"Too many items, max processable dir size: {max_items}"
                     )
-                items += 1
+                items += 1  # noqa SIM103 
                 target = files if entry.is_file() else directories
                 target.append(entry.relative_to(path) if relative_paths else entry)
             return ListDirOutput(

@@ -20,10 +20,7 @@ def generate_gradient_text(text: str, start_color: str, end_color: str) -> Text:
     gradient_text = Text()
 
     for i, char in enumerate(text):
-        if len(text) > 1:
-            blend = i / (len(text) - 1)
-        else:
-            blend = 0
+        blend = i / (len(text) - 1) if len(text) > 1 else 0
 
         r = int(start_rgb[0] + (end_rgb[0] - start_rgb[0]) * blend)
         g = int(start_rgb[1] + (end_rgb[1] - start_rgb[1]) * blend)

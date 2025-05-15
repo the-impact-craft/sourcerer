@@ -70,7 +70,7 @@ class ProviderCredsRegistrationScreen(ModalScreen):
                 yield Select(
                     options=(
                         (provider, provider)
-                        for provider in self.provider_credentials_settings.keys()
+                        for provider in self.provider_credentials_settings
                     ),
                     name=self.PROVIDERS_NAME,
                     id=self.PROVIDER_SELECTOR_ID,
@@ -110,7 +110,7 @@ class ProviderCredsRegistrationScreen(ModalScreen):
 
         # If multiple authentication methods exist, display a selection dropdown
         if len(auth_methods) > 1:
-            options = [(auth_type, auth_type) for auth_type in auth_methods.keys()]
+            options = [(auth_type, auth_type) for auth_type in auth_methods]
             await self.query_one(f"#{self.SETTINGS_CONTAINER_ID}").mount(
                 Container(
                     Label("Auth method:", classes="form_label"),
