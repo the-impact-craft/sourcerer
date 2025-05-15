@@ -68,3 +68,29 @@ source = [
 
 [tool.coverage.report]
 fail_under = 75
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+# Enable these rules
+select = [
+  "E",    # pycodestyle
+  "F",    # pyflakes
+  "I",    # isort
+  "N",    # pep8-naming
+  "UP",   # pyupgrade
+  "C90",  # mccabe (complexity)
+  "B",    # flake8-bugbear
+  "SIM",  # flake8-simplify
+]
+
+# Allow autofix for these rule sets
+fixable = ["ALL"]
+
+# Disallow autofix for these
+unfixable = ["F401"]  # unused imports - maybe you want to catch it manually
+
+
+[tool.ruff.mccabe]
+max-complexity = 10
