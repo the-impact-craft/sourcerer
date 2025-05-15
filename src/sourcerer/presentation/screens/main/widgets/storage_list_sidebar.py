@@ -124,7 +124,9 @@ class StorageListSidebar(VerticalScroll):
         ]
         storages = sorted(storages, key=lambda x: x.storage.storage)
 
-        for letter, storages_group in groupby(storages, key=lambda x: x.storage.storage[0]):
+        for letter, storages_group in groupby(
+            storages, key=lambda x: x.storage.storage[0]
+        ):
             with Container(id=f"group-{letter}", classes="storage-group"):
                 yield Horizontal(
                     Rule(id="rule-left"),

@@ -4,6 +4,7 @@ This module provides widgets for displaying and interacting with storage content
 including files and folders. It handles file selection, navigation, and content
 display with search functionality.
 """
+
 import contextlib
 import os.path
 from dataclasses import dataclass
@@ -491,7 +492,7 @@ class StorageContentContainer(Vertical):
             not self.storage_content.files and not self.storage_content.folders
         ):
             with Middle(), Center():
-                    yield Static(NO_DATA_LOGO)
+                yield Static(NO_DATA_LOGO)
             return
         with Horizontal(classes="file_list_header"):
             yield FileMetaLabel("Name", classes="file_name")
