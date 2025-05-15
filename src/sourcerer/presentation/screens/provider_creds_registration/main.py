@@ -7,11 +7,11 @@ from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.screen import ModalScreen
-from textual.widgets import Select, Label
+from textual.widgets import Label, Select
 
 from sourcerer.domain.access_credentials.services import (
-    BaseAccessCredentialsService,
     AuthField,
+    BaseAccessCredentialsService,
 )
 from sourcerer.infrastructure.access_credentials.exceptions import (
     MissingAuthFieldsError,

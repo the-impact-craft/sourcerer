@@ -4,10 +4,10 @@ import webbrowser
 
 from textual import on
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Container
+from textual.containers import Container, Horizontal
+from textual.css.query import NoMatches
 from textual.screen import ModalScreen
 from textual.widgets import Label, RichLog
-from textual.css.query import NoMatches
 
 from sourcerer import __version__
 from sourcerer.presentation.screens.shared.widgets.button import Button

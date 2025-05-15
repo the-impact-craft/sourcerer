@@ -5,7 +5,7 @@ This module defines the abstract base class for credentials repositories,
 providing a common interface for different storage implementations.
 """
 
-from abc import abstractmethod, ABCMeta
+from abc import ABCMeta, abstractmethod
 
 from sourcerer.domain.access_credentials.entities import Credentials
 

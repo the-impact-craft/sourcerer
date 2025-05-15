@@ -7,32 +7,32 @@ interface for various cloud storage providers.
 
 from itertools import groupby
 from pathlib import Path
-from typing import List, Any, Callable
+from typing import Any, Callable, List
 
 import humanize
 from platformdirs import user_downloads_dir
 
 from sourcerer.domain.shared.entities import StorageProvider
 from sourcerer.domain.storage_provider.entities import (
-    StoragePermissions,
-    StorageContent,
-    Folder,
     File,
+    Folder,
     Storage,
+    StorageContent,
+    StoragePermissions,
 )
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
 from sourcerer.infrastructure.storage_provider.exceptions import (
-    ListStoragesException,
-    StoragePermissionException,
-    ListStorageItemsException,
-    ReadStorageItemsException,
-    DeleteStorageItemsException,
-    UploadStorageItemsException,
     CredentialsNotFoundException,
+    DeleteStorageItemsException,
+    ListStorageItemsException,
+    ListStoragesException,
+    ReadStorageItemsException,
+    StoragePermissionException,
+    UploadStorageItemsException,
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
-from sourcerer.settings import PATH_DELIMITER, PAGE_SIZE
+from sourcerer.settings import PAGE_SIZE, PATH_DELIMITER
 
 
 @storage_provider(StorageProvider.S3)

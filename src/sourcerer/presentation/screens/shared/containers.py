@@ -1,4 +1,4 @@
-from textual.containers import ScrollableContainer, HorizontalScroll, VerticalScroll
+from textual.containers import HorizontalScroll, ScrollableContainer, VerticalScroll
 
 
 class ScrollableContainerWithNoBindings(ScrollableContainer, inherit_bindings=False):

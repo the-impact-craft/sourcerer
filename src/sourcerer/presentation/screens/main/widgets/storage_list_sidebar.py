@@ -11,7 +11,7 @@ from typing import Dict, List
 
 from textual import events
 from textual.app import ComposeResult
-from textual.containers import VerticalScroll, Horizontal, Container
+from textual.containers import Container, Horizontal, VerticalScroll
 from textual.reactive import reactive
 from textual.widgets import Label, Rule
 

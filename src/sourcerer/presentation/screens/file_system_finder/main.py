@@ -1,12 +1,12 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Callable
+from typing import Callable, List
 
 from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal, Container
+from textual.containers import Container, Horizontal
 from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.screen import ModalScreen

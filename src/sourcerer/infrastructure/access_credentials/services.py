@@ -15,14 +15,14 @@ from dependency_injector.wiring import Provide
 from google.cloud import storage
 
 from sourcerer.domain.access_credentials.entities import (
-    Credentials,
-    Boto3Credentials,
     AzureCredentials,
+    Boto3Credentials,
+    Credentials,
 )
 from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository
 from sourcerer.domain.access_credentials.services import (
-    BaseAccessCredentialsService,
     AuthField,
+    BaseAccessCredentialsService,
 )
 from sourcerer.domain.shared.entities import StorageProvider
 from sourcerer.infrastructure.access_credentials.exceptions import (
@@ -30,8 +30,8 @@ from sourcerer.infrastructure.access_credentials.exceptions import (
     MissingAuthFieldsError,
 )
 from sourcerer.infrastructure.access_credentials.registry import (
-    access_credentials_method,
     AccessCredentialsMethod,
+    access_credentials_method,
 )
 from sourcerer.infrastructure.utils import generate_uuid
 from sourcerer.presentation.di_container import DiContainer

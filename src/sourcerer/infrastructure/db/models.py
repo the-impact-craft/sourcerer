@@ -7,7 +7,7 @@ and their relationships.
 
 from datetime import datetime
 
-from sqlalchemy import Column, Integer, Boolean, DateTime, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.orm import declarative_base
 from sqlalchemy_utils.types.encrypted.encrypted_type import EncryptedType
 

@@ -7,7 +7,7 @@ access credential services for various cloud providers.
 
 import functools
 from dataclasses import dataclass
-from typing import Type, Dict
+from typing import Dict, Type
 
 from sourcerer.domain.access_credentials.services import BaseAccessCredentialsService
 from sourcerer.infrastructure.utils import Singleton

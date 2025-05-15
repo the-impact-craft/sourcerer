@@ -7,12 +7,12 @@ providing a common interface for cloud storage operations.
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import List, Callable
+from typing import Callable, List
 
 from sourcerer.domain.storage_provider.entities import (
-    StoragePermissions,
-    StorageContent,
     Storage,
+    StorageContent,
+    StoragePermissions,
 )
 
 

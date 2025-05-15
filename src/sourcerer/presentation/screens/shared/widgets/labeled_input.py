@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from textual.app import ComposeResult
 from textual.containers import Container
-from textual.widgets import Label, Input, TextArea
+from textual.widgets import Input, Label, TextArea
 
 
 class LabeledInput(Container):

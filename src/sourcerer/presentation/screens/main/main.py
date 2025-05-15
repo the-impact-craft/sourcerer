@@ -1,7 +1,7 @@
 import traceback
 from pathlib import Path
 
-from textual import work, on
+from textual import on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal
@@ -44,15 +44,15 @@ from sourcerer.presentation.screens.provider_creds_list.main import (
     ProviderCredsListScreen,
 )
 from sourcerer.presentation.screens.storage_action_progress.main import (
+    DeleteKey,
+    DownloadKey,
     StorageActionProgressScreen,
     UploadKey,
-    DownloadKey,
-    DeleteKey,
 )
 from sourcerer.presentation.themes.github_dark import github_dark_theme
 from sourcerer.presentation.utils import (
-    get_provider_service_by_access_uuid,
     get_provider_service_by_access_credentials,
+    get_provider_service_by_access_uuid,
 )
 
 

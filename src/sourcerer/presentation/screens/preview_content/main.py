@@ -3,7 +3,7 @@ from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
 from textual.screen import ModalScreen
-from textual.widgets import RichLog, LoadingIndicator
+from textual.widgets import LoadingIndicator, RichLog
 
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
 from sourcerer.infrastructure.storage_provider.exceptions import (

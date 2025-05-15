@@ -12,17 +12,17 @@ from enum import Enum, auto
 from textual import events, on
 from textual.app import ComposeResult
 from textual.containers import (
-    VerticalScroll,
-    Horizontal,
     Center,
-    Middle,
     Container,
+    Horizontal,
+    Middle,
     Vertical,
+    VerticalScroll,
 )
 from textual.css.query import NoMatches
 from textual.message import Message
 from textual.reactive import reactive
-from textual.widgets import Label, Static, Input, Checkbox
+from textual.widgets import Checkbox, Input, Label, Static
 
 from sourcerer.domain.storage_provider.entities import StorageContent
 from sourcerer.presentation.screens.main.messages.delete_request import DeleteRequest
@@ -40,11 +40,11 @@ from sourcerer.presentation.screens.main.messages.upload_request import UploadRe
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.settings import NO_DATA_LOGO
 from sourcerer.settings import (
-    UPLOAD_ICON,
-    DOWNLOAD_ICON,
-    PREVIEW_ICON,
     DIRECTORY_ICON,
+    DOWNLOAD_ICON,
     FILE_ICON,
+    PREVIEW_ICON,
+    UPLOAD_ICON,
 )
 
 

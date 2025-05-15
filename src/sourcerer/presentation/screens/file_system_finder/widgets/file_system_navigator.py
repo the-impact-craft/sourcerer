@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from time import time
-from typing import ClassVar, Sequence, Literal, List, Callable, Tuple, Type
+from typing import Callable, ClassVar, List, Literal, Sequence, Tuple, Type
 
 from textual import events, on
 from textual.app import ComposeResult
@@ -11,17 +11,16 @@ from textual.css.query import NoMatches
 from textual.message import Message
 from textual.reactive import reactive
 from textual.widget import Widget
-from textual.widgets import Rule, Label
+from textual.widgets import Label, Rule
 
 from sourcerer.infrastructure.file_system.exceptions import ListDirException
 from sourcerer.infrastructure.file_system.services import FileSystemService
+from sourcerer.infrastructure.utils import generate_uuid
 from sourcerer.presentation.screens.shared.containers import (
     ScrollHorizontalContainerWithNoBindings,
     ScrollVerticalContainerWithNoBindings,
 )
-
-from sourcerer.infrastructure.utils import generate_uuid
-from sourcerer.settings import DOUBLE_CLICK_THRESHOLD, FILE_ICON, DIRECTORY_ICON
+from sourcerer.settings import DIRECTORY_ICON, DOUBLE_CLICK_THRESHOLD, FILE_ICON
 
 
 class PathListingContainer(ScrollVerticalContainerWithNoBindings):
@@ -489,11 +488,11 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
             path (Path): The directory path to list contents for
 
         Returns:
-            PathListingContainer | None: A container with folder and file widgets, or None if directory is empty or
+            - PathListingContainer | None: A container with folder and file widgets, or None if directory is empty or
             listing fails
 
         Raises:
-            Notifies user via self.notify() if directory listing encounters an error
+            - Notifies user via self.notify() if directory listing encounters an error
         """
         try:
             dir_list = self.file_system_service.list_dir(path, relative_paths=False)

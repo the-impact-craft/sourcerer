@@ -7,7 +7,7 @@ interface for various cloud storage providers.
 
 import os.path
 from pathlib import Path
-from typing import List, Any, Callable
+from typing import Any, Callable, List
 
 import humanize
 from azure.mgmt.storage import StorageManagementClient
@@ -16,20 +16,20 @@ from platformdirs import user_downloads_dir
 
 from sourcerer.domain.shared.entities import StorageProvider
 from sourcerer.domain.storage_provider.entities import (
-    StoragePermissions,
-    StorageContent,
-    Storage,
-    Folder,
     File,
+    Folder,
+    Storage,
+    StorageContent,
+    StoragePermissions,
 )
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
 from sourcerer.infrastructure.storage_provider.exceptions import (
-    ListStoragesException,
-    ListStorageItemsException,
-    ReadStorageItemsException,
-    DeleteStorageItemsException,
-    UploadStorageItemsException,
     AzureMissingContainerException,
+    DeleteStorageItemsException,
+    ListStorageItemsException,
+    ListStoragesException,
+    ReadStorageItemsException,
+    UploadStorageItemsException,
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file

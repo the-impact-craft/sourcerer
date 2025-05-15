@@ -3,13 +3,13 @@ import time
 from textual.events import MouseMove, MouseUp
 
 from sourcerer.presentation.screens.main.messages.resizing_rule import (
-    ResizingRuleSelect,
-    ResizingRuleRelease,
     ResizingRuleMove,
+    ResizingRuleRelease,
+    ResizingRuleSelect,
 )
 from sourcerer.presentation.screens.main.widgets.resizing_rule import (
-    ResizingRule,
     MoveEvent,
+    ResizingRule,
 )
 from sourcerer.presentation.settings import MIN_SECTION_DIMENSION
 

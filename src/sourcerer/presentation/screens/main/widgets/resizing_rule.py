@@ -6,8 +6,8 @@ from textual.widgets import Rule
 
 from sourcerer.presentation.screens.main.messages.resizing_rule import (
     ResizingRuleMove,
-    ResizingRuleSelect,
     ResizingRuleRelease,
+    ResizingRuleSelect,
 )
 
 

@@ -8,11 +8,11 @@ from rich.text import Text
 from textual import on
 from textual.app import ComposeResult
 from textual.color import Gradient
-from textual.containers import Container, VerticalScroll, Horizontal, Center
+from textual.containers import Center, Container, Horizontal, VerticalScroll
 from textual.css.query import NoMatches
-from textual.screen import ModalScreen
-from textual.widgets import ProgressBar, Label, Rule
 from textual.reactive import reactive
+from textual.screen import ModalScreen
+from textual.widgets import Label, ProgressBar, Rule
 
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
 from sourcerer.infrastructure.storage_provider.exceptions import (

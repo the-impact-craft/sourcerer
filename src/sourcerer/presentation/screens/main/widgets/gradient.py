@@ -1,5 +1,5 @@
-from textual.widgets import Static
 from rich.text import Text
+from textual.widgets import Static
 
 
 def hex_to_rgb(hex_color: str):

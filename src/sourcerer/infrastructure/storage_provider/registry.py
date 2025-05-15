@@ -6,7 +6,7 @@ storage provider services.
 """
 
 import functools
-from typing import Type, Dict
+from typing import Dict, Type
 
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
 from sourcerer.infrastructure.utils import Singleton

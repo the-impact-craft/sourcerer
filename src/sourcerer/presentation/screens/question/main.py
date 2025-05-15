@@ -1,6 +1,6 @@
 from textual import on
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Container
+from textual.containers import Container, Horizontal
 from textual.screen import ModalScreen
 from textual.widgets import Label
 

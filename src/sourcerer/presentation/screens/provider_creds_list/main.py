@@ -7,13 +7,13 @@ from textual.containers import Container, Horizontal, VerticalScroll
 from textual.message import Message
 from textual.reactive import reactive
 from textual.screen import ModalScreen
-from textual.widgets import Label, Checkbox
+from textual.widgets import Checkbox, Label
 
 from sourcerer.domain.access_credentials.entities import Credentials
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
 from sourcerer.presentation.screens.provider_creds_registration.main import (
-    ProviderCredsRegistrationScreen,
     ProviderCredentialsEntry,
+    ProviderCredsRegistrationScreen,
 )
 from sourcerer.presentation.screens.shared.widgets.button import Button
 
