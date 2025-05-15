@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import List
 
 from dependency_injector.wiring import Provide
 from textual import on
@@ -251,13 +250,13 @@ class ProviderCredsRegistrationScreen(ModalScreen):
             self.auth_method = provider_auth_class
             await self._mount_credentials_fields(provider_auth_class.auth_fields())
 
-    async def _mount_credentials_fields(self, fields: List[AuthField]) -> None:
+    async def _mount_credentials_fields(self, fields: list[AuthField]) -> None:
         """
         Mounts a container of labeled input fields for credentials onto the settings container
         and sets focus on the first input field.
 
         Args:
-            fields (List[AuthField]): A list of AuthField objects containing key, label, and required attributes.
+            fields (list[AuthField]): A list of AuthField objects containing key, label, and required attributes.
 
         Returns:
             None

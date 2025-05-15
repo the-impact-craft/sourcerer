@@ -7,7 +7,6 @@ access credential services for various cloud providers.
 
 import functools
 from dataclasses import dataclass
-from typing import Dict, Type
 
 from sourcerer.domain.access_credentials.services import BaseAccessCredentialsService
 from sourcerer.infrastructure.utils import Singleton
@@ -38,19 +37,19 @@ class AccessCredentialsRegistry(metaclass=Singleton):
     def __init__(self, *args, **kwargs):
         """Initialize the registry with an empty dictionary."""
         super().__init__(*args, **kwargs)
-        self._items_: Dict[str, Dict[str, type]] = {}  # type: ignore
+        self._items_: dict[str, dict[str, type]] = {}  # type: ignore
 
     def register(
         self,
         access_credentials_method: AccessCredentialsMethod,
-        cls: Type[BaseAccessCredentialsService],
+        cls: type[BaseAccessCredentialsService],
     ):
         """
         Register a credential service implementation.
 
         Args:
             access_credentials_method (AccessCredentialsMethod): The method descriptor
-            cls (Type[BaseAccessCredentialsService]): The service class to register
+            cls (type[BaseAccessCredentialsService]): The service class to register
         """
         if access_credentials_method.provider not in self._items_:
             self._items_[access_credentials_method.provider] = {}

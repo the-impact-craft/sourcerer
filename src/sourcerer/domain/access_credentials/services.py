@@ -8,7 +8,6 @@ authentication methods.
 
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import List
 
 from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository
 
@@ -82,7 +81,7 @@ class BaseAccessCredentialsService:
 
     @classmethod
     @abstractmethod
-    def auth_fields(cls) -> List[AuthField]:
+    def auth_fields(cls) -> list[AuthField]:
         """
         Get list of authentication fields.
 

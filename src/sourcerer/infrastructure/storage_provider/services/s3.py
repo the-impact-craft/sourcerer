@@ -5,9 +5,10 @@ This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
 
+from collections.abc import Callable
 from itertools import groupby
 from pathlib import Path
-from typing import Any, Callable, List
+from typing import Any
 
 import humanize
 from platformdirs import user_downloads_dir
@@ -90,7 +91,7 @@ class S3ProviderService(BaseStorageProviderService):
             client_args["endpoint_url"] = self.credentials.endpoint_url
         return session.resource("s3", **client_args)
 
-    def list_storages(self) -> List[Storage]:
+    def list_storages(self) -> list[Storage]:
         """
         Return a list of available S3 buckets.
 
@@ -109,7 +110,7 @@ class S3ProviderService(BaseStorageProviderService):
             for i in response.get("Buckets")
         ]
 
-    def get_storage_permissions(self, storage: str) -> List[StoragePermissions]:
+    def get_storage_permissions(self, storage: str) -> list[StoragePermissions]:
         """
         Return the permissions for the specified S3 bucket.
 

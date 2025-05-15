@@ -7,7 +7,6 @@ such as storage containers, files, folders, and permissions.
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List
 
 
 @dataclass
@@ -37,7 +36,7 @@ class StoragePermissions:
     """
 
     user: str
-    permissions: List[str]
+    permissions: list[str]
 
 
 @dataclass
@@ -82,5 +81,5 @@ class StorageContent:
         folders (List[Folder]): List of folders in the location
     """
 
-    files: List[File]
-    folders: List[Folder]
+    files: list[File]
+    folders: list[Folder]

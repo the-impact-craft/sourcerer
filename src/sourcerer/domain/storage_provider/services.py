@@ -6,8 +6,8 @@ providing a common interface for cloud storage operations.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, List
 
 from sourcerer.domain.storage_provider.entities import (
     Storage,
@@ -27,7 +27,7 @@ class BaseStorageProviderService(ABC):
     """
 
     @abstractmethod
-    def list_storages(self) -> List[Storage]:
+    def list_storages(self) -> list[Storage]:
         """
         Return a list of available storages.
 
@@ -36,7 +36,7 @@ class BaseStorageProviderService(ABC):
         """
 
     @abstractmethod
-    def get_storage_permissions(self, storage: str) -> List[StoragePermissions]:
+    def get_storage_permissions(self, storage: str) -> list[StoragePermissions]:
         """
         Return the permissions for the specified storage.
 

@@ -17,7 +17,7 @@ def get_encryption_key(path: Path):
 
     # If key file exists, read the key from it
     if os.path.exists(key_file_path):
-        with open(key_file_path, "r", encoding="utf-8") as f:
+        with open(key_file_path, encoding="utf-8") as f:
             return f.read().strip()
 
     # Otherwise, generate a new key and store it

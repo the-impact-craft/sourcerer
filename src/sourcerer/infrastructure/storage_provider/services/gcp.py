@@ -5,8 +5,9 @@ This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
 
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, List
+from typing import Any
 
 import humanize
 from platformdirs import user_downloads_dir
@@ -52,7 +53,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
         """
         self.client = credentials
 
-    def list_storages(self) -> List[Storage]:
+    def list_storages(self) -> list[Storage]:
         """
         Return a list of available GCP buckets.
 
@@ -70,7 +71,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
         except Exception as ex:
             raise ListStoragesError(str(ex)) from ex
 
-    def get_storage_permissions(self, storage: str) -> List[StoragePermissions]:
+    def get_storage_permissions(self, storage: str) -> list[StoragePermissions]:
         """
         Return the permissions for the specified GCP bucket.
 

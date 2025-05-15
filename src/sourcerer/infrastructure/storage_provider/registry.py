@@ -6,7 +6,6 @@ storage provider services.
 """
 
 import functools
-from typing import Dict, Type
 
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
 from sourcerer.infrastructure.utils import Singleton
@@ -23,9 +22,9 @@ class StorageProviderRegistry(metaclass=Singleton):
     def __init__(self, *args, **kwargs):
         """Initialize the registry with an empty dictionary."""
         super().__init__(*args, **kwargs)
-        self._items_: Dict[str, type] = {}
+        self._items_: dict[str, type] = {}
 
-    def register(self, storage_provider: str, cls: Type[BaseStorageProviderService]):
+    def register(self, storage_provider: str, cls: type[BaseStorageProviderService]):
         """
         Register a storage provider service implementation.
 

@@ -6,8 +6,9 @@ interface for various cloud storage providers.
 """
 
 import os.path
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable, List
+from typing import Any
 
 import humanize
 from azure.mgmt.storage import StorageManagementClient
@@ -76,7 +77,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             credential=self.credentials,
         )
 
-    def list_storages(self) -> List[Storage]:
+    def list_storages(self) -> list[Storage]:
         """
         Return a list of available Azure containers.
 
@@ -95,7 +96,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
         except Exception as ex:
             raise ListStoragesError(str(ex)) from ex
 
-    def get_storage_permissions(self, storage: str) -> List[StoragePermissions]:
+    def get_storage_permissions(self, storage: str) -> list[StoragePermissions]:
         raise NotImplementedError("Not implemented")
 
     def list_storage_items(

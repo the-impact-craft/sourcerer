@@ -2,7 +2,6 @@ import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List
 
 from rich.text import Text
 from textual import on
@@ -107,7 +106,7 @@ class StorageActionProgressScreen(ModalScreen):
         storage_name: str,
         path: str,
         provider_service: BaseStorageProviderService | None,
-        keys: List[UploadKey | DownloadKey | DeleteKey],
+        keys: list[UploadKey | DownloadKey | DeleteKey],
         action: str,
         *args,
         **kwargs,
@@ -119,7 +118,7 @@ class StorageActionProgressScreen(ModalScreen):
             storage_name (str): Name of the storage being operated on
             path (str): Path within the storage
             provider_service (BaseStorageProviderService | None): Service for interacting with the storage provider
-            keys (List[Key]): List of keys representing files/folders to process
+            keys (list[Key]): List of keys representing files/folders to process
             action (str): Type of action being performed ('download', 'upload', or 'delete')
             *args: Additional positional arguments to pass to parent class
             **kwargs: Additional keyword arguments to pass to parent class

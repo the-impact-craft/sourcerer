@@ -1,8 +1,9 @@
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from time import time
-from typing import Callable, ClassVar, List, Literal, Sequence, Tuple, Type
+from typing import ClassVar, Literal
 
 from textual import events, on
 from textual.app import ComposeResult
@@ -94,7 +95,7 @@ class FileSystemWidget(Widget):
         """
         self.entity_name = entity_name
         self.icon = icon
-        self.last_file_click: Tuple[float, Path | None] = (
+        self.last_file_click: tuple[float, Path | None] = (
             time() - 2,
             None,
         )
@@ -230,7 +231,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
     """
 
     # Consolidate key binding data
-    BINDINGS: ClassVar[List[BindingType]] = [
+    BINDINGS: ClassVar[list[BindingType]] = [
         Binding("enter", "select_cursor", "Select", show=False),
         Binding("up", "cursor_up", "Cursor up", show=False),
         Binding("down", "cursor_down", "Cursor down", show=False),
@@ -685,7 +686,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         elements: Sequence[Widget],
         direction: Literal["up", "down"],
         selector: Callable,
-        of_type: Type | None = None,
+        of_type: type | None = None,
     ) -> Widget | None:
         """
         Determine the next element in a sequence based on navigation direction and selection criteria.

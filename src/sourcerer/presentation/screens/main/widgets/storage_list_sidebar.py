@@ -7,7 +7,6 @@ and selection of storage items.
 
 from collections import namedtuple
 from itertools import groupby
-from typing import Dict, List
 
 from textual import events
 from textual.app import ComposeResult
@@ -84,7 +83,7 @@ class StorageListSidebar(VerticalScroll):
         storages: Dictionary mapping provider types to lists of storage instances
     """
 
-    storages: reactive[Dict[str, List[Storage]]] = reactive({}, recompose=True)
+    storages: reactive[dict[str, list[Storage]]] = reactive({}, recompose=True)
 
     DEFAULT_CSS = """
     StorageListSidebar {

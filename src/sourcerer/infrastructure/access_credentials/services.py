@@ -7,7 +7,6 @@ interface for various cloud providers and authentication methods.
 
 import json
 from abc import ABC
-from typing import List
 
 import boto3
 from azure.identity import ClientSecretCredential
@@ -299,7 +298,7 @@ class S3ProfileName(S3AccessCredentialsService):
             raise CredentialsAuthError("Failed to authenticate") from e
 
     @classmethod
-    def auth_fields(cls) -> List[AuthField]:
+    def auth_fields(cls) -> list[AuthField]:
         """
         Get list of authentication fields.
 
@@ -399,7 +398,7 @@ class GCPCredentialsService(AccessCredentialsService):
             ) from e
 
     @classmethod
-    def auth_fields(cls) -> List[AuthField]:
+    def auth_fields(cls) -> list[AuthField]:
         """
         Get list of authentication fields.
 
@@ -476,7 +475,7 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
             ) from e
 
     @classmethod
-    def auth_fields(cls) -> List[AuthField]:
+    def auth_fields(cls) -> list[AuthField]:
         """
         Get list of authentication fields.
 
