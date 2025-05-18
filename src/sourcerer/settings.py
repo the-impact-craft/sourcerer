@@ -23,6 +23,8 @@ DB_NAME = "sourcerer.db"
 
 ENCRYPTION_KEY = get_encryption_key(APP_DIR)
 
+MAX_PARALLEL_STORAGE_LIST_OPERATIONS = 3
+
 # Maximum number of parallel download operations
 MAX_PARALLEL_DOWNLOADS = 8
 
