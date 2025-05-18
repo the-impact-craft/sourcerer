@@ -1,4 +1,5 @@
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from textual import on, work
@@ -54,6 +55,7 @@ from sourcerer.presentation.utils import (
     get_provider_service_by_access_credentials,
     get_provider_service_by_access_uuid,
 )
+from sourcerer.settings import MAX_PARALLEL_STORAGE_LIST_OPERATIONS
 
 
 class Sourcerer(App, ResizeContainersWatcherMixin):
@@ -168,25 +170,11 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         if not access_credentials:
             return
 
-        for credentials in access_credentials:
-            provider_service = get_provider_service_by_access_credentials(credentials)
-            if not provider_service:
-                self.notify(
-                    f"Could not get storages list for {credentials.name}!",
-                    severity="error",
-                )
-                continue
-            try:
-                storages = provider_service.list_storages()
-                self.storage_list_sidebar.storages = {
-                    credentials.uuid: storages,
-                    **self.storage_list_sidebar.storages,
-                }
-            except Exception:
-                self.notify(
-                    f"Could not get storages list for {credentials.name}!",
-                    severity="error",
-                )
+        with ThreadPoolExecutor(
+            max_workers=MAX_PARALLEL_STORAGE_LIST_OPERATIONS
+        ) as executor:
+            for credentials in access_credentials:
+                executor.submit(self._load_storages, credentials)
 
     @on(SelectStorageItem)
     def on_select_storage_item(self, event: SelectStorageItem):
@@ -392,16 +380,13 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         )
 
         if not provider_service:
-            self.notify("Could not extract storage content", severity="error")
+            self.notify_error("Could not extract storage content")
             return
         params = {"storage": storage_name, "path": path or "", "prefix": prefix or ""}
         try:
             self.storage_content.storage_content = provider_service.list_storage_items(**params)  # type: ignore
         except ListStorageItemsError as e:
-            self.notify(
-                f"""Could not extract storage content \n{str(e)}""",
-                severity="error",
-            )
+            self.notify_error(f"""Could not extract storage content \n{str(e)}""")
 
     def _upload_file(
         self,
@@ -434,7 +419,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         """
         # Validate input parameters
         if not source_path:
-            self.notify("No file selected for upload", severity="error")
+            self.notify_error("No file selected for upload")
             return
 
         # Get the provider service
@@ -442,7 +427,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             access_credentials_uuid, self.credentials_service
         )
         if not provider_service:
-            self.notify("Could not get provider service for upload", severity="error")
+            self.notify_error("Could not get provider service for upload")
             return
 
         # Create upload key
@@ -466,3 +451,41 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                 access_credentials_uuid, storage_name, path
             ),
         )
+
+    def _load_storages(self, credentials):
+        """
+        Loads the list of storages for the given access credentials.
+
+        This method retrieves the list of storages from the provider service
+        associated with the provided access credentials and updates the
+        storage list sidebar with the retrieved storages.
+
+        Args:
+            credentials (Credentials): The access credentials for which to load storages.
+
+        Note:
+            If an error occurs while retrieving the storages, a notification is shown
+            to the user.
+        """
+        provider_service = get_provider_service_by_access_credentials(credentials)
+        if not provider_service:
+            self.notify_error(f"Could not get storages list for {credentials.name}!")
+            return
+
+        try:
+            storages = provider_service.list_storages()
+            self.storage_list_sidebar.storages = {
+                credentials.uuid: storages,
+                **self.storage_list_sidebar.storages,
+            }
+        except Exception:
+            self.notify_error(f"Could not get storages list for {credentials.name}!")
+
+    def notify_error(self, message):
+        """
+        Displays an error notification to the user.
+
+        Args:
+            message (str): The error message to display.
+        """
+        self.notify(message, severity="error")
