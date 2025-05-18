@@ -83,7 +83,8 @@ class StorageListSidebar(VerticalScroll):
         storages: Dictionary mapping provider types to lists of storage instances
     """
 
-    storages: reactive[dict[str, list[Storage]]] = reactive({}, recompose=True)
+    storages: reactive[dict[str, list[Storage]]] = reactive({})
+    last_update_timestamp: reactive[float] = reactive(0, recompose=True)
 
     DEFAULT_CSS = """
     StorageListSidebar {

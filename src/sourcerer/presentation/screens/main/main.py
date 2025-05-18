@@ -1,3 +1,4 @@
+import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -474,10 +475,8 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
 
         try:
             storages = provider_service.list_storages()
-            self.storage_list_sidebar.storages = {
-                credentials.uuid: storages,
-                **self.storage_list_sidebar.storages,
-            }
+            self.storage_list_sidebar.storages[credentials.uuid] = storages
+            self.storage_list_sidebar.last_update_timestamp = time.time()
         except Exception:
             self.notify_error(f"Could not get storages list for {credentials.name}!")
 
