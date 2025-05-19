@@ -375,6 +375,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         self.storage_content.storage = storage_name
         self.storage_content.access_credentials_uuid = access_credentials_uuid
         self.storage_content.search_prefix = prefix or ""
+        self.storage_content.storage_content = None
+        self.storage_content.selected_files = set()
+        self.storage_content.selected_files_n = 0
 
         provider_service = get_provider_service_by_access_uuid(
             access_credentials_uuid, self.credentials_service
