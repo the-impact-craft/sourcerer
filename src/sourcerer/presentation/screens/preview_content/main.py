@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from rich.syntax import Syntax
 from textual import on
 from textual.app import ComposeResult
@@ -51,7 +53,13 @@ class PreviewContentScreen(ModalScreen):
             return
 
         text_log = self.query_one(RichLog)
-        lexer = Syntax.guess_lexer(self.key, content)
+
+        extension = Path(self.key).suffix
+        match extension:
+            case ".tfstate":
+                lexer = "json"
+            case _:
+                lexer = Syntax.guess_lexer(self.key, content)
         content = Syntax(content, lexer, line_numbers=True, theme="ansi_dark")
         text_log.write(content)
 

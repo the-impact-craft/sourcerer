@@ -68,6 +68,8 @@ TEXT_EXTENSIONS = {
     ".cpp",
     ".go",
     ".rs",
+    ".tfstate",
+    ".tf",
 }
 
 
