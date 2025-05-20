@@ -197,9 +197,10 @@ class AzureStorageProviderService(BaseStorageProviderService):
             dest_path (str, optional): Destination path in storage. Defaults to None.
         """
         try:
-            containers_client = self.get_containers_client(storage)
             if not storage_path:
-                raise AzureMissingContainerError()
+                raise AzureMissingContainerError("Container is required for Azure storage")
+
+            containers_client = self.get_containers_client(storage)           
 
             storage_path_parts = storage_path.split("/", 1)
 
