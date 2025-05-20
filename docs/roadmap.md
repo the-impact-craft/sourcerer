@@ -16,7 +16,7 @@ Our roadmap unveils the features, improvements, and integrations designed to emp
   - ✅ S3-compatible storages (e.g. AWS S3, MinIO, etc.)
     - ✅ Access Key/Secret Key pair
     - ✅ Profile name
-  - [] Azure Blob Storage (planned)
+  - ✅Azure Blob Storage (planned)
 
 - [ ] **Storage actions support** – Perform basic operations with ease:
   - [ ] View storage metadata
