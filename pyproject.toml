@@ -1,7 +1,7 @@
 [project]
 
 name = "data-sourcerer"
-version = "0.2.0"
+version = "0.2.1"
 description = "Sourcerer is a terminal cloud storage navigator."
 requires-python = ">=3.9"
 
@@ -33,14 +33,15 @@ dependencies = [
 sourcerer = "sourcerer.presentation.app:main"
 
 [build-system]
-requires = ["setuptools >= 61.0",  "setuptools-scm"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
     "bandit>=1.8.3",
     "black>=25.1.0",
     "coverage>=7.8.0",
+    "hatch>=1.14.1",
     "mkdocs-material>=9.6.12",
     "pre-commit>=4.2.0",
     "pylint>=3.3.6",
@@ -54,6 +55,7 @@ dev = [
     "bandit>=1.8.3",
     "black>=25.1.0",
     "coverage>=7.8.0",
+    "hatch>=1.14.1",
     "mkdocs-material>=9.6.12",
     "pre-commit>=4.2.0",
     "pylint>=3.3.6",
@@ -96,3 +98,7 @@ unfixable = ["F401"]  # unused imports - maybe you want to catch it manually
 
 [tool.ruff.mccabe]
 max-complexity = 10
+
+[tool.hatch.build]
+include = ["src"]
+sources = ["src"]
