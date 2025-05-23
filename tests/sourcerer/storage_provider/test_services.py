@@ -1,6 +1,6 @@
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, mock_open
 
 from sourcerer.domain.shared.entities import StorageProvider
 from sourcerer.domain.storage_provider.entities import Folder, File, StorageContent
@@ -833,7 +833,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
         dest_path = "test/dest/file.txt"
 
         with patch.object(self.service, 'get_containers_client', return_value=self.mock_blob_service_client):
-            with patch('builtins.open', unittest.mock.mock_open(read_data=b'test content')):
+            with patch('builtins.open', mock_open(read_data=b'test content')):
                 # Act
                 self.service.upload_storage_item(self.test_storage, self.test_container, source_path, dest_path)
 
@@ -847,7 +847,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
         source_path = Path("/test/source/file.txt")
 
         with patch.object(self.service, 'get_containers_client', return_value=self.mock_blob_service_client):
-            with patch('builtins.open', unittest.mock.mock_open(read_data=b'test content')):
+            with patch('builtins.open', mock_open(read_data=b'test content')):
                 # Act
                 self.service.upload_storage_item(self.test_storage, self.test_container, source_path)
 
@@ -862,7 +862,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
         self.mock_container_client.upload_blob.side_effect = Exception("Upload failed")
 
         with patch.object(self.service, 'get_containers_client', return_value=self.mock_blob_service_client):
-            with patch('builtins.open', unittest.mock.mock_open(read_data=b'test content')):
+            with patch('builtins.open', mock_open(read_data=b'test content')):
                 # Act & Assert
                 with self.assertRaises(UploadStorageItemsError):
                     self.service.upload_storage_item(self.test_storage, self.test_container, source_path)
@@ -877,7 +877,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
         self.mock_container_client.download_blob.return_value = mock_download_stream
 
         with patch.object(self.service, 'get_containers_client', return_value=self.mock_blob_service_client):
-            with patch('builtins.open', unittest.mock.mock_open()) as mock_file:
+            with patch('builtins.open', mock_open()) as mock_file:
                 # Act
                 result = self.service.download_storage_item(self.test_storage, self.test_key)
 

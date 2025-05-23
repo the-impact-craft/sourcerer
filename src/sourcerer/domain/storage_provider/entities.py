@@ -5,12 +5,12 @@ This module defines data classes representing cloud storage entities
 such as storage containers, files, folders, and permissions.
 """
 
-from dataclasses import dataclass
 from datetime import datetime
 
+from msgspec._core import Struct
 
-@dataclass
-class Storage:
+
+class Storage(Struct):
     """
     Represents a cloud storage container (bucket/container).
 
@@ -25,8 +25,7 @@ class Storage:
     date_created: datetime
 
 
-@dataclass
-class StoragePermissions:
+class StoragePermissions(Struct):
     """
     Represents permissions for a user on a storage resource.
 
@@ -39,8 +38,7 @@ class StoragePermissions:
     permissions: list[str]
 
 
-@dataclass
-class Folder:
+class Folder(Struct):
     """
     Represents a folder/directory within a storage container.
 
@@ -51,8 +49,7 @@ class Folder:
     key: str
 
 
-@dataclass
-class File:
+class File(Struct):
     """
     Represents a file within a storage container.
 
@@ -71,8 +68,7 @@ class File:
     date_modified: datetime | None = None
 
 
-@dataclass
-class StorageContent:
+class StorageContent(Struct):
     """
     Represents the contents of a storage location, including files and folders.
 

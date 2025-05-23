@@ -1,9 +1,9 @@
 import contextlib
 import os
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass
 from pathlib import Path
 
+from msgspec._core import Struct
 from rich.text import Text
 from textual import on
 from textual.app import ComposeResult
@@ -44,8 +44,7 @@ gradient2 = Gradient.from_colors(
 )
 
 
-@dataclass
-class Key:
+class Key(Struct):
     """
     Base class for representing a key in storage operations.
 
@@ -76,7 +75,6 @@ class DeleteKey(Key):
     """
 
 
-@dataclass
 class UploadKey(Key):
     """
     Represents a key for upload operations.
