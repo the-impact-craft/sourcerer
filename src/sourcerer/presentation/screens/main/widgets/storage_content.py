@@ -170,7 +170,7 @@ class FolderItem(Horizontal):
 
     def compose(self):
         """Compose the folder item layout with folder name and icon."""
-        yield Label(f"{DIRECTORY_ICON}{self.folder.key}")
+        yield Label(f"{DIRECTORY_ICON}{self.folder.key}", markup=False)
 
     def on_click(self, _: events.Click) -> None:
         """Handle click events to navigate into the folder."""
@@ -205,6 +205,9 @@ class FileItem(Horizontal):
     FileItem.active {
         background: $secondary;
         color: $panel;
+    }
+    .file_size {
+        color: $primary
     }
     Checkbox {
         border: none;
@@ -255,11 +258,9 @@ class FileItem(Horizontal):
 
     def compose(self):
         yield Checkbox()
-        yield FileMetaLabel(f"{FILE_ICON} {self.file.key}", classes="file_name")
-        yield FileMetaLabel(
-            f"[$primary]{self.file.size}[/$primary]", classes="file_size"
-        )
-        yield FileMetaLabel(str(self.file.date_modified), classes="file_date")
+        yield FileMetaLabel(f"{FILE_ICON} {self.file.key}", classes="file_name", markup=False)
+        yield FileMetaLabel(f"{self.file.size}", classes="file_size", markup=False)
+        yield FileMetaLabel(str(self.file.date_modified), classes="file_date", markup=False)
         if self.file.is_text:
             yield Button(f"{PREVIEW_ICON}", name="preview", classes="download")
 
@@ -361,6 +362,15 @@ class StorageContentContainer(Vertical):
         height: auto;
         border-bottom: solid $secondary;
         margin: 1 0;
+        
+        PathSelector {
+            &.primary_color {
+                color: $primary;
+            }
+            &.secondary_color {
+                color: $secondary;
+            }
+        }
     }
     .storage_path_item {
         padding: 0 0;
@@ -462,13 +472,14 @@ class StorageContentContainer(Vertical):
             with Horizontal():
                 yield Label("Current Path: ", classes="storage_path_item")
                 for index, breadcrumb in enumerate(breadcrumbs):
-                    color = "$primary" if index == 0 else "$secondary"
+                    color_classes = "primary" if index == 0 else "secondary"
                     yield PathSelector(
-                        renderable=f"[{color}]{breadcrumb}[/]",
+                        renderable=breadcrumb,
                         storage=self.storage,
                         path="/".join(breadcrumbs[1 : index + 1]),
                         access_credentials_uuid=self.access_credentials_uuid,
-                        classes="storage_path_item",
+                        classes=f"storage_path_item {color_classes}_color",
+                        markup=False
                     )
                     yield Label("/", classes="storage_path_item")
             with Horizontal():
