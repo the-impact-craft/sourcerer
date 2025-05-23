@@ -5,15 +5,14 @@ This module defines data classes representing access credentials
 used for authentication with various cloud providers.
 """
 
-from dataclasses import dataclass
 from datetime import datetime
 
 import boto3
 from azure.identity import ClientSecretCredential
+from msgspec._core import Struct
 
 
-@dataclass
-class Credentials:
+class Credentials(Struct):
     """
     Represents access credentials for a provider.
 
@@ -38,8 +37,7 @@ class Credentials:
     updated_at: datetime | None = None
 
 
-@dataclass
-class Boto3Credentials:
+class Boto3Credentials(Struct):
     """
     Represents AWS credentials using boto3 session.
 
@@ -54,8 +52,7 @@ class Boto3Credentials:
     signature_version: str | None = None
 
 
-@dataclass
-class AzureCredentials:
+class AzureCredentials(Struct):
     """
     Represents Azure credentials.
 

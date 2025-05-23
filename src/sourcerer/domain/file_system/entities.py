@@ -5,12 +5,12 @@ This module defines data classes representing file system entities and
 operation results used throughout the application.
 """
 
-from dataclasses import dataclass
 from pathlib import Path
 
+from msgspec._core import Struct
 
-@dataclass
-class SearchResult:
+
+class SearchResult(Struct):
     """
     Represents the result of a search operation.
 
@@ -30,8 +30,7 @@ class SearchResult:
     line: int
 
 
-@dataclass
-class SearchResultOutput:
+class SearchResultOutput(Struct):
     """
     Represents the output of a search operation.
 
@@ -51,8 +50,7 @@ class SearchResultOutput:
     total: int
 
 
-@dataclass
-class ListDirOutput:
+class ListDirOutput(Struct):
     """
     Represents the output of a list directory operation.
 
