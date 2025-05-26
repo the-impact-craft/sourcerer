@@ -55,8 +55,10 @@ class PreviewContentScreen(ModalScreen):
         text_log = self.query_one(RichLog)
 
         extension = Path(self.key).suffix
-        
-        lexer = 'json' if extension == ".tfstate" else Syntax.guess_lexer(self.key, content)
+
+        lexer = (
+            "json" if extension == ".tfstate" else Syntax.guess_lexer(self.key, content)
+        )
 
         content = Syntax(content, lexer, line_numbers=True, theme="ansi_dark")
         text_log.write(content)
