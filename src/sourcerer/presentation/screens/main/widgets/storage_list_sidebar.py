@@ -20,6 +20,7 @@ from sourcerer.presentation.screens.main.messages.select_storage_item import (
     SelectStorageItem,
 )
 from sourcerer.presentation.screens.main.widgets.gradient import GradientWidget
+from sourcerer.presentation.screens.shared.widgets.loader import Loader
 
 STORAGE_ICONS = {
     StorageProvider.S3: "🟠",
@@ -83,6 +84,7 @@ class StorageListSidebar(VerticalScroll):
         storages: Dictionary mapping provider types to lists of storage instances
     """
 
+    is_loading: reactive[bool] = reactive(False, recompose=True)
     storages: reactive[dict[str, list[Storage]]] = reactive({})
     last_update_timestamp: reactive[float] = reactive(0, recompose=True)
 
@@ -112,11 +114,28 @@ class StorageListSidebar(VerticalScroll):
 
         }
     }
+    #header {
+        width: 100%;
+        
+        GradientWidget {
+            width: auto;
+        }
+        
+        Loader {
+            width: 5%;
+        }
+    }
     """
 
     def compose(self) -> ComposeResult:
-        with Container(id="header"):
-            yield GradientWidget("🧙SOURCERER", id="left-middle")
+        with Horizontal(id="header"):
+            if self.is_loading:
+                yield Loader()
+            yield GradientWidget(
+                " SOURCERER" if self.is_loading else "🧙SOURCERER",
+                id="left-middle",
+            )
+
         StorageData = namedtuple("Storage", ["access_credentials_uuid", "storage"])
         storages = [
             StorageData(access_credentials_uuid, storage)

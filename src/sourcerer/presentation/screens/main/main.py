@@ -171,11 +171,19 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         if not access_credentials:
             return
 
+        self.storage_list_sidebar.is_loading = True
+
         with ThreadPoolExecutor(
             max_workers=MAX_PARALLEL_STORAGE_LIST_OPERATIONS
         ) as executor:
-            for credentials in access_credentials:
+            futures = [
                 executor.submit(self._load_storages, credentials)
+                for credentials in access_credentials
+            ]
+
+            for future in futures:
+                future.result()
+        self.storage_list_sidebar.is_loading = False
 
     @on(SelectStorageItem)
     def on_select_storage_item(self, event: SelectStorageItem):
