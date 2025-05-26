@@ -4,7 +4,7 @@ import uuid
 from pathlib import Path
 
 
-def get_encryption_key(path: Path):
+def get_encryption_key(path: Path) -> str:
     """
     Get the encryption key from a file or generate a new one if the file doesn't exist.
 
