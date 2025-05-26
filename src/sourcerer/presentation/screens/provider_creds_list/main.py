@@ -11,10 +11,14 @@ from textual.widgets import Checkbox, Label
 
 from sourcerer.domain.access_credentials.entities import Credentials
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
+from sourcerer.presentation.screens.provider_creds_list.messages.reload_credentials_request import (
+    ReloadCredentialsRequest,
+)
 from sourcerer.presentation.screens.provider_creds_registration.main import (
     ProviderCredentialsEntry,
     ProviderCredsRegistrationScreen,
 )
+from sourcerer.presentation.screens.question.main import QuestionScreen
 from sourcerer.presentation.screens.shared.widgets.button import Button
 
 
@@ -39,6 +43,7 @@ class ProviderCredentialsRow(Horizontal):
         yield Label(self.row.name, classes="credentials_name")
         yield Label(self.row.provider, classes="credentials_provider")
         yield Label(self.row.credentials_type, classes="credentials_auth_method")
+        yield Button("❌", name="delete", classes="credentials_auth_delete")
 
     def on_mouse_move(self, _) -> None:
         """Change background color when hovered."""
@@ -58,6 +63,34 @@ class ProviderCredentialsRow(Horizontal):
         """
         self.row.active = event.value
         self.post_message(self.ChangeActiveStatus(self.row.uuid, self.row.active))
+
+    @on(Button.Click)
+    def on_delete_button_click(self, _: Button.Click):
+        """
+        Handle delete button click events by deleting the associated credentials using the credentials service.
+
+        Args:
+            _ (Button.Click): The button click event.
+        """
+        self.app.push_screen(
+            QuestionScreen(
+                f"Are you sure you want to delete {self.row.provider} {self.row.name} credentials?"
+            ),
+            callback=self.delete_callback,  # type: ignore
+        )
+
+    def delete_callback(self, result: bool):
+        """
+        Callback function to handle the result of the confirmation screen.
+
+        Args:
+            result (bool): True if the user confirmed, False otherwise.
+        """
+        if not result:
+            return
+        credentials_service = CredentialsService()
+        credentials_service.delete(self.row.uuid)
+        self.post_message(ReloadCredentialsRequest())
 
 
 class ProviderCredsListScreen(ModalScreen):
@@ -94,6 +127,7 @@ class ProviderCredsListScreen(ModalScreen):
                     yield Label("Name", classes="credentials_name")
                     yield Label("Provider", classes="credentials_provider")
                     yield Label("Auth method", classes="credentials_auth_method")
+                    yield Label("Delete", classes="credentials_auth_delete")
                 for row in self.credentials_list:
                     yield ProviderCredentialsRow(row, classes="credentials_row")
             with Horizontal(id="controls"):
@@ -161,4 +195,14 @@ class ProviderCredsListScreen(ModalScreen):
             self.credentials_service.activate(event.uuid)
         else:
             self.credentials_service.deactivate(event.uuid)
+        self.refresh_credentials_list()
+
+    @on(ReloadCredentialsRequest)
+    def on_reload_credentials_request(self, _: ReloadCredentialsRequest):
+        """
+        Handle reload credentials request events by refreshing the credentials list.
+
+        Args:
+            _ (ReloadCredentialsRequest): The reload credentials request event.
+        """
         self.refresh_credentials_list()

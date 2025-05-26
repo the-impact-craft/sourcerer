@@ -2,8 +2,6 @@ QuestionScreen {
   align: center middle;
   content-align: center top;
 
-
-
   & > Container {
     padding: 1 2 0 2;
     margin: 0 0;
@@ -11,11 +9,10 @@ QuestionScreen {
     height: 8;
     border: solid $warning-darken-1;
 
-    & > Label {
+    & > Static {
       margin: 1;
       text-align: center;
-      column-span: 2;
-      width: auto;
+      text-wrap: wrap;
     }
 
     & > Horizontal {
@@ -28,6 +25,3 @@ QuestionScreen {
   }
 
 }
-
-
-

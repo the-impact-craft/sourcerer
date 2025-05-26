@@ -71,6 +71,15 @@ class CredentialsService:
         """
         return self.credentials_repo.list(active_only)
 
+    def delete(self, uuid):
+        """
+        Delete credentials by UUID.
+
+        Args:
+            uuid (str): Unique identifier for the credentials to delete
+        """
+        return self.credentials_repo.delete(uuid)
+
     def get(self, uuid):
         """
         Get credentials by UUID.
@@ -422,7 +431,6 @@ class GCPCredentialsService(AccessCredentialsService):
     AccessCredentialsMethod(StorageProvider.AzureStorage, "Client Secret Credentials")
 )
 class AzureClientSecretCredentialsService(AccessCredentialsService):
-
     def store(self, name, credentials: dict):
         """
         Store Azure client_id and secret_key_pair credentials.

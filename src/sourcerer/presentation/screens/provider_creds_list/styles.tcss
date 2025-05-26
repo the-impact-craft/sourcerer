@@ -43,23 +43,23 @@ ProviderCredsListScreen {
     }
 
     .credentials_name {
-      width: 30%;
+      width: 20%;
     }
 
     .credentials_provider {
-      width: 30%;
+      width: 25%;
     }
 
     .credentials_auth_method {
       width: 30%;
     }
 
+    .credentials_auth_delete {
+      width: 10%;
+    }
 
     & > Select {
       margin-bottom: 1;
     }
   }
 }
-
-
-

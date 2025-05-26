@@ -1,8 +1,9 @@
+from rich.text import Text
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
 from textual.screen import ModalScreen
-from textual.widgets import Label
+from textual.widgets import Static
 
 from sourcerer.presentation.screens.shared.widgets.button import Button
 
@@ -18,7 +19,7 @@ class QuestionScreen(ModalScreen[bool]):
 
     def compose(self) -> ComposeResult:
         with Container():
-            yield Label(self.question)
+            yield Static(Text(self.question, style="bold"), id="question_label")
             with Horizontal():
                 yield Button("Yes", name="yes")
                 yield Button("No", name="no")
@@ -28,4 +29,4 @@ class QuestionScreen(ModalScreen[bool]):
         """
         Handle button click events.
         """
-        self.dismiss(event.action)  # type: ignore
+        self.dismiss(event.action == "yes")  # type: ignore

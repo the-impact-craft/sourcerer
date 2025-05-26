@@ -29,6 +29,18 @@ class BaseCredentialsRepository(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
+    def delete(self, uuid):
+        """Delete credentials by UUID.
+
+        Args:
+            uuid: Unique identifier for the credentials to delete
+
+        Raises:
+            NotImplementedError: Method must be implemented by concrete classes
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def get(self, uuid):
         """Retrieve credentials by UUID.
 
