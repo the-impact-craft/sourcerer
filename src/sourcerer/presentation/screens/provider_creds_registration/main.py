@@ -15,6 +15,7 @@ from sourcerer.domain.access_credentials.services import (
 from sourcerer.infrastructure.access_credentials.exceptions import (
     MissingAuthFieldsError,
 )
+from sourcerer.infrastructure.utils import generate_unique_name
 from sourcerer.presentation.di_container import DiContainer
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.shared.widgets.labeled_input import LabeledInput
@@ -215,7 +216,10 @@ class ProviderCredsRegistrationScreen(ModalScreen):
             if isinstance(input_field, LabeledInput) and input_field.get().value
         }
 
-        auth_name = self.query_one("#auth_name", LabeledInput).get().value or "default"
+        auth_name = (
+            self.query_one("#auth_name", LabeledInput).get().value
+            or generate_unique_name()
+        )
 
         return ProviderCredentialsEntry(
             name=auth_name,

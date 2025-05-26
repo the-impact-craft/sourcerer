@@ -4,8 +4,8 @@ Utility functions for the Sourcerer application.
 This module provides various utility functions used throughout the application,
 including UUID generation, MIME type detection, and file type checking.
 """
-
 import mimetypes
+import secrets
 import uuid
 from pathlib import Path
 
@@ -102,3 +102,117 @@ class Singleton(type):
         if cls not in cls._instances:
             cls._instances[cls] = super().__call__(*args, **kwargs)
         return cls._instances[cls]
+
+
+def generate_unique_name() -> str:
+    """
+    Generate a unique name for a file or directory.
+
+    Returns:
+        str: A unique name
+    """
+    adjectives = [
+        "goofy",
+        "quirky",
+        "snappy",
+        "witty",
+        "bubbly",
+        "zany",
+        "wonky",
+        "clumsy",
+        "cheeky",
+        "sassy",
+        "cryptic",
+        "shadowy",
+        "enigmatic",
+        "arcane",
+        "veiled",
+        "hidden",
+        "phantasmal",
+        "whispering",
+        "hollow",
+        "ghostly",
+        "mighty",
+        "fierce",
+        "brave",
+        "bold",
+        "ironclad",
+        "unyielding",
+        "stormforged",
+        "grim",
+        "feral",
+        "dauntless",
+        "stellar",
+        "vivid",
+        "luminous",
+        "glimmering",
+        "blazing",
+        "radiant",
+        "shimmering",
+        "snazzy",
+        "flashy",
+        "dazzling",
+    ]
+
+    names = [
+        "gandalf",
+        "merlin",
+        "morgana",
+        "radagast",
+        "saruman",
+        "galadriel",
+        "smaug",
+        "elminster",
+        "ambrosius",
+        "balrog",
+        "sauron",
+        "rivendell",
+        "azkaban",
+        "gryffindor",
+        "slytherin",
+        "rowena",
+        "helga",
+        "alatar",
+        "pellinore",
+        "nimue",
+        "glorfindel",
+        "melian",
+        "feanor",
+        "titania",
+        "oberon",
+        "cerberus",
+        "phoenix",
+        "gryphon",
+        "hydra",
+        "basilisk",
+        "leviathan",
+        "wraith",
+        "djinn",
+        "fae",
+        "nymph",
+        "dryad",
+        "selkie",
+        "witchking",
+        "morwen",
+        "telvanni",
+        "daedric",
+        "argonian",
+        "auriel",
+        "azura",
+        "boethiah",
+        "nocturnal",
+        "zarthos",
+        "shadar",
+        "kobold",
+        "lich",
+        "oracle",
+        "summoner",
+        "geomancer",
+        "runeweaver",
+        "voidcaller",
+        "planewalker",
+    ]
+
+    adjective = secrets.choice(adjectives)
+    name = secrets.choice(names)
+    return f"{adjective}_{name}"
