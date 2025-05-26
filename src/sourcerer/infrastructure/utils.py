@@ -4,9 +4,8 @@ Utility functions for the Sourcerer application.
 This module provides various utility functions used throughout the application,
 including UUID generation, MIME type detection, and file type checking.
 """
-
 import mimetypes
-import random
+import secrets
 import uuid
 from pathlib import Path
 
@@ -214,6 +213,6 @@ def generate_unique_name() -> str:
         "planewalker",
     ]
 
-    adjective = random.choice(adjectives)
-    name = random.choice(names)
+    adjective = secrets.choice(adjectives)
+    name = secrets.choice(names)
     return f"{adjective}_{name}"
