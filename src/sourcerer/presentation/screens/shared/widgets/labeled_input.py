@@ -75,6 +75,10 @@ class LabeledInput(Container):
             Value: A dataclass containing the name and value of the input field.
 
         """
-        input_area = self.query_one(".form_input")
-        text = input_area.document.text if isinstance(input_area, TextArea) else input_area.value  # type: ignore
+        input_area = self.query_one(".form_input", expect_type=Input)
+        text = (
+            input_area.document.text
+            if isinstance(input_area, TextArea)
+            else input_area.value
+        )
         return self.Value(name=self.key, value=text)

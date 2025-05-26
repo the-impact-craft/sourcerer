@@ -30,7 +30,7 @@ class Database:
         """
         self.db_url = db_url
         self.engine = sqlalchemy.create_engine(db_url)
-        self.scoped_session = scoped_session(sessionmaker(bind=self.engine))  # type: ignore
+        self.scoped_session = scoped_session(sessionmaker(bind=self.engine))
 
     def prepare_db(self):
         """

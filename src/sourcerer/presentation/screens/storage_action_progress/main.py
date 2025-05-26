@@ -243,7 +243,7 @@ class StorageActionProgressScreen(ModalScreen):
         This method handles the download of multiple files, updating progress bars
         and handling various error conditions that might occur during the process.
         """
-        main_progress_bar = self.query_one("#progress_bar")
+        main_progress_bar = self.query_one("#progress_bar", ProgressBar)
         failed_downloads = []
 
         with ThreadPoolExecutor(max_workers=MAX_PARALLEL_DOWNLOADS) as executor:
@@ -289,13 +289,13 @@ class StorageActionProgressScreen(ModalScreen):
         def progress_callback(progress_bar, chunk):
             progress_bar.advance(chunk)
 
-        progress_bar = self.query_one(f"#progress_bar_{uuid}")
+        progress_bar = self.query_one(f"#progress_bar_{uuid}", ProgressBar)
 
         try:
             # Step 1: Get file size
             try:
                 file_size = self.provider_service.get_file_size(self.storage_name, key)
-                progress_bar.total = file_size  # type: ignore
+                progress_bar.total = file_size
             except Exception as ex:
                 self.notify(
                     f"Failed to get file size for {key}: {str(ex)}", severity="error"
@@ -316,9 +316,9 @@ class StorageActionProgressScreen(ModalScreen):
                 return
 
             # Step 3: Ensure progress bar is complete
-            if progress_bar.progress != progress_bar.total:  # type: ignore
+            if progress_bar.progress != progress_bar.total:
                 try:
-                    progress_bar.progress = file_size  # type: ignore
+                    progress_bar.progress = file_size
                 except Exception as ex:
                     self.log.error(f"Error updating progress bar: {ex}")
                     # Non-critical error, continue execution
@@ -338,7 +338,7 @@ class StorageActionProgressScreen(ModalScreen):
         This method handles the deletion of multiple files, updating progress bars
         and handling various error conditions that might occur during the process.
         """
-        main_progress_bar = self.query_one("#progress_bar")
+        main_progress_bar = self.query_one("#progress_bar", ProgressBar)
         failed_downloads = []
 
         with ThreadPoolExecutor(max_workers=MAX_PARALLEL_DOWNLOADS) as executor:
@@ -377,11 +377,11 @@ class StorageActionProgressScreen(ModalScreen):
             main_progress_bar.advance(1)
             return
 
-        progress_bar = self.query_one(f"#progress_bar_{uuid}")
+        progress_bar = self.query_one(f"#progress_bar_{uuid}", ProgressBar)
         try:
-            progress_bar.total = 1  # type: ignore
+            progress_bar.total = 1
             self.provider_service.delete_storage_item(self.storage_name, key)
-            progress_bar.advance(1)  # type: ignore
+            progress_bar.advance(1)
         except Exception:
             self.notify(f"Failed to delete {key}", severity="error")
             raise
@@ -395,7 +395,7 @@ class StorageActionProgressScreen(ModalScreen):
         This method handles the upload of files, updating progress bars and
         handling various error conditions that might occur during the process.
         """
-        main_progress_bar = self.query_one("#progress_bar")
+        main_progress_bar = self.query_one("#progress_bar", ProgressBar)
         failed_downloads = []
         if not self.provider_service:
             self.notify("Failed to upload files", severity="error")
@@ -409,10 +409,12 @@ class StorageActionProgressScreen(ModalScreen):
                         storage=self.storage_name,
                         storage_path=self.path,
                         source_path=key.path,
-                        dest_path=key.dest_path,  # type: ignore
+                        dest_path=key.dest_path,
                     )
-                    progress_bar = self.query_one(f"#progress_bar_{key.uuid}")
-                    progress_bar.advance(1)  # type: ignore
+                    progress_bar = self.query_one(
+                        f"#progress_bar_{key.uuid}", ProgressBar
+                    )
+                    progress_bar.advance(1)
                 except UploadStorageItemsError as e:
                     self.notify(f"Failed to upload {key.path}: {e}", severity="error")
                 finally:
@@ -420,8 +422,8 @@ class StorageActionProgressScreen(ModalScreen):
             elif source_path.is_dir():
 
                 files_n = len([i for i in source_path.rglob("*") if i.is_file()])
-                progress_bar = self.query_one(f"#progress_bar_{key.uuid}")
-                progress_bar.total = files_n  # type: ignore
+                progress_bar = self.query_one(f"#progress_bar_{key.uuid}", ProgressBar)
+                progress_bar.total = files_n
                 with ThreadPoolExecutor(max_workers=MAX_PARALLEL_DOWNLOADS) as executor:
                     self.active_executor = executor
                     futures = [
@@ -445,10 +447,12 @@ class StorageActionProgressScreen(ModalScreen):
                     self.files_has_been_processed = True
                 self.active_executor = None
                 try:
-                    self.query_one(f"#progress_file_details_{key.uuid}").remove()
-                except Exception:
+                    await self.query_one(
+                        f"#progress_file_details_{key.uuid}", Label
+                    ).remove()
+                except NoMatches:
                     self.log(f"Failed to remove progress details for {key.uuid}")
-            main_progress_bar.advance(1)  # type: ignore
+            main_progress_bar.advance(1)
 
     def upload_file(self, source, rel_source, destination, uuid):
         """
@@ -465,12 +469,12 @@ class StorageActionProgressScreen(ModalScreen):
         if not self.provider_service:
             self.notify(f"Failed to upload {source}", severity="error")
             return
-        progress_bar = self.query_one(f"#progress_bar_{uuid}")
+        progress_bar = self.query_one(f"#progress_bar_{uuid}", ProgressBar)
         details_container = None
         with contextlib.suppress(NoMatches):
-            details_container = self.query_one(f"#progress_file_details_{uuid}")
+            details_container = self.query_one(f"#progress_file_details_{uuid}", Label)
         if details_container:
-            details_container.update(Text(f"({rel_source})", overflow="ellipsis"))  # type: ignore
+            details_container.update(Text(f"({rel_source})", overflow="ellipsis"))
         try:
             self.provider_service.upload_storage_item(
                 storage=self.storage_name,
@@ -478,7 +482,7 @@ class StorageActionProgressScreen(ModalScreen):
                 source_path=source,
                 dest_path=destination,
             )
-            progress_bar.advance(1)  # type: ignore
+            progress_bar.advance(1)
         except UploadStorageItemsError as e:
             self.notify(f"Failed to upload {source}: {e}", severity="error")
 

@@ -155,7 +155,7 @@ class ProviderCredsRegistrationScreen(ModalScreen):
         if event.control.name == self.PROVIDERS_NAME:
             await self._process_selected_provider(str(event.value))
         elif event.control.name == self.AUTH_METHODS_NAME:
-            provider = self.query_one(f"#{self.PROVIDER_SELECTOR_ID}").selection  # type: ignore
+            provider = self.query_one(f"#{self.PROVIDER_SELECTOR_ID}", Select).selection
             await self._process_selected_provider_auth_method(
                 provider, str(event.value)
             )
@@ -215,7 +215,7 @@ class ProviderCredsRegistrationScreen(ModalScreen):
             if isinstance(input_field, LabeledInput) and input_field.get().value
         }
 
-        auth_name = self.query_one("#auth_name").get().value or "default"  # type: ignore
+        auth_name = self.query_one("#auth_name", LabeledInput).get().value or "default"
 
         return ProviderCredentialsEntry(
             name=auth_name,

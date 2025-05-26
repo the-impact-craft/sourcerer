@@ -41,7 +41,7 @@ class Button(Label):
             ValueError: If 'name' is not included in the keyword arguments.
         """
         super().__init__(*args, **kwargs)
-        if "name" not in kwargs:
+        if "name" not in kwargs or not kwargs["name"]:
             raise ValueError("Name is required attribute for button")
 
     def on_click(self, _: events.Click) -> None:

@@ -8,6 +8,7 @@ authentication methods.
 
 from abc import abstractmethod
 from dataclasses import dataclass
+from typing import Any
 
 from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository
 
@@ -71,7 +72,7 @@ class BaseAccessCredentialsService:
         """
 
     @abstractmethod
-    def authenticate(self, credentials: str):
+    def authenticate(self, credentials: str) -> Any:
         """
         Authenticate using stored credentials.
 

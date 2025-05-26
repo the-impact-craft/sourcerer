@@ -474,7 +474,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
             NoMatches: Silently caught internally if no widget matches the UUID.
         """
         try:
-            return self.query_one(f"#{container_uuid}")  # type: ignore
+            return self.query_one(f"#{container_uuid}", PathListingContainer)
         except NoMatches:
             return None
 

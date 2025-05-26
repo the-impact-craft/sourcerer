@@ -86,7 +86,9 @@ class StorageListSidebar(VerticalScroll):
 
     is_loading: reactive[bool] = reactive(False, recompose=True)
     storages: reactive[dict[str, list[Storage]]] = reactive({})
-    last_update_timestamp: reactive[float] = reactive(0, recompose=True)
+    last_update_timestamp: reactive[float] = reactive(
+        0.0, recompose=True
+    )  # ty: ignore[invalid-assignment]
 
     DEFAULT_CSS = """
     StorageListSidebar {

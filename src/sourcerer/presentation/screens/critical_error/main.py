@@ -51,7 +51,7 @@ class CriticalErrorScreen(ModalScreen[bool]):
         if event.action == "report":
             webbrowser.open(self._build_github_issue_url(), new=0, autoraise=True)
         elif event.action == "dismiss":
-            self.dismiss()  # type: ignore
+            self.dismiss()
 
     def _build_github_issue_url(self) -> str:
         """

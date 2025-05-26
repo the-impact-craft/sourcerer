@@ -36,6 +36,7 @@ from sourcerer.presentation.screens.main.mixins.resize_containers_watcher_mixin 
 )
 from sourcerer.presentation.screens.main.widgets.resizing_rule import ResizingRule
 from sourcerer.presentation.screens.main.widgets.storage_content import (
+    FileItem,
     StorageContentContainer,
 )
 from sourcerer.presentation.screens.main.widgets.storage_list_sidebar import (
@@ -244,7 +245,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                 ),
                 path=event.path,
                 keys=[
-                    DownloadKey(display_name=key, uuid=generate_uuid(), path=key)  # type: ignore
+                    DownloadKey(display_name=key, uuid=generate_uuid(), path=key)
                     for key in event.keys
                 ],
                 action="download",
@@ -274,7 +275,8 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                 ),
                 path=event.path,
                 keys=[
-                    DeleteKey(display_name=key, uuid=generate_uuid(), path=key) for key in event.keys  # type: ignore
+                    DeleteKey(display_name=key, uuid=generate_uuid(), path=key)
+                    for key in event.keys
                 ],
                 action="delete",
             ),
@@ -313,8 +315,8 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             event (UncheckFilesRequest): The uncheck request event containing file keys
         """
         for key_uuid in event.keys:
-            file_item = self.query_one(f"#{key_uuid}")
-            file_item.uncheck()  # type: ignore
+            file_item = self.query_one(f"#{key_uuid}", FileItem)
+            file_item.uncheck()
         self.storage_content.selected_files = set()
         self.storage_content.selected_files_n = 0
 
@@ -396,7 +398,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             return
         params = {"storage": storage_name, "path": path or "", "prefix": prefix or ""}
         try:
-            self.storage_content.storage_content = provider_service.list_storage_items(**params)  # type: ignore
+            self.storage_content.storage_content = provider_service.list_storage_items(
+                **params
+            )
         except ListStorageItemsError as e:
             self.notify_error(f"""Could not extract storage content \n{str(e)}""")
 

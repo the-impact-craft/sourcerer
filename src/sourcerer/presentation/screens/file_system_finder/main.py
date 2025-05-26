@@ -155,11 +155,13 @@ class FileSystemNavigationModal(ModalScreen):
         if not event.path:
             return
         try:
-            active_path_label: Static = self.query_one("#active-path")  # type: ignore
+            active_path_label = self.query_one("#active-path", Static)
         except NoMatches:
             return
-        label = str(event.path.relative_to(self.work_dir))
-        if event.path.is_dir():
+        label = str(
+            event.path.relative_to(self.work_dir)
+        )  # ty: ignore[possibly-unbound-attribute]
+        if event.path.is_dir():  # ty: ignore[possibly-unbound-attribute]
             label += "/"
         active_path_label.update(label)
         self.active_path = event.path

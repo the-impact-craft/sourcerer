@@ -190,7 +190,7 @@ class S3AccessKeySecretKeyPair(S3AccessCredentialsService):
         """
         return self.credentials_repo.get(uuid)
 
-    def authenticate(self, credentials: str):  # type: ignore
+    def authenticate(self, credentials: str):
         """
         Authenticate using stored credentials.
 
@@ -201,22 +201,27 @@ class S3AccessKeySecretKeyPair(S3AccessCredentialsService):
             boto3.Session: Authenticated boto3 session
         """
         try:
-            credentials: dict = json.loads(credentials)
+            credentials_dict: dict = json.loads(credentials)
+
+            access_key_id = credentials_dict.get("aws_access_key_id")
+            secret_access_key = credentials_dict.get("aws_secret_access_key")
+            endpoint_url = credentials_dict.get("endpoint_url")
+            signature_version = credentials_dict.get("signature_version")
 
             session_args = {
-                "aws_access_key_id": credentials.get("aws_access_key_id"),
-                "aws_secret_access_key": credentials.get("aws_secret_access_key"),
+                "aws_access_key_id": access_key_id,
+                "aws_secret_access_key": secret_access_key,
             }
 
-            if region := credentials.get("region"):
+            if region := credentials_dict.get("region"):
                 session_args["region_name"] = region
 
             session = boto3.Session(**session_args)
 
             return Boto3Credentials(
                 session=session,
-                endpoint_url=credentials.get("endpoint_url", None),
-                signature_version=credentials.get("signature_version", None),
+                endpoint_url=endpoint_url,
+                signature_version=signature_version,
             )
         except Exception as e:
             raise CredentialsAuthError("Failed to authenticate") from e
@@ -277,7 +282,7 @@ class S3ProfileName(S3AccessCredentialsService):
         """
         return self.credentials_repo.get(uuid)
 
-    def authenticate(self, credentials: str):  # type: ignore
+    def authenticate(self, credentials: str):
         """
         Authenticate using stored profile name.
 
@@ -288,11 +293,14 @@ class S3ProfileName(S3AccessCredentialsService):
             boto3.Session: Authenticated boto3 session
         """
         try:
-            credentials: dict = json.loads(credentials)
-            session = boto3.Session(profile_name=credentials.get("profile_name"))
+            credentials_dict: dict = json.loads(credentials)
+            profile_name = credentials_dict.get("profile_name")
+            endpoint_url = credentials_dict.get("endpoint_url")
+
+            session = boto3.Session(profile_name=profile_name)
             return Boto3Credentials(
                 session=session,
-                endpoint_url=credentials.get("endpoint_url"),
+                endpoint_url=endpoint_url,
             )
         except Exception as e:
             raise CredentialsAuthError("Failed to authenticate") from e
@@ -353,7 +361,7 @@ class GCPCredentialsService(AccessCredentialsService):
         """
         return self.credentials_repo.get(uuid)
 
-    def authenticate(self, credentials: str):  # type: ignore
+    def authenticate(self, credentials: str):
         """
         Authenticate with Google Cloud Platform using service account credentials.
 
@@ -446,7 +454,7 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
         """
         return self.credentials_repo.get(uuid)
 
-    def authenticate(self, credentials: str):  # type: ignore
+    def authenticate(self, credentials: str):
         try:
             # Parse the outer JSON structure
             parsed_credentials = json.loads(credentials)

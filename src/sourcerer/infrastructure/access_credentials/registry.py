@@ -37,7 +37,7 @@ class AccessCredentialsRegistry(metaclass=Singleton):
     def __init__(self, *args, **kwargs):
         """Initialize the registry with an empty dictionary."""
         super().__init__(*args, **kwargs)
-        self._items_: dict[str, dict[str, type]] = {}  # type: ignore
+        self._items_: dict[str, dict[str, type]] = {}
 
     def register(
         self,

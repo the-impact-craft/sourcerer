@@ -28,6 +28,7 @@ dependencies = [
     "azure-identity>=1.22.0,<2.0.0",
     "azure-mgmt-storage>=22.2.0,<23.0.0",
     "msgspec>=0.19.0",
+    "ty>=0.0.1a6",
 ]
 
 [project.scripts]
@@ -49,6 +50,7 @@ dev = [
     "pyright>=1.1.400",
     "ruff>=0.11.7",
     "textual-dev>=1.7.0",
+    "ty>=0.0.1a6",
 ]
 
 [project.optional-dependencies]
@@ -103,3 +105,7 @@ max-complexity = 10
 [tool.hatch.build]
 include = ["src"]
 sources = ["src"]
+
+[tool.ty.rules]
+unresolved-import = "ignore"
+invalid-assignment = "warn"

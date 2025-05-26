@@ -91,7 +91,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
         try:
             accounts_client = self.get_accounts_client()
             return [
-                Storage(StorageProvider.AzureStorage, i.name, i.creation_time)  # type: ignore
+                Storage(StorageProvider.AzureStorage, i.name, i.creation_time)
                 for i in accounts_client.storage_accounts.list()
             ]
         except Exception as ex:
@@ -198,9 +198,11 @@ class AzureStorageProviderService(BaseStorageProviderService):
         """
         try:
             if not storage_path:
-                raise AzureMissingContainerError("Container is required for Azure storage")
+                raise AzureMissingContainerError(
+                    "Container is required for Azure storage"
+                )
 
-            containers_client = self.get_containers_client(storage)           
+            containers_client = self.get_containers_client(storage)
 
             storage_path_parts = storage_path.split("/", 1)
 
