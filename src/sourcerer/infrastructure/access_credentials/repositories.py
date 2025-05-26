@@ -57,6 +57,9 @@ class SQLAlchemyCredentialsRepository(BaseCredentialsRepository):
             credentials = (
                 session.query(DBCredentials).filter(DBCredentials.uuid == uuid).first()
             )
+            if credentials is None:
+                # No matching credentials found; return early
+                return
             session.delete(credentials)
             session.commit()
 
