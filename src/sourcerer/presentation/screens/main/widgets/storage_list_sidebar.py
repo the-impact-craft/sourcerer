@@ -171,7 +171,7 @@ class StorageListSidebar(VerticalScroll):
                     )
 
     @on(Button.Click)
-    def on_mount(self, event: Button.Click) -> None:
-        """Initialize the storage list sidebar on mount."""
+    def on_button_click(self, event: Button.Click) -> None:
+        """Handle button click events to refresh the storage list."""
         if event.action == "header_click":
             self.post_message(RefreshStoragesListRequest())

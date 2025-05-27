@@ -353,7 +353,8 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         Handles requests to refresh the storage list.
 
         This method is triggered when a RefreshStoragesListRequest event is received.
-        It resets the storage content display and refreshes the storage list.
+        It refreshes the storage list if the storage list sidebar is not currently
+        loading.
 
         Args:
             _ (RefreshStoragesListRequest): The refresh request event
