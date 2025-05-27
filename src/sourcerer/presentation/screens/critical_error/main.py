@@ -29,7 +29,7 @@ class CriticalErrorScreen(ModalScreen[bool]):
             yield RichLog(highlight=True, markup=True)
             with Horizontal():
                 yield Button("Report", name="report")
-                yield Button("Dismiss", name="dismiss")
+                yield Button("Exit", name="exit")
 
     def on_mount(self) -> None:
         """
@@ -50,8 +50,8 @@ class CriticalErrorScreen(ModalScreen[bool]):
         """
         if event.action == "report":
             webbrowser.open(self._build_github_issue_url(), new=0, autoraise=True)
-        elif event.action == "dismiss":
-            self.dismiss()
+        elif event.action == "exit":
+            self.app.exit()
 
     def _build_github_issue_url(self) -> str:
         """
@@ -67,7 +67,7 @@ Steps to Reproduce:
 …
 …
 Traceback:
-```{self.traceback}```
+```{self.traceback[-1000:]}```
         """
 
         return (
