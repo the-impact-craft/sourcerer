@@ -323,21 +323,25 @@ class StorageContentContainer(Vertical):
         selected_files_n: Number of selected files
     """
 
-    storage: reactive[str | None] = reactive(
+    storage: reactive[str | None] = reactive(  # ty: ignore[invalid-assignment]
         None, recompose=True
-    )  # ty: ignore[invalid-assignment]
-    path: reactive[str | None] = reactive(
+    )
+    path: reactive[str | None] = reactive(  # ty: ignore[invalid-assignment]
         None, recompose=False
-    )  # ty: ignore[invalid-assignment]
-    search_prefix: reactive[str | None] = reactive(
+    )
+    search_prefix: reactive[str | None] = reactive(  # ty: ignore[invalid-assignment]
         None, recompose=False
-    )  # ty: ignore[invalid-assignment]
-    access_credentials_uuid: reactive[str | None] = reactive(
+    )
+    access_credentials_uuid: reactive[
+        str | None
+    ] = reactive(  # ty: ignore[invalid-assignment]
         "", recompose=False
-    )  # ty: ignore[invalid-assignment]
-    storage_content: reactive[StorageContent | None] = reactive(
+    )
+    storage_content: reactive[
+        StorageContent | None
+    ] = reactive(  # ty: ignore[invalid-assignment]
         None, recompose=True
-    )  # ty: ignore[invalid-assignment]
+    )
     selected_files: reactive[set] = reactive(set(), recompose=False)
     selected_files_n: reactive[int] = reactive(0, recompose=False)
 
@@ -376,7 +380,7 @@ class StorageContentContainer(Vertical):
         height: auto;
         border-bottom: solid $secondary;
         margin: 1 0;
-        
+
         PathSelector {
             &.primary_color {
                 color: $primary;

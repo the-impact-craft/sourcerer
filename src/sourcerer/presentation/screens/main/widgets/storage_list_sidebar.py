@@ -86,9 +86,9 @@ class StorageListSidebar(VerticalScroll):
 
     is_loading: reactive[bool] = reactive(False, recompose=True)
     storages: reactive[dict[str, list[Storage]]] = reactive({})
-    last_update_timestamp: reactive[float] = reactive(
+    last_update_timestamp: reactive[float] = reactive(  # ty: ignore[invalid-assignment]
         0.0, recompose=True
-    )  # ty: ignore[invalid-assignment]
+    )
 
     DEFAULT_CSS = """
     StorageListSidebar {
@@ -100,14 +100,14 @@ class StorageListSidebar(VerticalScroll):
             #rule-left {
                 width: 1;
             }
-            
+
             Horizontal {
                 height: auto;
             }
             Rule.-horizontal {
                 height: 1;
                 margin: 0 0;
-                    
+
             }
             .storage-letter {
                 color: $secondary;
@@ -118,11 +118,11 @@ class StorageListSidebar(VerticalScroll):
     }
     #header {
         width: 100%;
-        
+
         GradientWidget {
             width: auto;
         }
-        
+
         Loader {
             width: 5%;
         }

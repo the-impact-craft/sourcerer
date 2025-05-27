@@ -19,9 +19,9 @@ class MoveEvent:
 
 class ResizingRule(Rule, can_focus=True):
     dragging: reactive[bool] = reactive(False)
-    position: reactive[MoveEvent | None] = reactive(
+    position: reactive[MoveEvent | None] = reactive(  # ty: ignore[invalid-assignment]
         None
-    )  # ty: ignore[invalid-assignment]
+    )
 
     def __init__(self, prev_component_id, next_component_id, *args, **kwargs):
         super().__init__(*args, **kwargs)
