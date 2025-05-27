@@ -8,7 +8,7 @@ Our roadmap unveils the features, improvements, and integrations designed to emp
 
 ## 🗺️ The Roadmap
 
-- ✅ **Initial release** 
+- ✅ **Initial release**
 
 - ✅ **Multi-cloud storage viewing** – Navigate files and folders from:
   - ✅ Google Cloud Storage (GCS)
@@ -25,6 +25,8 @@ Our roadmap unveils the features, improvements, and integrations designed to emp
   - ✅ Upload files
   - ✅ Delete objects
   - [ ] Rename / move objects
+
+- ✅ **Delete credentials** – Remove access keys from the local database.
 
 - [ ] **Bookmarking** – Save frequently visited locations across storage accounts for quick teleportation.
 
