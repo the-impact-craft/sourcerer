@@ -159,9 +159,9 @@ class FileSystemNavigationModal(ModalScreen):
         except NoMatches:
             return
         label = str(
-            event.path.relative_to(
+            event.path.relative_to(  # ty: ignore[possibly-unbound-attribute]
                 self.work_dir
-            )  # ty: ignore[possibly-unbound-attribute]
+            )
         )
         if event.path.is_dir():  # ty: ignore[possibly-unbound-attribute]
             label += "/"

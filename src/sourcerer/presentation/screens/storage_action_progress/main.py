@@ -185,9 +185,9 @@ class StorageActionProgressScreen(ModalScreen):
         Sets the border title and starts the appropriate worker thread based on the action type
         (download, delete, or upload).
         """
-        self.query_one("#StorageActionProgress").border_title = (
-            f"{self.action.capitalize()} {len(self.keys)} files from {self.storage_name}"
-        )
+        self.query_one(
+            "#StorageActionProgress"
+        ).border_title = f"{self.action.capitalize()} {len(self.keys)} files from {self.storage_name}"
 
         if self.action == "download":
             self.active_worker = self.run_worker(self.download_files, thread=True)
@@ -447,9 +447,7 @@ class StorageActionProgressScreen(ModalScreen):
                     self.files_has_been_processed = True
                 self.active_executor = None
                 try:
-                    await self.query_one(
-                        f"#progress_file_details_{key.uuid}", Label
-                    ).remove()
+                    self.query_one(f"#progress_file_details_{key.uuid}", Label).remove()
                 except NoMatches:
                     self.log(f"Failed to remove progress details for {key.uuid}")
             main_progress_bar.advance(1)

@@ -332,16 +332,12 @@ class StorageContentContainer(Vertical):
     search_prefix: reactive[str | None] = reactive(  # ty: ignore[invalid-assignment]
         None, recompose=False
     )
-    access_credentials_uuid: reactive[
+    access_credentials_uuid: reactive[  # ty: ignore[invalid-assignment]
         str | None
-    ] = reactive(  # ty: ignore[invalid-assignment]
-        "", recompose=False
-    )
-    storage_content: reactive[
+    ] = reactive("", recompose=False)
+    storage_content: reactive[  # ty: ignore[invalid-assignment]
         StorageContent | None
-    ] = reactive(  # ty: ignore[invalid-assignment]
-        None, recompose=True
-    )
+    ] = reactive(None, recompose=True)
     selected_files: reactive[set] = reactive(set(), recompose=False)
     selected_files_n: reactive[int] = reactive(0, recompose=False)
 
