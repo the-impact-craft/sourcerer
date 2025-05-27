@@ -1,11 +1,12 @@
+from itertools import cycle
+
 from textual.app import ComposeResult
 from textual.containers import Container
 from textual.widgets import Static
 
 
 class Loader(Container):
-    stops = "⣷⣯⣟⡿⢿⣻⣽⣾"
-    index = 0
+    stops = cycle("⣷⣯⣟⡿⢿⣻⣽⣾")
 
     DEFAULT_CSS = """
     Loader {
@@ -14,7 +15,7 @@ class Loader(Container):
     """
 
     def __init__(self, *args, **kwargs):
-        self.label = Static(self.stops[self.index])
+        self.label = Static(next(self.stops))
         super().__init__(*args, **kwargs)
 
     def compose(self) -> ComposeResult:
@@ -24,8 +25,4 @@ class Loader(Container):
         self.auto_refresh = 1 / 10
 
     def automatic_refresh(self):
-        self.index += 1
-        if self.index >= len(self.stops):
-            self.index = 0
-        value = self.stops[self.index]
-        self.label.update(value)
+        self.label.update(next(self.stops))
