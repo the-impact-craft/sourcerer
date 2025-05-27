@@ -24,6 +24,9 @@ from sourcerer.presentation.screens.main.messages.download_request import (
     DownloadRequest,
 )
 from sourcerer.presentation.screens.main.messages.preview_request import PreviewRequest
+from sourcerer.presentation.screens.main.messages.refresh_storages_list_request import (
+    RefreshStoragesListRequest,
+)
 from sourcerer.presentation.screens.main.messages.select_storage_item import (
     SelectStorageItem,
 )
@@ -343,6 +346,22 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                 access_credentials_uuid=event.access_credentials_uuid,
             )
         )
+
+    @on(RefreshStoragesListRequest)
+    def on_refresh_storages_list_request(self, _: RefreshStoragesListRequest):
+        """
+        Handles requests to refresh the storage list.
+
+        This method is triggered when a RefreshStoragesListRequest event is received.
+        It refreshes the storage list if the storage list sidebar is not currently
+        loading.
+
+        Args:
+            _ (RefreshStoragesListRequest): The refresh request event
+        """
+        if self.storage_list_sidebar.is_loading:
+            return
+        self.refresh_storages()
 
     def reset_storage_content(self):
         """

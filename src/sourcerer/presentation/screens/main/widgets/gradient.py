@@ -1,5 +1,6 @@
 from rich.text import Text
-from textual.widgets import Static
+
+from sourcerer.presentation.screens.shared.widgets.button import Button
 
 
 def hex_to_rgb(hex_color: str):
@@ -32,8 +33,7 @@ def generate_gradient_text(text: str, start_color: str, end_color: str) -> Text:
     return gradient_text
 
 
-class GradientWidget(Static):
-
+class GradientWidget(Button):
     def on_mount(self):
         """
         Generate a gradient text effect for the widget's content.

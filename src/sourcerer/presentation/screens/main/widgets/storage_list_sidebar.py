@@ -8,7 +8,7 @@ and selection of storage items.
 from collections import namedtuple
 from itertools import groupby
 
-from textual import events
+from textual import events, on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.reactive import reactive
@@ -16,10 +16,14 @@ from textual.widgets import Label, Rule
 
 from sourcerer.domain.shared.entities import StorageProvider
 from sourcerer.domain.storage_provider.entities import Storage
+from sourcerer.presentation.screens.main.messages.refresh_storages_list_request import (
+    RefreshStoragesListRequest,
+)
 from sourcerer.presentation.screens.main.messages.select_storage_item import (
     SelectStorageItem,
 )
 from sourcerer.presentation.screens.main.widgets.gradient import GradientWidget
+from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.shared.widgets.loader import Loader
 
 STORAGE_ICONS = {
@@ -136,6 +140,7 @@ class StorageListSidebar(VerticalScroll):
             yield GradientWidget(
                 " SOURCERER" if self.is_loading else "🧙SOURCERER",
                 id="left-middle",
+                name="header_click",
             )
 
         StorageData = namedtuple("Storage", ["access_credentials_uuid", "storage"])
@@ -164,3 +169,9 @@ class StorageListSidebar(VerticalScroll):
                         storage_name=item.storage.storage,
                         access_credentials_uuid=item.access_credentials_uuid,
                     )
+
+    @on(Button.Click)
+    def on_button_click(self, event: Button.Click) -> None:
+        """Handle button click events to refresh the storage list."""
+        if event.action == "header_click":
+            self.post_message(RefreshStoragesListRequest())
