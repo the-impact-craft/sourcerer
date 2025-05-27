@@ -8,6 +8,7 @@ import mimetypes
 import secrets
 import uuid
 from pathlib import Path
+from typing import ClassVar
 
 from sourcerer.settings import TEXT_EXTENSIONS
 
@@ -83,7 +84,7 @@ class Singleton(type):
     Metaclass that implements the singleton pattern, ensuring only one instance of a class exists.
     """
 
-    _instances = {}
+    _instances: ClassVar[dict["Singleton", type]] = {}
 
     def __call__(cls, *args, **kwargs):
         """

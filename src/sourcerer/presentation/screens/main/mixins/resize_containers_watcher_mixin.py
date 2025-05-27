@@ -1,4 +1,5 @@
 import time
+from typing import ClassVar
 
 from textual.events import MouseMove, MouseUp
 
@@ -28,7 +29,7 @@ class ResizeContainersWatcherMixin:
     and is inherited from textual App.
     """
 
-    required_methods = ["query_one", "refresh"]
+    required_methods: ClassVar[list[str]] = ["query_one", "refresh"]
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)

@@ -1,11 +1,12 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
-from textual.binding import Binding
+from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal
 from textual.css.query import NoMatches
 from textual.reactive import reactive
@@ -30,7 +31,7 @@ class FileSystemNavigationModal(ModalScreen):
     CONTAINER_ID = "file_system_view_container"
     CSS_PATH = "styles.tcss"
 
-    BINDINGS = [
+    BINDINGS: ClassVar[list[BindingType]] = [
         Binding("escape", "app.pop_screen", "Pop screen"),
     ]
 

@@ -2,10 +2,11 @@ import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
+from typing import ClassVar
 
 from textual import on, work
 from textual.app import App, ComposeResult
-from textual.binding import Binding
+from textual.binding import Binding, BindingType
 from textual.containers import Horizontal
 from textual.reactive import reactive
 from textual.widgets import Footer
@@ -93,7 +94,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
     """
 
     CSS_PATH = "styles.tcss"
-    BINDINGS = [Binding("ctrl+r", "registrations", "Registrations list")]
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("ctrl+r", "registrations", "Registrations list")
+    ]
     is_storage_list_loading = reactive(False, recompose=True)
 
     def __init__(self, *args, **kwargs):
@@ -421,7 +424,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                 **params
             )
         except ListStorageItemsError as e:
-            self.notify_error(f"""Could not extract storage content \n{str(e)}""")
+            self.notify_error(f"""Could not extract storage content \n{e}""")
 
     def _upload_file(
         self,

@@ -150,7 +150,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
 
         except Exception as ex:
             raise ListStorageItemsError(
-                f"Failed to list items in {storage}: {str(ex)}"
+                f"Failed to list items in {storage}: {ex}"
             ) from ex
 
     def read_storage_item(self, storage: str, key: str) -> str:

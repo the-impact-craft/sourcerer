@@ -298,7 +298,7 @@ class StorageActionProgressScreen(ModalScreen):
                 progress_bar.total = file_size
             except Exception as ex:
                 self.notify(
-                    f"Failed to get file size for {key}: {str(ex)}", severity="error"
+                    f"Failed to get file size for {key}: {ex}", severity="error"
                 )
                 self.log.error(f"Error getting file size: {ex}")
                 return
@@ -311,7 +311,7 @@ class StorageActionProgressScreen(ModalScreen):
                     lambda chunk: progress_callback(progress_bar, chunk),
                 )
             except Exception as ex:
-                self.notify(f"Failed to download {key}: {str(ex)}", severity="error")
+                self.notify(f"Failed to download {key}: {ex}", severity="error")
                 self.log.error(f"Error downloading file: {ex}")
                 return
 
@@ -324,9 +324,7 @@ class StorageActionProgressScreen(ModalScreen):
                     # Non-critical error, continue execution
         except Exception as ex:
             # Catch any unexpected exceptions
-            self.notify(
-                f"Unexpected error downloading {key}: {str(ex)}", severity="error"
-            )
+            self.notify(f"Unexpected error downloading {key}: {ex}", severity="error")
             self.log.error(f"Unexpected error: {ex}")
         finally:
             main_progress_bar.advance(1)

@@ -92,8 +92,9 @@ select = [
   "C90",  # mccabe (complexity)
   "B",    # flake8-bugbear
   "SIM",  # flake8-simplify
+  "Q",    #flake8-quotes
+  "RUF",
 ]
-
 # Allow autofix for these rule sets
 fixable = ["ALL"]
 

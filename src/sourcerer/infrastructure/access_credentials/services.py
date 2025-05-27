@@ -408,11 +408,9 @@ class GCPCredentialsService(AccessCredentialsService):
             return storage.Client.from_service_account_info(service_acc_info)
 
         except json.JSONDecodeError as e:
-            raise CredentialsAuthError(f"Invalid credentials format: {str(e)}") from e
+            raise CredentialsAuthError(f"Invalid credentials format: {e}") from e
         except Exception as e:
-            raise CredentialsAuthError(
-                f"Failed to authenticate with GCP: {str(e)}"
-            ) from e
+            raise CredentialsAuthError(f"Failed to authenticate with GCP: {e}") from e
 
     @classmethod
     def auth_fields(cls) -> list[AuthField]:
@@ -484,11 +482,9 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
             )
 
         except json.JSONDecodeError as e:
-            raise CredentialsAuthError(f"Invalid credentials format: {str(e)}") from e
+            raise CredentialsAuthError(f"Invalid credentials format: {e}") from e
         except Exception as e:
-            raise CredentialsAuthError(
-                f"Failed to authenticate with Azure: {str(e)}"
-            ) from e
+            raise CredentialsAuthError(f"Failed to authenticate with Azure: {e}") from e
 
     @classmethod
     def auth_fields(cls) -> list[AuthField]:
