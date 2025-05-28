@@ -24,7 +24,7 @@ from sourcerer.presentation.screens.main.messages.select_storage_item import (
 )
 from sourcerer.presentation.screens.main.widgets.gradient import GradientWidget
 from sourcerer.presentation.screens.shared.widgets.button import Button
-from sourcerer.presentation.screens.shared.widgets.loader import Loader
+from sourcerer.presentation.screens.shared.widgets.spinner import Spinner
 
 STORAGE_ICONS = {
     StorageProvider.S3: "🟠",
@@ -127,7 +127,7 @@ class StorageListSidebar(VerticalScroll):
             width: auto;
         }
 
-        Loader {
+        Spinner {
             width: 5%;
         }
     }
@@ -136,7 +136,7 @@ class StorageListSidebar(VerticalScroll):
     def compose(self) -> ComposeResult:
         with Horizontal(id="header"):
             if self.is_loading:
-                yield Loader()
+                yield Spinner()
             yield GradientWidget(
                 " SOURCERER" if self.is_loading else "🧙SOURCERER",
                 id="left-middle",
