@@ -40,8 +40,8 @@ class FileSystemNavigationModal(ModalScreen):
     def __init__(
         self,
         *args,
-        file_system_service: FileSystemService = Provide[
-            DiContainer.file_system_service
+        file_system_service: FileSystemService = Provide[  # type: ignore
+            DiContainer.file_system_service  # type: ignore
         ],
         validation_rules: list[FileSystemSelectionValidationRule] | None = None,
         **kwargs,
