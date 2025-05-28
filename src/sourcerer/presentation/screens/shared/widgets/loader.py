@@ -1,11 +1,10 @@
 from itertools import cycle
 
-from textual.app import ComposeResult
-from textual.containers import Container
+from textual.app import RenderResult
 from textual.widgets import Static
 
 
-class Loader(Container):
+class Loader(Static):
     stops = cycle("⣷⣯⣟⡿⢿⣻⣽⣾")
 
     DEFAULT_CSS = """
@@ -14,15 +13,8 @@ class Loader(Container):
     }
     """
 
-    def __init__(self, *args, **kwargs):
-        self.label = Static(next(self.stops))
-        super().__init__(*args, **kwargs)
-
-    def compose(self) -> ComposeResult:
-        yield self.label
+    def render(self) -> RenderResult:
+        return next(self.stops)
 
     def on_mount(self) -> None:
         self.auto_refresh = 1 / 10
-
-    def automatic_refresh(self):
-        self.label.update(next(self.stops))
