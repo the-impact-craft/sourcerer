@@ -41,6 +41,8 @@ class StorageItem(Label):
     selection and visual feedback on hover.
     """
 
+    selected = reactive(False, recompose=True, toggle_class="selected")
+
     DEFAULT_CSS = """
     StorageItem {
         width: 90%;
@@ -52,6 +54,11 @@ class StorageItem(Label):
 
         & > :hover {
             background: $warning;
+            color: $panel;
+        }
+
+        &.selected {
+            background: $primary;
             color: $panel;
         }
     }
@@ -175,3 +182,12 @@ class StorageListSidebar(VerticalScroll):
         """Handle button click events to refresh the storage list."""
         if event.action == "header_click":
             self.post_message(RefreshStoragesListRequest())
+
+    @on(SelectStorageItem)
+    def on_select_storage_item(self, event: SelectStorageItem) -> None:
+        """Handle selection of a storage item."""
+        for child in self.query(StorageItem):
+            child.selected = (
+                child.storage_name == event.name
+                and child.access_credentials_uuid == event.access_credentials_uuid
+            )
