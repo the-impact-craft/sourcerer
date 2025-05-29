@@ -15,6 +15,9 @@ from sourcerer.domain.access_credentials.services import (
 from sourcerer.infrastructure.access_credentials.exceptions import (
     MissingAuthFieldsError,
 )
+from sourcerer.infrastructure.access_credentials.registry import (
+    AccessCredentialsRegistry,
+)
 from sourcerer.infrastructure.utils import generate_unique_name
 from sourcerer.presentation.di_container import DiContainer
 from sourcerer.presentation.screens.shared.widgets.button import Button
@@ -48,8 +51,8 @@ class ProviderCredsRegistrationScreen(ModalScreen):
     def __init__(
         self,
         *args,
-        credentials_type_registry=Provide[
-            DiContainer.config.access_credential_method_registry
+        credentials_type_registry: AccessCredentialsRegistry = Provide[  # type: ignore
+            DiContainer.config.access_credential_method_registry  # type: ignore
         ],
         **kwargs,
     ):
@@ -123,7 +126,7 @@ class ProviderCredsRegistrationScreen(ModalScreen):
 
         # If only one authentication method exists, set it and mount its fields
         self.auth_method = next(iter(auth_methods.values()))
-        cls: BaseAccessCredentialsService = self.auth_method
+        cls: type[BaseAccessCredentialsService] = self.auth_method
         await self._mount_credentials_fields(cls.auth_fields())
 
     @on(Select.Changed)
@@ -206,7 +209,7 @@ class ProviderCredsRegistrationScreen(ModalScreen):
             ProviderCredentialsEntry: An object containing the authentication name, method, and fields.
         """
         if not self.auth_method:
-            return
+            return None
 
         fields = {
             input_field.get().name: input_field.get().value

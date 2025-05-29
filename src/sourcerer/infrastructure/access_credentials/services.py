@@ -46,8 +46,8 @@ class CredentialsService:
 
     def __init__(
         self,
-        credentials_repo: BaseCredentialsRepository = Provide[
-            DiContainer.credentials_repository
+        credentials_repo: BaseCredentialsRepository = Provide[  # type: ignore
+            DiContainer.credentials_repository  # type: ignore
         ],
     ):
         """
@@ -121,8 +121,8 @@ class AccessCredentialsService(BaseAccessCredentialsService, ABC):
 
     def __init__(
         self,
-        credentials_repo: BaseCredentialsRepository = Provide[
-            DiContainer.credentials_repository
+        credentials_repo: BaseCredentialsRepository = Provide[  # type: ignore
+            DiContainer.credentials_repository  # type: ignore
         ],
     ):
         """
