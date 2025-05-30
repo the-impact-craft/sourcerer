@@ -9,3 +9,4 @@ class SelectStorageItem(Message):
     path: str | None = None
     access_credentials_uuid: str | None = None
     prefix: str | None = None
+    focus_content: bool = False

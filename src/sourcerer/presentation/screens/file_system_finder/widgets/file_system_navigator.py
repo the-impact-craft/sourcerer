@@ -21,6 +21,7 @@ from sourcerer.presentation.screens.shared.containers import (
     ScrollHorizontalContainerWithNoBindings,
     ScrollVerticalContainerWithNoBindings,
 )
+from sourcerer.presentation.settings import KeyBindings
 from sourcerer.settings import DIRECTORY_ICON, DOUBLE_CLICK_THRESHOLD, FILE_ICON
 
 
@@ -48,7 +49,7 @@ class FileSystemWidget(Widget):
             background: $block-cursor-blurred-background;
             text-style: $block-cursor-blurred-text-style;
         }
-        
+
         .folder-name {
             text-overflow: ellipsis;
             text-wrap: nowrap;
@@ -161,7 +162,7 @@ class FileSystemWidget(Widget):
             Calls the `on_click` method if the pressed key is "enter", which may trigger
             folder navigation or file opening depending on the widget's context.
         """
-        if event.key == "enter":
+        if event.key == KeyBindings.ENTER.value:
             self.on_file_select()
 
     def on_file_select(self):
@@ -232,11 +233,13 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
 
     # Consolidate key binding data
     BINDINGS: ClassVar[list[BindingType]] = [
-        Binding("enter", "select_cursor", "Select", show=False),
-        Binding("up", "cursor_up", "Cursor up", show=False),
-        Binding("down", "cursor_down", "Cursor down", show=False),
-        Binding("left", "cursor_left", "Cursor left", show=False),
-        Binding("right", "cursor_right", "Cursor right", show=False),
+        Binding(KeyBindings.ENTER.value, "select_cursor", "Select", show=False),
+        Binding(KeyBindings.ARROW_UP.value, "cursor_up", "Cursor up", show=False),
+        Binding(KeyBindings.ARROW_DOWN.value, "cursor_down", "Cursor down", show=False),
+        Binding(KeyBindings.ARROW_LEFT.value, "cursor_left", "Cursor left", show=False),
+        Binding(
+            KeyBindings.ARROW_RIGHT.value, "cursor_right", "Cursor right", show=False
+        ),
     ]
 
     MAIN_CONTAINER_ID: ClassVar[str] = "dirs_content"
@@ -306,9 +309,9 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         )
         self._focus_first_child(path_listing_container)
 
-        self.path_listing_containers_uuids[str(self.work_dir)] = (
-            path_listing_container.id
-        )
+        self.path_listing_containers_uuids[
+            str(self.work_dir)
+        ] = path_listing_container.id
 
     def action_cursor_down(self) -> None:
         """
@@ -626,9 +629,9 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         await self._mount_path_listing_container(path_listing_container)
 
         if str(folder_path) not in self.path_listing_containers_uuids:
-            self.path_listing_containers_uuids[str(folder_path)] = (
-                path_listing_container.id
-            )
+            self.path_listing_containers_uuids[
+                str(folder_path)
+            ] = path_listing_container.id
 
     @on(FileSystemWidget.Focus)
     def on_folder_focus(self, event: FileSystemWidget.Focus):

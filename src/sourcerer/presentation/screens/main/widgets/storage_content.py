@@ -7,18 +7,20 @@ display with search functionality.
 
 import contextlib
 import os.path
+from abc import abstractmethod
 from dataclasses import dataclass
 from enum import Enum, auto
+from typing import ClassVar, Self
 
 from textual import events, on
 from textual.app import ComposeResult
+from textual.binding import Binding, BindingType
 from textual.containers import (
     Center,
     Container,
     Horizontal,
     Middle,
     Vertical,
-    VerticalScroll,
 )
 from textual.css.query import NoMatches
 from textual.message import Message
@@ -38,8 +40,11 @@ from sourcerer.presentation.screens.main.messages.uncheck_files_request import (
     UncheckFilesRequest,
 )
 from sourcerer.presentation.screens.main.messages.upload_request import UploadRequest
+from sourcerer.presentation.screens.shared.containers import (
+    ScrollVerticalContainerWithNoBindings,
+)
 from sourcerer.presentation.screens.shared.widgets.button import Button
-from sourcerer.presentation.settings import NO_DATA_LOGO
+from sourcerer.presentation.settings import NO_DATA_LOGO, KeyBindings
 from sourcerer.settings import (
     DIRECTORY_ICON,
     DOWNLOAD_ICON,
@@ -91,6 +96,10 @@ class ActionType(Enum):
         return action_map[action_str]
 
 
+class UnfocusableCheckbox(Checkbox):
+    can_focus = False
+
+
 class FileMetaLabel(Static):
     """Widget for displaying file metadata information.
 
@@ -120,6 +129,16 @@ class PathSelector(Label):
         access_credentials_uuid: UUID of the access credentials being used
     """
 
+    can_focus = True
+
+    DEFAULT_CSS = """
+    PathSelector {
+        &:focus {
+            background: $secondary-lighten-2;
+        }
+    }
+    """
+
     def __init__(self, storage, path, access_credentials_uuid, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.storage = storage
@@ -128,31 +147,92 @@ class PathSelector(Label):
 
     def on_click(self, _: events.Click) -> None:
         """Handle click events to navigate to the selected path."""
+        self._select()
+
+    def on_key(self, event: events.Key) -> None:
+        """Handle key events to navigate to the selected path."""
+        if event.key == KeyBindings.ENTER.value:
+            self._select()
+
+    def _select(self):
+        """Select the current path."""
         self.post_message(
-            SelectStorageItem(self.storage, self.path, self.access_credentials_uuid)
+            SelectStorageItem(
+                self.storage,
+                self.path,
+                self.access_credentials_uuid,
+                focus_content=True,
+            )
         )
 
 
-class FolderItem(Horizontal):
+class StorageItem(Horizontal):
+    DEFAULT_CSS = """
+        StorageItem.active {
+            background: $secondary;
+            color: $panel;
+        }
+        StorageItem:focus {
+            background: $secondary-lighten-2;
+            color: $panel;
+        }
+        """
+
+    can_focus = True
+
+    def __init__(self, focus_first: bool, *args, **kwargs):
+        """Initialize the storage content widget."""
+        super().__init__(*args, **kwargs)
+        self.focus_first = focus_first
+
+    def on_mount(self) -> None:
+        """Handle the mounting of the widget."""
+        if self.focus_first and self.first_child:
+            self.focus()
+
+    @abstractmethod
+    def _select(self, widget=None):
+        raise NotImplementedError
+
+    def on_click(self, event: events.Click) -> None:
+        """Handle click events to navigate into the folder."""
+        self._select(event.widget)
+
+    def on_key(self, event: events.Key) -> None:
+        """Handle key events to navigate into the folder."""
+        if event.key == KeyBindings.ARROW_UP.value:
+            if self.first_child:
+                self.parent.children[-1].focus()  # type: ignore
+                return
+            self.screen.focus_previous()
+        if event.key == KeyBindings.ARROW_DOWN.value:
+            if self.last_child:
+                self.parent.children[0].focus()  # type: ignore
+                return
+            self.screen.focus_next()
+
+    @on(events.Enter)
+    @on(events.Leave)
+    def on_enter(self, event: events.Enter):
+        self.set_class(self.is_mouse_over, "active")
+
+
+class FolderItem(StorageItem):
     """Widget for displaying and interacting with folder items.
 
     This widget represents a folder in the storage content view, allowing
     navigation into the folder and visual feedback on hover/selection.
     """
 
-    DEFAULT_CSS = """
-    FolderItem {
-        margin-bottom: 1;
-    }
-    FolderItem.active {
-        background: $secondary;
-        color: $panel;
-    }
-    """
-    can_focus = False
-
     def __init__(
-        self, storage, access_credentials_uuid, parent_path, folder, *args, **kwargs
+        self,
+        storage,
+        access_credentials_uuid,
+        parent_path,
+        folder,
+        focus_first,
+        *args,
+        **kwargs,
     ):
         """Initialize a folder item widget.
 
@@ -162,7 +242,7 @@ class FolderItem(Horizontal):
             parent_path: The parent path of the folder
             folder: The folder name
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(focus_first, *args, **kwargs)
         self.storage = storage
         self.access_credentials_uuid = access_credentials_uuid
         self.parent_path = parent_path
@@ -172,26 +252,29 @@ class FolderItem(Horizontal):
         """Compose the folder item layout with folder name and icon."""
         yield Label(f"{DIRECTORY_ICON}{self.folder.key}", markup=False)
 
-    def on_click(self, _: events.Click) -> None:
-        """Handle click events to navigate into the folder."""
+    def _select(self, widget=None):
+        """Select the folder."""
         path = self.folder.key
         if self.parent_path:
             path = self.parent_path.strip("/") + "/" + path
 
         self.post_message(
-            SelectStorageItem(self.storage, path, self.access_credentials_uuid)
+            SelectStorageItem(
+                self.storage, path, self.access_credentials_uuid, focus_content=True
+            )
         )
 
-    def on_mouse_move(self, _) -> None:
-        """Handle mouse move events to highlight the folder."""
-        self.add_class("active")
+    def on_key(self, event: events.Key) -> None:
+        """Handle key events to navigate into the folder."""
+        if event.key in (KeyBindings.ARROW_UP.value, KeyBindings.ARROW_DOWN.value):
+            event.prevent_default()
+        if event.key == KeyBindings.ENTER.value:
+            self._select()
+            return
+        super().on_key(event)
 
-    def on_leave(self, _) -> None:
-        """Handle mouse leave events to remove highlight."""
-        self.remove_class("active")
 
-
-class FileItem(Horizontal):
+class FileItem(StorageItem):
     """Widget for displaying and interacting with file items.
 
     This widget represents a file in the storage content view, allowing
@@ -199,17 +282,10 @@ class FileItem(Horizontal):
     """
 
     DEFAULT_CSS = """
-    FileItem {
-        margin-bottom: 1;
-    }
-    FileItem.active {
-        background: $secondary;
-        color: $panel;
-    }
     .file_size {
         color: $primary
     }
-    Checkbox {
+    UnfocusableCheckbox {
         border: none;
         padding: 0 0;
         display: none;
@@ -219,7 +295,6 @@ class FileItem(Horizontal):
         }
     }
     """
-    can_focus = False
 
     @dataclass
     class Selected(Message):
@@ -239,11 +314,7 @@ class FileItem(Horizontal):
 
         name: str
 
-    def on_mount(self):
-        """Initialize the file item on mount."""
-        self.add_class("file-item")
-
-    def __init__(self, storage, parent_path, file, *args, **kwargs):
+    def __init__(self, storage, parent_path, file, focus_first, *args, **kwargs):
         """Initialize a file item widget.
 
         Args:
@@ -251,13 +322,13 @@ class FileItem(Horizontal):
             parent_path: The parent path of the file
             file: The file name
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(focus_first, *args, **kwargs)
         self.storage = storage
         self.parent_path = parent_path
         self.file = file
 
     def compose(self):
-        yield Checkbox()
+        yield UnfocusableCheckbox()
         yield FileMetaLabel(
             f"{FILE_ICON} {self.file.key}", classes="file_name", markup=False
         )
@@ -268,42 +339,50 @@ class FileItem(Horizontal):
         if self.file.is_text:
             yield Button(f"{PREVIEW_ICON}", name="preview", classes="download")
 
-    def on_mouse_move(self, _) -> None:
-        """Handle mouse move events to highlight the file."""
-        self.add_class("active")
+    @on(events.Enter)
+    @on(events.Leave)
+    def on_enter(self, event: events.Enter):
+        self.set_class(self.is_mouse_over, "active")
 
-    def on_leave(self, _) -> None:
-        """Handle mouse leave events to remove highlight."""
-        self.remove_class("active")
+    def on_key(self, event: events.Key) -> None:
+        """Handle key events to toggle file selection."""
+        if event.key in (KeyBindings.ARROW_UP.value, KeyBindings.ARROW_DOWN.value):
+            event.prevent_default()
+        if event.key == KeyBindings.ENTER.value:
+            checkbox = self.query_one(UnfocusableCheckbox)
+            checkbox.value = not checkbox.value
+            if checkbox.value:
+                self.post_message(self.Selected(self.file.key))
+            else:
+                self.post_message(self.Unselect(self.file.key))
+            return
+        super().on_key(event)
 
-    def on_click(self, event: events.Click) -> None:
-        """Handle click events to toggle file selection."""
+    def _select(self, widget=None):
         preview_button = None
         with contextlib.suppress(NoMatches):
             preview_button = self.query_one(Button)
 
-        if event.widget is preview_button:
+        if widget is preview_button:
             self.post_message(self.Preview(self.file.key))
             return
 
-        checkbox = self.query_one(Checkbox)
-        if event.widget is not checkbox:
+        checkbox = self.query_one(UnfocusableCheckbox)
+        if widget is not checkbox:
             checkbox.value = not checkbox.value
         if checkbox.value:
             self.post_message(self.Selected(self.file.key))
         else:
             self.post_message(self.Unselect(self.file.key))
-        event.prevent_default()
-        event.stop()
 
     def uncheck(self):
         """Uncheck the file's checkbox."""
-        checkbox = self.query_one(Checkbox)
+        checkbox = self.query_one(UnfocusableCheckbox)
         checkbox.value = False
 
     def check(self):
         """Check the file's checkbox."""
-        checkbox = self.query_one(Checkbox)
+        checkbox = self.query_one(UnfocusableCheckbox)
         checkbox.value = True
 
 
@@ -340,6 +419,16 @@ class StorageContentContainer(Vertical):
     ] = reactive(None, recompose=True)
     selected_files: reactive[set] = reactive(set(), recompose=False)
     selected_files_n: reactive[int] = reactive(0, recompose=False)
+    focus_content: reactive[bool] = reactive(False, recompose=False)
+
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding(
+            f"{KeyBindings.CTRL.value}+{KeyBindings.BACKSPACE.value}",
+            "back_to_prev_path",
+            "Navigate back to the previous path",
+            show=True,
+        ),
+    ]
 
     DEFAULT_CSS = """
 
@@ -524,13 +613,28 @@ class StorageContentContainer(Vertical):
             yield FileMetaLabel("Size", classes="file_size")
             yield FileMetaLabel("Date modified", classes="file_date")
             yield FileMetaLabel("Preview", classes="preview")
-        with VerticalScroll(id="content"):
+        with ScrollVerticalContainerWithNoBindings(id="content", can_focus=False):
             for folder in self.storage_content.folders:
                 yield FolderItem(
-                    self.storage, self.access_credentials_uuid, self.path, folder
+                    self.storage,
+                    self.access_credentials_uuid,
+                    self.path,
+                    folder,
+                    self.focus_content,
                 )
             for file in self.storage_content.files:
-                yield FileItem(self.storage, self.path, file, id=file.uuid)
+                yield FileItem(
+                    self.storage, self.path, file, self.focus_content, id=file.uuid
+                )
+
+    def focus(self, scroll_visible: bool = True) -> Self:
+        try:
+            content = self.query_one(ScrollVerticalContainerWithNoBindings)
+        except NoMatches:
+            return self
+        if len(content.children) > 0:
+            content.children[0].focus()
+        return self
 
     @on(Input.Submitted)
     def on_input_submitted(self, event: Input.Submitted):
@@ -542,19 +646,6 @@ class StorageContentContainer(Vertical):
 
         Args:
             event (Input.Submitted): The submit event containing the input value
-        """
-        self.apply_search_prefix(event.value)
-
-    @on(Input.Blurred)
-    def on_input_blurred(self, event: Input.Blurred):
-        """
-        Handle input blur events to apply the search prefix.
-
-        This method is triggered when the input field loses focus and applies
-        the search prefix to the current storage content.
-
-        Args:
-            event (Input.Blurred): The blur event containing the input value
         """
         self.apply_search_prefix(event.value)
 
@@ -711,5 +802,28 @@ class StorageContentContainer(Vertical):
                 self.path,
                 self.access_credentials_uuid,
                 value,
+                focus_content=True,
+            )
+        )
+
+    def action_back_to_prev_path(self):
+        """
+        Navigate back to the previous path in the storage content.
+
+        This method updates the path to the parent directory and triggers a
+        SelectStorageItem message to refresh the storage content with the new path.
+        """
+        if not self.storage:
+            return
+        if not self.path:
+            return
+        path_parents = [i for i in self.path.split("/")[:-1] if i]
+        prev_path = "/".join(path_parents)
+        self.post_message(
+            SelectStorageItem(
+                self.storage,
+                prev_path,
+                self.access_credentials_uuid,
+                focus_content=True,
             )
         )
