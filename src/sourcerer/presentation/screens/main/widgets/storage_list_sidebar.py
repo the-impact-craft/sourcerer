@@ -7,10 +7,12 @@ and selection of storage items.
 
 from collections import namedtuple
 from itertools import groupby
+from typing import Self
 
 from textual import events, on
 from textual.app import ComposeResult
-from textual.containers import Container, Horizontal, VerticalScroll
+from textual.containers import Horizontal, Vertical
+from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.widgets import Label, Rule
 
@@ -23,8 +25,12 @@ from sourcerer.presentation.screens.main.messages.select_storage_item import (
     SelectStorageItem,
 )
 from sourcerer.presentation.screens.main.widgets.gradient import GradientWidget
+from sourcerer.presentation.screens.shared.containers import (
+    ScrollVerticalContainerWithNoBindings,
+)
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.shared.widgets.spinner import Spinner
+from sourcerer.presentation.settings import KeyBindings
 
 STORAGE_ICONS = {
     StorageProvider.S3: "🟠",
@@ -41,6 +47,7 @@ class StorageItem(Label):
     selection and visual feedback on hover.
     """
 
+    can_focus = True
     selected = reactive(False, recompose=True, toggle_class="selected")
 
     DEFAULT_CSS = """
@@ -53,7 +60,12 @@ class StorageItem(Label):
         text-wrap: nowrap;
 
         & > :hover {
-            background: $warning;
+            background: $primary-lighten-2;
+            color: $panel;
+        }
+
+        & > :focus {
+            background: $primary-lighten-2;
             color: $panel;
         }
 
@@ -78,6 +90,38 @@ class StorageItem(Label):
 
     def on_click(self, _: events.Click) -> None:
         """Handle click events to select the storage item."""
+        self._select_storage()
+
+    def on_key(self, event: events.Key) -> None:
+        """Handle key events to select the storage item."""
+        if event.key == KeyBindings.ENTER.value:
+            self._select_storage()
+            return
+        storages = [
+            component
+            for component in self.screen.focus_chain
+            if isinstance(component, StorageItem)
+        ]
+        if not storages:
+            return
+        if event.key == KeyBindings.ARROW_DOWN.value:
+            if self.screen.focused == storages[-1]:
+                storages[0].focus()
+                return
+            self.screen.focus_next(StorageItem)
+        elif event.key == KeyBindings.ARROW_UP.value:
+            if self.screen.focused == storages[0]:
+                storages[-1].focus()
+                return
+            self.screen.focus_previous(StorageItem)
+
+    def _select_storage(self):
+        """
+        Select the storage item and notify the application.
+        This method posts a message to select the storage item based on its
+        name and access credentials UUID.
+
+        """
         self.post_message(
             SelectStorageItem(
                 self.storage_name, access_credentials_uuid=self.access_credentials_uuid
@@ -85,7 +129,7 @@ class StorageItem(Label):
         )
 
 
-class StorageListSidebar(VerticalScroll):
+class StorageListSidebar(Vertical):
     """Sidebar widget for displaying the list of storage providers.
 
     This widget manages the display of storage providers grouped by their type,
@@ -105,27 +149,29 @@ class StorageListSidebar(VerticalScroll):
     StorageListSidebar {
         padding-right:  0;
         margin-right: 0;
-        & > .storage-group {
+        height: 100%;
+        margin-bottom: 1;
+        #rule-left {
+            width: 1;
+        }
+
+        ScrollVerticalContainerWithNoBindings{
+            height: 95%;
+        }
+
+        Horizontal {
             height: auto;
-            margin-bottom: 1;
-            #rule-left {
-                width: 1;
-            }
-
-            Horizontal {
-                height: auto;
-            }
-            Rule.-horizontal {
-                height: 1;
-                margin: 0 0;
-
-            }
-            .storage-letter {
-                color: $secondary;
-                padding: 0 1;
-            }
+        }
+        Rule.-horizontal {
+            height: 1;
+            margin: 0 0;
 
         }
+        .storage-letter {
+            color: $secondary;
+            padding: 0 1;
+        }
+
     }
     #header {
         width: 100%;
@@ -157,11 +203,11 @@ class StorageListSidebar(VerticalScroll):
             for storage in storages
         ]
         storages = sorted(storages, key=lambda x: x.storage.storage)
+        with ScrollVerticalContainerWithNoBindings():
+            for letter, storages_group in groupby(
+                storages, key=lambda x: x.storage.storage[0]
+            ):
 
-        for letter, storages_group in groupby(
-            storages, key=lambda x: x.storage.storage[0]
-        ):
-            with Container(id=f"group-{letter}", classes="storage-group"):
                 yield Horizontal(
                     Rule(id="rule-left"),
                     Label(letter.upper(), classes="storage-letter"),
@@ -170,12 +216,18 @@ class StorageListSidebar(VerticalScroll):
 
                 for item in storages_group:
                     yield StorageItem(
-                        renderable=STORAGE_ICONS.get(item.storage.provider, "")
-                        + " "
-                        + item.storage.storage,
+                        renderable=f'{STORAGE_ICONS.get(item.storage.provider, "")} {item.storage.storage}',
                         storage_name=item.storage.storage,
                         access_credentials_uuid=item.access_credentials_uuid,
                     )
+
+    def focus(self, scroll_visible: bool = True) -> Self:
+        try:
+            content = self.query_one(StorageItem)
+        except NoMatches:
+            return self
+        content.focus()
+        return self
 
     @on(Button.Click)
     def on_button_click(self, event: Button.Click) -> None:

@@ -56,6 +56,7 @@ from sourcerer.presentation.screens.storage_action_progress.main import (
     StorageActionProgressScreen,
     UploadKey,
 )
+from sourcerer.presentation.settings import KeyBindings
 from sourcerer.presentation.themes.github_dark import github_dark_theme
 from sourcerer.presentation.utils import (
     get_provider_service_by_access_credentials,
@@ -95,7 +96,13 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
 
     CSS_PATH = "styles.tcss"
     BINDINGS: ClassVar[list[BindingType]] = [
-        Binding("ctrl+r", "registrations", "Registrations list")
+        Binding("ctrl+r", "registrations", "Registrations list"),
+        Binding(
+            KeyBindings.ARROW_LEFT.value, "focus_sidebar", "Focus sidebar", show=False
+        ),
+        Binding(
+            KeyBindings.ARROW_RIGHT.value, "focus_content", "Focus content", show=False
+        ),
     ]
     is_storage_list_loading = reactive(False, recompose=True)
 
@@ -132,6 +139,18 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
 
         self.theme = "github-dark"
         self.init_storages_list()
+
+    def action_focus_content(self):
+        """
+        Focuses the storage content container.
+        """
+        self.storage_content.focus()
+
+    def action_focus_sidebar(self):
+        """
+        Focuses the storage list sidebar.
+        """
+        self.storage_list_sidebar.focus()
 
     def action_registrations(self):
         """
@@ -209,7 +228,11 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             5. Notify the user if an error occurs during the retrieval process.
         """
         self.refresh_storage_content(
-            event.access_credentials_uuid, event.name, event.path, event.prefix
+            event.access_credentials_uuid,
+            event.name,
+            event.path,
+            event.prefix,
+            event.focus_content,
         )
 
     @on(UploadRequest)
@@ -384,7 +407,12 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         self.uncheck_files_request(UncheckFilesRequest(keys=[]))
 
     def refresh_storage_content(
-        self, access_credentials_uuid, storage_name, path, prefix=None
+        self,
+        access_credentials_uuid,
+        storage_name,
+        path,
+        prefix=None,
+        focus_content=False,
     ):
         """
         Refreshes the storage content display with items from the specified storage path.
@@ -410,6 +438,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         self.storage_content.storage_content = None
         self.storage_content.selected_files = set()
         self.storage_content.selected_files_n = 0
+        self.storage_content.focus_content = focus_content
 
         provider_service = get_provider_service_by_access_uuid(
             access_credentials_uuid, self.credentials_service
