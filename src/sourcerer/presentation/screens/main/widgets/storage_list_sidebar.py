@@ -11,7 +11,7 @@ from typing import Self
 
 from textual import events, on
 from textual.app import ComposeResult
-from textual.containers import Horizontal, VerticalScroll
+from textual.containers import Horizontal, Vertical
 from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.widgets import Label, Rule
@@ -25,6 +25,9 @@ from sourcerer.presentation.screens.main.messages.select_storage_item import (
     SelectStorageItem,
 )
 from sourcerer.presentation.screens.main.widgets.gradient import GradientWidget
+from sourcerer.presentation.screens.shared.containers import (
+    ScrollVerticalContainerWithNoBindings,
+)
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.shared.widgets.spinner import Spinner
 from sourcerer.presentation.settings import KeyBindings
@@ -126,7 +129,7 @@ class StorageItem(Label):
         )
 
 
-class StorageListSidebar(VerticalScroll):
+class StorageListSidebar(Vertical):
     """Sidebar widget for displaying the list of storage providers.
 
     This widget manages the display of storage providers grouped by their type,
@@ -146,10 +149,14 @@ class StorageListSidebar(VerticalScroll):
     StorageListSidebar {
         padding-right:  0;
         margin-right: 0;
-        height: auto;
+        height: 100%;
         margin-bottom: 1;
         #rule-left {
             width: 1;
+        }
+
+        ScrollVerticalContainerWithNoBindings{
+            height: 95%;
         }
 
         Horizontal {
@@ -196,23 +203,23 @@ class StorageListSidebar(VerticalScroll):
             for storage in storages
         ]
         storages = sorted(storages, key=lambda x: x.storage.storage)
+        with ScrollVerticalContainerWithNoBindings():
+            for letter, storages_group in groupby(
+                storages, key=lambda x: x.storage.storage[0]
+            ):
 
-        for letter, storages_group in groupby(
-            storages, key=lambda x: x.storage.storage[0]
-        ):
-
-            yield Horizontal(
-                Rule(id="rule-left"),
-                Label(letter.upper(), classes="storage-letter"),
-                Rule(),
-            )
-
-            for item in storages_group:
-                yield StorageItem(
-                    renderable=f'{STORAGE_ICONS.get(item.storage.provider, "")} {item.storage.storage}',
-                    storage_name=item.storage.storage,
-                    access_credentials_uuid=item.access_credentials_uuid,
+                yield Horizontal(
+                    Rule(id="rule-left"),
+                    Label(letter.upper(), classes="storage-letter"),
+                    Rule(),
                 )
+
+                for item in storages_group:
+                    yield StorageItem(
+                        renderable=f'{STORAGE_ICONS.get(item.storage.provider, "")} {item.storage.storage}',
+                        storage_name=item.storage.storage,
+                        access_credentials_uuid=item.access_credentials_uuid,
+                    )
 
     def focus(self, scroll_visible: bool = True) -> Self:
         try:
