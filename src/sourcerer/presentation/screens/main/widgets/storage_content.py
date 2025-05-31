@@ -166,13 +166,13 @@ class PathSelector(Label):
         )
 
 
-class StorageItem(Horizontal):
+class StorageContentItem(Horizontal):
     DEFAULT_CSS = """
-        StorageItem.active {
+        StorageContentItem.active {
             background: $secondary;
             color: $panel;
         }
-        StorageItem:focus {
+        StorageContentItem:focus {
             background: $secondary-lighten-2;
             color: $panel;
         }
@@ -217,7 +217,7 @@ class StorageItem(Horizontal):
         self.set_class(self.is_mouse_over, "active")
 
 
-class FolderItem(StorageItem):
+class FolderItem(StorageContentItem):
     """Widget for displaying and interacting with folder items.
 
     This widget represents a folder in the storage content view, allowing
@@ -274,7 +274,7 @@ class FolderItem(StorageItem):
         super().on_key(event)
 
 
-class FileItem(StorageItem):
+class FileItem(StorageContentItem):
     """Widget for displaying and interacting with file items.
 
     This widget represents a file in the storage content view, allowing
