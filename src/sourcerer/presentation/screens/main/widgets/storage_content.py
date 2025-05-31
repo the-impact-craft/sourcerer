@@ -339,11 +339,6 @@ class FileItem(StorageContentItem):
         if self.file.is_text:
             yield Button(f"{PREVIEW_ICON}", name="preview", classes="download")
 
-    @on(events.Enter)
-    @on(events.Leave)
-    def on_enter(self, event: events.Enter):
-        self.set_class(self.is_mouse_over, "active")
-
     def on_key(self, event: events.Key) -> None:
         """Handle key events to toggle file selection."""
         if event.key in (KeyBindings.ARROW_UP.value, KeyBindings.ARROW_DOWN.value):
