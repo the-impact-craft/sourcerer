@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
+from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, VerticalScroll
@@ -8,6 +9,7 @@ from textual.screen import ModalScreen
 from textual.widgets import Label, Select
 
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
+from sourcerer.presentation.di_container import DiContainer
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.shared.widgets.labeled_input import LabeledInput
 
@@ -34,12 +36,14 @@ class StoragesRegistrationScreen(ModalScreen):
 
     def __init__(
         self,
+        credentials_service: CredentialsService = Provide[
+            DiContainer.credentials_repository
+        ],
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
-        self.credentials_service = CredentialsService()
-        self.credentials = self.credentials_service.list()
+        self.credentials = credentials_service.list()
         self.auth_method = None
 
     def compose(self) -> ComposeResult:

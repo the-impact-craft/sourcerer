@@ -2,6 +2,7 @@ import datetime
 import uuid
 from enum import Enum
 
+from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, VerticalScroll
@@ -12,6 +13,7 @@ from textual.widgets import Label
 from sourcerer.domain.storage.entities import Storage
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
 from sourcerer.infrastructure.storage.services import StoragesService
+from sourcerer.presentation.di_container import DiContainer
 from sourcerer.presentation.screens.question.main import QuestionScreen
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.storages_list.messages.reload_storages_request import (
@@ -85,10 +87,18 @@ class StoragesListScreen(ModalScreen):
 
     storages_list = reactive([], recompose=True)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        credentials_service: CredentialsService = Provide[
+            DiContainer.credentials_service
+        ],
+        storages_service: StoragesService = Provide[DiContainer.storages_service],
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
-        self.storage_service = StoragesService()
-        self.credentials_service = CredentialsService()
+        self.storage_service = storages_service
+        self.credentials_service = credentials_service
 
     def compose(self) -> ComposeResult:
         with Container(id=self.MAIN_CONTAINER_ID):

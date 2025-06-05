@@ -10,7 +10,6 @@ from abc import ABC
 
 import boto3
 from azure.identity import ClientSecretCredential
-from dependency_injector.wiring import Provide
 from google.cloud import storage
 
 from sourcerer.domain.access_credentials.entities import (
@@ -33,7 +32,6 @@ from sourcerer.infrastructure.access_credentials.registry import (
     access_credentials_method,
 )
 from sourcerer.infrastructure.utils import generate_uuid
-from sourcerer.presentation.di_container import DiContainer
 
 
 class CredentialsService:
@@ -44,19 +42,14 @@ class CredentialsService:
     and deactivating credentials.
     """
 
-    def __init__(
-        self,
-        credentials_repo: BaseCredentialsRepository = Provide[  # type: ignore
-            DiContainer.credentials_repository  # type: ignore
-        ],
-    ):
+    def __init__(self, repository: BaseCredentialsRepository):
         """
         Initialize the service with a credentials repository.
 
         Args:
-            credentials_repo (BaseCredentialsRepository): Repository for storing credentials
+            repository (BaseCredentialsRepository): Repository for storing credentials
         """
-        self.credentials_repo = credentials_repo
+        self.credentials_repo = repository
 
     def list(self, active_only=False) -> list[Credentials]:
         """
@@ -119,12 +112,7 @@ class AccessCredentialsService(BaseAccessCredentialsService, ABC):
     access credential service implementations.
     """
 
-    def __init__(
-        self,
-        credentials_repo: BaseCredentialsRepository = Provide[  # type: ignore
-            DiContainer.credentials_repository  # type: ignore
-        ],
-    ):
+    def __init__(self, credentials_repo: BaseCredentialsRepository):
         """
         Initialize the service with a credentials repository.
 

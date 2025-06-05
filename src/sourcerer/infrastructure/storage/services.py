@@ -1,16 +1,11 @@
-from dependency_injector.wiring import Provide
-
 from sourcerer.domain.storage.entities import Storage
 from sourcerer.domain.storage.repositories import BaseStoragesRepository
-from sourcerer.presentation.di_container import DiContainer
 
 
 class StoragesService:
     def __init__(
         self,
-        repository: BaseStoragesRepository = Provide[  # type: ignore
-            DiContainer.storages_repository  # type: ignore
-        ],
+        repository: BaseStoragesRepository,
     ):
         self.repository = repository
 

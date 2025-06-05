@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import ClassVar
 
+from dependency_injector.wiring import Provide
 from textual import on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding, BindingType
@@ -17,6 +18,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
     ListStorageItemsError,
 )
 from sourcerer.infrastructure.utils import generate_uuid
+from sourcerer.presentation.di_container import DiContainer
 from sourcerer.presentation.screens.critical_error.main import CriticalErrorScreen
 from sourcerer.presentation.screens.file_system_finder.main import (
     FileSystemNavigationModal,
@@ -109,9 +111,16 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
     ]
     is_storage_list_loading = reactive(False, recompose=True)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        credentials_service: CredentialsService = Provide[
+            DiContainer.credentials_repository
+        ],
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
-        self.credentials_service = CredentialsService()
+        self.credentials_service = credentials_service
         self.storage_list_sidebar = StorageListSidebar(id="storage_list_sidebar")
         self.storage_content = StorageContentContainer(id="storage_content_container")
         self.load_percentage = 0

@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from dependency_injector.wiring import Provide
 from rich.syntax import Syntax
 from textual import on
 from textual.app import ComposeResult
@@ -11,6 +12,7 @@ from sourcerer.infrastructure.access_credentials.services import CredentialsServ
 from sourcerer.infrastructure.storage_provider.exceptions import (
     ReadStorageItemsError,
 )
+from sourcerer.presentation.di_container import DiContainer
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.utils import get_provider_service_by_access_uuid
 
@@ -18,12 +20,23 @@ from sourcerer.presentation.utils import get_provider_service_by_access_uuid
 class PreviewContentScreen(ModalScreen):
     CSS_PATH = "styles.tcss"
 
-    def __init__(self, storage_name, key, access_credentials_uuid, *args, **kwargs):
+    def __init__(
+        self,
+        storage_name,
+        key,
+        access_credentials_uuid,
+        *args,
+        credentials_service: CredentialsService = Provide[
+            DiContainer.credentials_repository
+        ],
+        **kwargs
+    ):
         super().__init__(*args, **kwargs)
 
         self.storage_name = storage_name
         self.key = key
         self.access_credentials_uuid = access_credentials_uuid
+        self.credentials_service = credentials_service
 
     def compose(self) -> ComposeResult:
         with Container(id="PreviewContentScreen"):
@@ -35,9 +48,8 @@ class PreviewContentScreen(ModalScreen):
     def on_mount(self) -> None:
         """Called when the DOM is ready."""
 
-        credentials_service = CredentialsService()
         provider_service = get_provider_service_by_access_uuid(
-            self.access_credentials_uuid, credentials_service
+            self.access_credentials_uuid, self.credentials_service
         )
         if not provider_service:
             self.notify("Could not read file :(", severity="error")
