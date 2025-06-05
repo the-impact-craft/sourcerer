@@ -4,13 +4,16 @@ Utility functions for the presentation layer.
 This module provides helper functions for the presentation layer,
 particularly for retrieving and initializing storage provider services.
 """
+from dependency_injector.wiring import Provide
 
+from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
 from sourcerer.infrastructure.access_credentials.exceptions import CredentialsAuthError
 from sourcerer.infrastructure.access_credentials.registry import (
     access_credential_method_registry,
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider_registry
+from sourcerer.presentation.di_container import DiContainer
 
 
 def get_provider_service_by_access_uuid(
@@ -32,6 +35,9 @@ def get_provider_service_by_access_uuid(
 
 def get_provider_service_by_access_credentials(
     credentials,
+    credentials_repo: BaseCredentialsRepository = Provide[
+        DiContainer.credentials_repository
+    ],
 ) -> BaseStorageProviderService | None:
     """
     Retrieves a storage provider service instance using the given access credentials.
@@ -67,7 +73,9 @@ def get_provider_service_by_access_credentials(
         return None
 
     try:
-        auth_credentials = credentials_service().authenticate(credentials.credentials)
+        auth_credentials = credentials_service(credentials_repo).authenticate(
+            credentials.credentials
+        )
     except CredentialsAuthError:
         return None
     return provider_service_class(auth_credentials)

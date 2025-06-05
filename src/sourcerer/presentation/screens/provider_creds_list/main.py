@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum
 
+from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, VerticalScroll
@@ -10,7 +11,9 @@ from textual.screen import ModalScreen
 from textual.widgets import Checkbox, Label
 
 from sourcerer.domain.access_credentials.entities import Credentials
+from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
+from sourcerer.presentation.di_container import DiContainer
 from sourcerer.presentation.screens.provider_creds_list.messages.reload_credentials_request import (
     ReloadCredentialsRequest,
 )
@@ -32,9 +35,12 @@ class ProviderCredentialsRow(Horizontal):
         uuid: str
         active: bool
 
-    def __init__(self, row: Credentials, *args, **kwargs):
+    def __init__(
+        self, row: Credentials, credentials_service: CredentialsService, *args, **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.row = row
+        self.credentials_service = credentials_service
 
     def compose(self) -> ComposeResult:
         yield Checkbox(
@@ -88,8 +94,7 @@ class ProviderCredentialsRow(Horizontal):
         """
         if not result:
             return
-        credentials_service = CredentialsService()
-        credentials_service.delete(self.row.uuid)
+        self.credentials_service.delete(self.row.uuid)
         self.post_message(ReloadCredentialsRequest())
 
 
@@ -107,9 +112,16 @@ class ProviderCredsListScreen(ModalScreen):
 
     credentials_list = reactive([], recompose=True)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        credentials_service: CredentialsService = Provide[
+            DiContainer.credentials_service
+        ],
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
-        self.credentials_service = CredentialsService()
+        self.credentials_service = credentials_service
 
     def compose(self) -> ComposeResult:
         with Container(id=self.MAIN_CONTAINER_ID):
@@ -129,7 +141,9 @@ class ProviderCredsListScreen(ModalScreen):
                     yield Label("Auth method", classes="credentials_auth_method")
                     yield Label("Delete", classes="credentials_auth_delete")
                 for row in self.credentials_list:
-                    yield ProviderCredentialsRow(row, classes="credentials_row")
+                    yield ProviderCredentialsRow(
+                        row, self.credentials_service, classes="credentials_row"
+                    )
             with Horizontal(id="controls"):
                 yield Button(ControlsEnum.CANCEL.value, name=ControlsEnum.CANCEL.name)
 
@@ -146,7 +160,11 @@ class ProviderCredsListScreen(ModalScreen):
         self.credentials_list = self.credentials_service.list()
 
     def create_provider_creds_registration(
-        self, credentials_entry: ProviderCredentialsEntry
+        self,
+        credentials_entry: ProviderCredentialsEntry,
+        credentials_repo: BaseCredentialsRepository = Provide[
+            DiContainer.credentials_repository
+        ],
     ):
         """
         Create a new provider credentials registration.
@@ -155,10 +173,13 @@ class ProviderCredsListScreen(ModalScreen):
 
         Args:
             credentials_entry (ProviderCredentialsEntry): The credentials entry to register.
+            credentials_repo (BaseCredentialsRepository): The repository to store the credentials.
         """
         if not credentials_entry:
             return
-        service = credentials_entry.cloud_storage_provider_credentials_service()  # type: ignore
+        service = credentials_entry.cloud_storage_provider_credentials_service(
+            credentials_repo
+        )
         service.store(credentials_entry.name, credentials_entry.fields)
         self.refresh_credentials_list()
 

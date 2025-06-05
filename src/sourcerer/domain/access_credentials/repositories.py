@@ -56,7 +56,7 @@ class BaseCredentialsRepository(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def list(self, active_only: bool | None = None):
+    def list(self, active_only: bool | None = None) -> list[Credentials]:
         """List all credentials in the repository.
 
         Args:

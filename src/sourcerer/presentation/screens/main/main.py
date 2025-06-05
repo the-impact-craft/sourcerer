@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import ClassVar
 
+from dependency_injector.wiring import Provide
 from textual import on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding, BindingType
@@ -11,11 +12,13 @@ from textual.containers import Horizontal
 from textual.reactive import reactive
 from textual.widgets import Footer
 
+from sourcerer.domain.storage_provider.entities import Storage
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
 from sourcerer.infrastructure.storage_provider.exceptions import (
     ListStorageItemsError,
 )
 from sourcerer.infrastructure.utils import generate_uuid
+from sourcerer.presentation.di_container import DiContainer
 from sourcerer.presentation.screens.critical_error.main import CriticalErrorScreen
 from sourcerer.presentation.screens.file_system_finder.main import (
     FileSystemNavigationModal,
@@ -56,6 +59,7 @@ from sourcerer.presentation.screens.storage_action_progress.main import (
     StorageActionProgressScreen,
     UploadKey,
 )
+from sourcerer.presentation.screens.storages_list.main import StoragesListScreen
 from sourcerer.presentation.settings import KeyBindings
 from sourcerer.presentation.themes.github_dark import github_dark_theme
 from sourcerer.presentation.utils import (
@@ -97,6 +101,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
     CSS_PATH = "styles.tcss"
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding("ctrl+r", "registrations", "Registrations list"),
+        Binding("ctrl+s", "storages", "Storages list"),
         Binding(
             KeyBindings.ARROW_LEFT.value, "focus_sidebar", "Focus sidebar", show=False
         ),
@@ -106,9 +111,16 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
     ]
     is_storage_list_loading = reactive(False, recompose=True)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        credentials_service: CredentialsService = Provide[
+            DiContainer.credentials_repository
+        ],
+        *args,
+        **kwargs,
+    ):
         super().__init__(*args, **kwargs)
-        self.credentials_service = CredentialsService()
+        self.credentials_service = credentials_service
         self.storage_list_sidebar = StorageListSidebar(id="storage_list_sidebar")
         self.storage_content = StorageContentContainer(id="storage_content_container")
         self.load_percentage = 0
@@ -163,6 +175,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         cloud storage credentials, which will then be reflected in the storage
         """
         self.app.push_screen(ProviderCredsListScreen(), callback=self.refresh_storages)
+
+    def action_storages(self):
+        self.app.push_screen(StoragesListScreen(), callback=self.refresh_storages)
 
     def refresh_storages(self, *args, **kwargs):
         """
@@ -541,7 +556,15 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
 
         try:
             storages = provider_service.list_storages()
-            self.storage_list_sidebar.storages[credentials.uuid] = storages
+            storage_names = [storage.storage for storage in storages]
+            registered_storages = [
+                Storage(credentials.provider, storage.name, storage.created_at)
+                for storage in credentials.storages
+                if storage.name not in storage_names
+            ]
+            self.storage_list_sidebar.storages[credentials.uuid] = (
+                storages + registered_storages
+            )
             self.storage_list_sidebar.last_update_timestamp = time.time()
         except Exception:
             self.notify_error(f"Could not get storages list for {credentials.name}!")
