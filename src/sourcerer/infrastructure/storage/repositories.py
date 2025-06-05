@@ -13,7 +13,7 @@ class SQLAlchemyStoragesRepository(BaseStoragesRepository):
         """
         self.db = db
 
-    def create(self, storage: Storage):
+    def create(self, storage: Storage) -> None:
         """
         Create a new storage entity in the database.
 
@@ -55,7 +55,7 @@ class SQLAlchemyStoragesRepository(BaseStoragesRepository):
                 for storage in query.all()
             ]
 
-    def delete(self, uuid: str):
+    def delete(self, uuid: str) -> None:
         """
         Delete a storage entity by its UUID.
 

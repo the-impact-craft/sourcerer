@@ -46,7 +46,7 @@ class SQLAlchemyCredentialsRepository(BaseCredentialsRepository):
             session.add(credentials)
             session.commit()
 
-    def delete(self, uuid: str):
+    def delete(self, uuid: str) -> None:
         """
         Delete credentials from the database by UUID.
 

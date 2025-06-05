@@ -27,6 +27,7 @@ from sourcerer.presentation.screens.storages_registration.main import (
 
 class ControlsEnum(Enum):
     CANCEL = "Cancel"
+    ADD_STORAGE = "Add Storage"
 
 
 class StorageRow(Horizontal):
@@ -78,12 +79,6 @@ class StoragesListScreen(ModalScreen):
 
     MAIN_CONTAINER_ID = "StoragesListScreen"
     SETTINGS_CONTAINER_ID = "settings"
-    PROVIDER_SELECTOR_ID = "provider_selector"
-    CREDENTIALS_TYPE_SELECTOR_ID = "credentials_type_select"
-    CREDENTIALS_FIELDS_CONTAINER_ID = "credentials_fields_container"
-
-    PROVIDERS_NAME = "providers"
-    AUTH_METHODS_NAME = "auth_methods"
 
     storages_list = reactive([], recompose=True)
 
@@ -105,7 +100,7 @@ class StoragesListScreen(ModalScreen):
             yield Container(
                 Button(
                     "+Add new storage",
-                    name="add_storage",
+                    name=ControlsEnum.ADD_STORAGE.name,
                     classes="add_storage_button",
                 ),
                 id="right-top",
@@ -155,17 +150,17 @@ class StoragesListScreen(ModalScreen):
         """
         if event.action == ControlsEnum.CANCEL.name:
             self.dismiss()
-        if event.action == "add_storage":
+        if event.action == ControlsEnum.ADD_STORAGE.name:
             self.app.push_screen(
                 StoragesRegistrationScreen(),
-                callback=self.create_provider_creds_registration,  # type: ignore
+                callback=self.create_storage_entry,  # type: ignore
             )
 
-    def create_provider_creds_registration(self, storage: StorageEntry | None):
+    def create_storage_entry(self, storage: StorageEntry | None):
         """
-        Create a new provider credentials registration.
+        Create a new storage entry.
 
-        Stores the provided credentials entry using its associated service and refreshes the credentials list.
+        Creates a new storage entry using the provided data and refreshes the storage list.
         """
         if storage is None:
             return

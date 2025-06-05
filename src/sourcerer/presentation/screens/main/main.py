@@ -114,7 +114,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
     def __init__(
         self,
         credentials_service: CredentialsService = Provide[
-            DiContainer.credentials_repository
+            DiContainer.credentials_service
         ],
         *args,
         **kwargs,

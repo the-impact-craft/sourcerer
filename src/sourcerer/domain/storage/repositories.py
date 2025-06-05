@@ -5,7 +5,7 @@ from sourcerer.domain.storage.entities import Storage
 
 class BaseStoragesRepository(metaclass=ABCMeta):
     @abstractmethod
-    def create(self, storage: Storage):
+    def create(self, storage: Storage) -> None:
         """Create a new storage entry in the repository.
         Args:
             storage (Storage): The storage object to store
@@ -23,7 +23,7 @@ class BaseStoragesRepository(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    def delete(self, uuid: str):
+    def delete(self, uuid: str) -> None:
         """Delete a storage entry by UUID.
         Args:
             uuid (str): The UUID of the storage entry to delete

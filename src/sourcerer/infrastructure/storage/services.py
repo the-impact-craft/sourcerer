@@ -9,7 +9,7 @@ class StoragesService:
     ):
         self.repository = repository
 
-    def create(self, storage: Storage):
+    def create(self, storage: Storage) -> None:
         """
         Create a new storage entity.
 
@@ -27,7 +27,7 @@ class StoragesService:
         """
         return self.repository.list(provider_id)
 
-    def delete(self, uuid: str):
+    def delete(self, uuid: str) -> None:
         """
         Delete a storage entity by its UUID.
 
