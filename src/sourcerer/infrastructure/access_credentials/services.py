@@ -58,7 +58,7 @@ class CredentialsService:
         """
         self.credentials_repo = credentials_repo
 
-    def list(self, active_only=False):
+    def list(self, active_only=False) -> list[Credentials]:
         """
         List credentials.
 

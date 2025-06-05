@@ -78,7 +78,7 @@ class SQLAlchemyCredentialsRepository(BaseCredentialsRepository):
                 session.query(DBCredentials).filter(DBCredentials.uuid == uuid).first()
             )
 
-    def list(self, active_only: bool | None = None):
+    def list(self, active_only: bool | None = None) -> list[Credentials]:
         """
         List all credentials in the repository.
 
@@ -103,6 +103,7 @@ class SQLAlchemyCredentialsRepository(BaseCredentialsRepository):
                     credentials_type=credential.credentials_type,
                     credentials=credential.credentials,
                     active=credential.active,
+                    storages=credential.storages,
                 )
                 for credential in credentials_query.all()
             ]

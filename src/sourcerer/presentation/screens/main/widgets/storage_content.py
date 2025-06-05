@@ -213,8 +213,9 @@ class StorageContentItem(Horizontal):
 
     @on(events.Enter)
     @on(events.Leave)
-    def on_enter(self, event: events.Enter):
-        self.set_class(self.is_mouse_over, "active")
+    def on_enter(self, _: events.Enter):
+        with contextlib.suppress(Exception):
+            self.set_class(self.is_mouse_over, "active")
 
 
 class FolderItem(StorageContentItem):

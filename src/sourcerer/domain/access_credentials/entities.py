@@ -4,12 +4,14 @@ Access credentials entity classes.
 This module defines data classes representing access credentials
 used for authentication with various cloud providers.
 """
-
+from dataclasses import field
 from datetime import datetime
 
 import boto3
 from azure.identity import ClientSecretCredential
 from msgspec._core import Struct
+
+from sourcerer.domain.storage.entities import Storage
 
 
 class Credentials(Struct):
@@ -35,6 +37,7 @@ class Credentials(Struct):
     active: bool
     created_at: datetime | None = None
     updated_at: datetime | None = None
+    storages: list[Storage] = field(default_factory=list)
 
 
 class Boto3Credentials(Struct):

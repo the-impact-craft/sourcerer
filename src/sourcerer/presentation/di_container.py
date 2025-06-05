@@ -15,6 +15,7 @@ from sourcerer.infrastructure.access_credentials.repositories import (
 )
 from sourcerer.infrastructure.db.config import Database
 from sourcerer.infrastructure.file_system.services import FileSystemService
+from sourcerer.infrastructure.storage.repositories import SQLAlchemyStoragesRepository
 from sourcerer.settings import APP_DIR, DB_NAME
 
 DB_URL = f"sqlite:////{APP_DIR}/{DB_NAME}"
@@ -41,6 +42,10 @@ class DiContainer(containers.DeclarativeContainer):
 
     credentials_repository = providers.Factory(
         SQLAlchemyCredentialsRepository, session_factory
+    )
+
+    storages_repository = providers.Factory(
+        SQLAlchemyStoragesRepository, session_factory
     )
 
     file_system_service = providers.Factory(FileSystemService, Path.home())

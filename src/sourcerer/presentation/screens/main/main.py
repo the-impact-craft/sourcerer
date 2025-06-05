@@ -11,6 +11,7 @@ from textual.containers import Horizontal
 from textual.reactive import reactive
 from textual.widgets import Footer
 
+from sourcerer.domain.storage_provider.entities import Storage
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
 from sourcerer.infrastructure.storage_provider.exceptions import (
     ListStorageItemsError,
@@ -56,6 +57,7 @@ from sourcerer.presentation.screens.storage_action_progress.main import (
     StorageActionProgressScreen,
     UploadKey,
 )
+from sourcerer.presentation.screens.storages_list.main import StoragesListScreen
 from sourcerer.presentation.settings import KeyBindings
 from sourcerer.presentation.themes.github_dark import github_dark_theme
 from sourcerer.presentation.utils import (
@@ -97,6 +99,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
     CSS_PATH = "styles.tcss"
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding("ctrl+r", "registrations", "Registrations list"),
+        Binding("ctrl+s", "storages", "Storages list"),
         Binding(
             KeyBindings.ARROW_LEFT.value, "focus_sidebar", "Focus sidebar", show=False
         ),
@@ -163,6 +166,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         cloud storage credentials, which will then be reflected in the storage
         """
         self.app.push_screen(ProviderCredsListScreen(), callback=self.refresh_storages)
+
+    def action_storages(self):
+        self.app.push_screen(StoragesListScreen(), callback=self.refresh_storages)
 
     def refresh_storages(self, *args, **kwargs):
         """
@@ -541,9 +547,18 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
 
         try:
             storages = provider_service.list_storages()
-            self.storage_list_sidebar.storages[credentials.uuid] = storages
+            storage_names = [storage.storage for storage in storages]
+            registered_storages = [
+                Storage(credentials.provider, storage.name, storage.created_at)
+                for storage in credentials.storages
+                if storage.name not in storage_names
+            ]
+            self.storage_list_sidebar.storages[credentials.uuid] = (
+                storages + registered_storages
+            )
             self.storage_list_sidebar.last_update_timestamp = time.time()
-        except Exception:
+        except Exception as e:
+            print(e)
             self.notify_error(f"Could not get storages list for {credentials.name}!")
 
     def notify_error(self, message):
