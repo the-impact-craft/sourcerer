@@ -49,7 +49,6 @@ class StorageRow(Horizontal):
         Args:
             _ (Button.Click): The button click event.
         """
-        self.notify("delete_storage")
         self.app.push_screen(
             QuestionScreen(
                 f"Are you sure you want to delete {self.storage.credentials_name} {self.storage.name} storage?"
