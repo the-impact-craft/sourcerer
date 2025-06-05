@@ -557,8 +557,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                 storages + registered_storages
             )
             self.storage_list_sidebar.last_update_timestamp = time.time()
-        except Exception as e:
-            print(e)
+        except Exception:
             self.notify_error(f"Could not get storages list for {credentials.name}!")
 
     def notify_error(self, message):
