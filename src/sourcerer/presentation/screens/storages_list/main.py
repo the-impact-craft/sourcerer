@@ -28,9 +28,12 @@ class ControlsEnum(Enum):
 
 
 class StorageRow(Horizontal):
-    def __init__(self, storage: Storage, *args, **kwargs):
+    def __init__(
+        self, storage: Storage, storages_service: StoragesService, *args, **kwargs
+    ):
         super().__init__(*args, **kwargs)
         self.storage = storage
+        self.storages_service = storages_service
 
     def compose(self):
         yield Label(self.storage.name, classes="storage_name")
@@ -44,8 +47,7 @@ class StorageRow(Horizontal):
     @on(Button.Click)
     def on_button_click(self, _: Button.Click):
         """
-        Handle delete button click events by deleting the associated credentials using the credentials service.
-
+        Handle delete button click events by showing a confirmation dialog for storage deletion.
         Args:
             _ (Button.Click): The button click event.
         """
@@ -65,8 +67,7 @@ class StorageRow(Horizontal):
         """
         if not result:
             return
-        credentials_service = StoragesService()
-        credentials_service.delete(self.storage.uuid)
+        self.storages_service.delete(self.storage.uuid)
         self.post_message(ReloadStoragesRequest())
 
 
@@ -105,7 +106,7 @@ class StoragesListScreen(ModalScreen):
                     yield Label("Credentials Name", classes="credentials_name")
                     yield Label("Delete", classes="storage_delete")
                 for storage in self.storages_list:
-                    yield StorageRow(storage)
+                    yield StorageRow(storage, self.storage_service)
             with Horizontal(id="controls"):
                 yield Button(ControlsEnum.CANCEL.value, name=ControlsEnum.CANCEL.name)
 

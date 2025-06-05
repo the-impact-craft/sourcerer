@@ -56,6 +56,7 @@ class Storage(Base):
 
     Attributes:
         id (int): Primary key
+        uuid (str): Unique identifier for the storage
         name (str): Name of the storage
         credentials_id (int): Foreign key referencing the credentials table
         created_at (datetime): Timestamp when the storage was created
@@ -72,6 +73,6 @@ class Storage(Base):
 
     credentials = relationship(
         "Credentials",
-        cascade="all,delete",
+        cascade="save-update",
         backref=backref("storages", passive_deletes=True),
     )
