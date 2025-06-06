@@ -460,7 +460,7 @@ class StorageContentContainer(Vertical):
         width: 100%;
         height: auto;
         border-bottom: solid $secondary;
-        margin: 1 0;
+        margin: 1 0 0 0;
 
         PathSelector {
             &.primary_color {
