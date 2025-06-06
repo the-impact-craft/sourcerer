@@ -4,7 +4,6 @@ Access credentials entity classes.
 This module defines data classes representing access credentials
 used for authentication with various cloud providers.
 """
-from dataclasses import field
 from datetime import datetime
 
 import boto3
@@ -37,7 +36,7 @@ class Credentials(Struct):
     active: bool
     created_at: datetime | None = None
     updated_at: datetime | None = None
-    storages: list[Storage] = field(default_factory=list)
+    storages: list[Storage] = []  # noqa: RUF012
 
 
 class Boto3Credentials(Struct):
