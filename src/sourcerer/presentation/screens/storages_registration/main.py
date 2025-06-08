@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
+from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Label, Select
@@ -33,6 +35,10 @@ class StoragesRegistrationScreen(ModalScreen):
     CREDENTIALS_SELECTOR_ID = "credentials_selector"
 
     PROVIDERS_NAME = "credentials"
+
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("escape", "cancel_screen", "Pop screen"),
+    ]
 
     def __init__(
         self,
@@ -84,7 +90,7 @@ class StoragesRegistrationScreen(ModalScreen):
                collected authentication fields.
         """
         if event.action == ControlsEnum.CANCEL.name:
-            self.dismiss()
+            self.action_cancel_screen()
         elif event.action == ControlsEnum.CREATE.name:
             storage_name = self.query_one("#storage_name", LabeledInput).get().value
             if not storage_name:
@@ -98,3 +104,6 @@ class StoragesRegistrationScreen(ModalScreen):
                 return
 
             self.dismiss(StorageEntry(storage_name, credentials_uuid))  # type: ignore
+
+    def action_cancel_screen(self):
+        self.dismiss()

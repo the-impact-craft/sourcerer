@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
+from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.screen import ModalScreen
 from textual.widgets import Label, Select
@@ -38,6 +40,10 @@ class ProviderCredentialsEntry:
 
 class ProviderCredsRegistrationScreen(ModalScreen):
     CSS_PATH = "styles.tcss"
+
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("escape", "cancel_screen", "Pop screen"),
+    ]
 
     MAIN_CONTAINER_ID = "ProviderCredsRegistrationScreen"
     SETTINGS_CONTAINER_ID = "settings"
@@ -182,7 +188,7 @@ class ProviderCredsRegistrationScreen(ModalScreen):
                collected authentication fields.
         """
         if event.action == ControlsEnum.CANCEL.name:
-            self.dismiss()
+            self.action_cancel_screen()
         elif event.action == ControlsEnum.CREATE.name:
             if not self.auth_method:
                 self.notify("Please select provider and auth method", severity="error")
@@ -284,3 +290,6 @@ class ProviderCredsRegistrationScreen(ModalScreen):
         self.query_one(f"#{self.CREDENTIALS_FIELDS_CONTAINER_ID}").query_one(
             ".form_input"
         ).focus()
+
+    def action_cancel_screen(self):
+        self.dismiss()

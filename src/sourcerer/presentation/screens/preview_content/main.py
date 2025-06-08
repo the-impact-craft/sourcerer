@@ -1,9 +1,11 @@
 from pathlib import Path
+from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from rich.syntax import Syntax
 from textual import on
 from textual.app import ComposeResult
+from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal
 from textual.screen import ModalScreen
 from textual.widgets import LoadingIndicator, RichLog
@@ -19,6 +21,9 @@ from sourcerer.presentation.utils import get_provider_service_by_access_uuid
 
 class PreviewContentScreen(ModalScreen):
     CSS_PATH = "styles.tcss"
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("escape", "cancel_screen", "Pop screen"),
+    ]
 
     def __init__(
         self,
@@ -79,4 +84,7 @@ class PreviewContentScreen(ModalScreen):
     def on_button_click(self, event: Button.Click) -> None:
         """Handle button click events."""
         if event.action == "cancel":
-            self.dismiss()
+            self.action_cancel_screen()
+
+    def action_cancel_screen(self):
+        self.dismiss()

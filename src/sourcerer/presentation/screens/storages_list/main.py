@@ -1,10 +1,12 @@
 import datetime
 import uuid
 from enum import Enum
+from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
+from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.reactive import reactive
 from textual.screen import ModalScreen
@@ -76,6 +78,10 @@ class StorageRow(Horizontal):
 
 class StoragesListScreen(ModalScreen):
     CSS_PATH = "styles.tcss"
+
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("escape", "cancel_screen", "Pop screen"),
+    ]
 
     MAIN_CONTAINER_ID = "StoragesListScreen"
     SETTINGS_CONTAINER_ID = "settings"
@@ -149,7 +155,7 @@ class StoragesListScreen(ModalScreen):
             event (Button.Click): The button click event.
         """
         if event.action == ControlsEnum.CANCEL.name:
-            self.dismiss()
+            self.action_cancel_screen()
         if event.action == ControlsEnum.ADD_STORAGE.name:
             self.app.push_screen(
                 StoragesRegistrationScreen(),
@@ -178,3 +184,6 @@ class StoragesListScreen(ModalScreen):
             )
         )
         self.refresh_storages_list()
+
+    def action_cancel_screen(self):
+        self.dismiss()

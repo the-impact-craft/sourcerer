@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
+from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.message import Message
 from textual.reactive import reactive
@@ -112,6 +114,10 @@ class ProviderCredsListScreen(ModalScreen):
 
     credentials_list = reactive([], recompose=True)
 
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("escape", "cancel_screen", "Pop screen"),
+    ]
+
     def __init__(
         self,
         credentials_service: CredentialsService = Provide[
@@ -195,7 +201,7 @@ class ProviderCredsListScreen(ModalScreen):
             event (Button.Click): The button click event.
         """
         if event.action == ControlsEnum.CANCEL.name:
-            self.dismiss()
+            self.action_cancel_screen()
         if event.action == "add_registration":
             self.app.push_screen(
                 ProviderCredsRegistrationScreen(),
@@ -227,3 +233,6 @@ class ProviderCredsListScreen(ModalScreen):
             _ (ReloadCredentialsRequest): The reload credentials request event.
         """
         self.refresh_credentials_list()
+
+    def action_cancel_screen(self):
+        self.dismiss()
