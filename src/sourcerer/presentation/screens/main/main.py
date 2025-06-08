@@ -1,3 +1,4 @@
+import contextlib
 import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
@@ -9,6 +10,7 @@ from textual import on, work
 from textual.app import App, ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import Horizontal
+from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.widgets import Footer
 
@@ -102,6 +104,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding("ctrl+r", "registrations", "Registrations list"),
         Binding("ctrl+s", "storages", "Storages list"),
+        Binding("ctrl+f", "find", show=False),
         Binding(
             KeyBindings.ARROW_LEFT.value, "focus_sidebar", "Focus sidebar", show=False
         ),
@@ -151,6 +154,13 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
 
         self.theme = "github-dark"
         self.init_storages_list()
+
+    def action_find(self):
+        """
+        Focus search input.
+        """
+        with contextlib.suppress(NoMatches):
+            self.query_one(f"#{self.storage_content.search_input_id}").focus()
 
     def action_focus_content(self):
         """
