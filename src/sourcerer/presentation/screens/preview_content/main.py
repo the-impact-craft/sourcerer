@@ -1,13 +1,10 @@
 from pathlib import Path
-from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from rich.syntax import Syntax
 from textual import on
 from textual.app import ComposeResult
-from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal
-from textual.screen import ModalScreen
 from textual.widgets import LoadingIndicator, RichLog
 
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
@@ -15,15 +12,13 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
     ReadStorageItemsError,
 )
 from sourcerer.presentation.di_container import DiContainer
+from sourcerer.presentation.screens.shared.modal_screens import ExitBoundModalScreen
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.utils import get_provider_service_by_access_uuid
 
 
-class PreviewContentScreen(ModalScreen):
+class PreviewContentScreen(ExitBoundModalScreen):
     CSS_PATH = "styles.tcss"
-    BINDINGS: ClassVar[list[BindingType]] = [
-        Binding("escape", "cancel_screen", "Pop screen"),
-    ]
 
     def __init__(
         self,
@@ -85,6 +80,3 @@ class PreviewContentScreen(ModalScreen):
         """Handle button click events."""
         if event.action == "cancel":
             self.action_cancel_screen()
-
-    def action_cancel_screen(self):
-        self.dismiss()
