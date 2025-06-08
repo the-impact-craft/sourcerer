@@ -1,15 +1,12 @@
 import datetime
 import uuid
 from enum import Enum
-from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
-from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.reactive import reactive
-from textual.screen import ModalScreen
 from textual.widgets import Label
 
 from sourcerer.domain.storage.entities import Storage
@@ -17,6 +14,9 @@ from sourcerer.infrastructure.access_credentials.services import CredentialsServ
 from sourcerer.infrastructure.storage.services import StoragesService
 from sourcerer.presentation.di_container import DiContainer
 from sourcerer.presentation.screens.question.main import QuestionScreen
+from sourcerer.presentation.screens.shared.modal_screens import (
+    RefreshTriggerableModalScreen,
+)
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.storages_list.messages.reload_storages_request import (
     ReloadStoragesRequest,
@@ -76,12 +76,8 @@ class StorageRow(Horizontal):
         self.post_message(ReloadStoragesRequest())
 
 
-class StoragesListScreen(ModalScreen):
+class StoragesListScreen(RefreshTriggerableModalScreen):
     CSS_PATH = "styles.tcss"
-
-    BINDINGS: ClassVar[list[BindingType]] = [
-        Binding("escape", "cancel_screen", "Pop screen"),
-    ]
 
     MAIN_CONTAINER_ID = "StoragesListScreen"
     SETTINGS_CONTAINER_ID = "settings"
@@ -100,7 +96,6 @@ class StoragesListScreen(ModalScreen):
         super().__init__(*args, **kwargs)
         self.storage_service = storages_service
         self.credentials_service = credentials_service
-        self._requires_storage_refresh = False
 
     def compose(self) -> ComposeResult:
         with Container(id=self.MAIN_CONTAINER_ID):
@@ -187,8 +182,3 @@ class StoragesListScreen(ModalScreen):
             )
         )
         self.refresh_storages_list()
-
-    def action_cancel_screen(self):
-        requires_storage_refresh = self._requires_storage_refresh
-        self._requires_storage_refresh = False
-        self.dismiss(requires_storage_refresh)

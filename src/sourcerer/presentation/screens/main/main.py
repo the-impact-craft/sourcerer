@@ -200,6 +200,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         configurations.
         """
         self.storage_list_sidebar.storages = {}
+        self.storage_list_sidebar.last_update_timestamp = time.time()
         self.init_storages_list()
 
     @work(thread=True)

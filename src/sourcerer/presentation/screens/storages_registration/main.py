@@ -1,17 +1,15 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
-from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal, VerticalScroll
-from textual.screen import ModalScreen
 from textual.widgets import Label, Select
 
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
 from sourcerer.presentation.di_container import DiContainer
+from sourcerer.presentation.screens.shared.modal_screens import ExitBoundModalScreen
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.shared.widgets.labeled_input import LabeledInput
 
@@ -27,7 +25,7 @@ class StorageEntry:
     credentials_uuid: str
 
 
-class StoragesRegistrationScreen(ModalScreen):
+class StoragesRegistrationScreen(ExitBoundModalScreen):
     CSS_PATH = "styles.tcss"
 
     MAIN_CONTAINER_ID = "StoragesRegistrationScreen"
@@ -35,10 +33,6 @@ class StoragesRegistrationScreen(ModalScreen):
     CREDENTIALS_SELECTOR_ID = "credentials_selector"
 
     PROVIDERS_NAME = "credentials"
-
-    BINDINGS: ClassVar[list[BindingType]] = [
-        Binding("escape", "cancel_screen", "Pop screen"),
-    ]
 
     def __init__(
         self,
@@ -104,6 +98,3 @@ class StoragesRegistrationScreen(ModalScreen):
                 return
 
             self.dismiss(StorageEntry(storage_name, credentials_uuid))  # type: ignore
-
-    def action_cancel_screen(self):
-        self.dismiss()

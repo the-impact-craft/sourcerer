@@ -1,15 +1,12 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
-from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.message import Message
 from textual.reactive import reactive
-from textual.screen import ModalScreen
 from textual.widgets import Checkbox, Label
 
 from sourcerer.domain.access_credentials.entities import Credentials
@@ -24,6 +21,9 @@ from sourcerer.presentation.screens.provider_creds_registration.main import (
     ProviderCredsRegistrationScreen,
 )
 from sourcerer.presentation.screens.question.main import QuestionScreen
+from sourcerer.presentation.screens.shared.modal_screens import (
+    RefreshTriggerableModalScreen,
+)
 from sourcerer.presentation.screens.shared.widgets.button import Button
 
 
@@ -100,7 +100,7 @@ class ProviderCredentialsRow(Horizontal):
         self.post_message(ReloadCredentialsRequest())
 
 
-class ProviderCredsListScreen(ModalScreen):
+class ProviderCredsListScreen(RefreshTriggerableModalScreen):
     CSS_PATH = "styles.tcss"
 
     MAIN_CONTAINER_ID = "ProviderCredsListScreen"
@@ -114,10 +114,6 @@ class ProviderCredsListScreen(ModalScreen):
 
     credentials_list = reactive([], recompose=True)
 
-    BINDINGS: ClassVar[list[BindingType]] = [
-        Binding("escape", "cancel_screen", "Pop screen"),
-    ]
-
     def __init__(
         self,
         credentials_service: CredentialsService = Provide[
@@ -128,7 +124,6 @@ class ProviderCredsListScreen(ModalScreen):
     ):
         super().__init__(*args, **kwargs)
         self.credentials_service = credentials_service
-        self._requires_storage_refresh = False
 
     def compose(self) -> ComposeResult:
         with Container(id=self.MAIN_CONTAINER_ID):
@@ -236,8 +231,3 @@ class ProviderCredsListScreen(ModalScreen):
             _ (ReloadCredentialsRequest): The reload credentials request event.
         """
         self.refresh_credentials_list()
-
-    def action_cancel_screen(self):
-        requires_storage_refresh = self._requires_storage_refresh
-        self._requires_storage_refresh = False
-        self.dismiss(requires_storage_refresh)
