@@ -5,11 +5,11 @@ from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, VerticalScroll
-from textual.screen import ModalScreen
 from textual.widgets import Label, Select
 
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
 from sourcerer.presentation.di_container import DiContainer
+from sourcerer.presentation.screens.shared.modal_screens import ExitBoundModalScreen
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.shared.widgets.labeled_input import LabeledInput
 
@@ -25,7 +25,7 @@ class StorageEntry:
     credentials_uuid: str
 
 
-class StoragesRegistrationScreen(ModalScreen):
+class StoragesRegistrationScreen(ExitBoundModalScreen):
     CSS_PATH = "styles.tcss"
 
     MAIN_CONTAINER_ID = "StoragesRegistrationScreen"
@@ -84,7 +84,7 @@ class StoragesRegistrationScreen(ModalScreen):
                collected authentication fields.
         """
         if event.action == ControlsEnum.CANCEL.name:
-            self.dismiss()
+            self.action_cancel_screen()
         elif event.action == ControlsEnum.CREATE.name:
             storage_name = self.query_one("#storage_name", LabeledInput).get().value
             if not storage_name:

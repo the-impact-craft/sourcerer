@@ -5,7 +5,6 @@ from rich.syntax import Syntax
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
-from textual.screen import ModalScreen
 from textual.widgets import LoadingIndicator, RichLog
 
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
@@ -13,11 +12,12 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
     ReadStorageItemsError,
 )
 from sourcerer.presentation.di_container import DiContainer
+from sourcerer.presentation.screens.shared.modal_screens import ExitBoundModalScreen
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.utils import get_provider_service_by_access_uuid
 
 
-class PreviewContentScreen(ModalScreen):
+class PreviewContentScreen(ExitBoundModalScreen):
     CSS_PATH = "styles.tcss"
 
     def __init__(
@@ -79,4 +79,4 @@ class PreviewContentScreen(ModalScreen):
     def on_button_click(self, event: Button.Click) -> None:
         """Handle button click events."""
         if event.action == "cancel":
-            self.dismiss()
+            self.action_cancel_screen()

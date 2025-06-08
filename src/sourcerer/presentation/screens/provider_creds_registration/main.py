@@ -5,7 +5,6 @@ from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, VerticalScroll
-from textual.screen import ModalScreen
 from textual.widgets import Label, Select
 
 from sourcerer.domain.access_credentials.services import (
@@ -20,6 +19,7 @@ from sourcerer.infrastructure.access_credentials.registry import (
 )
 from sourcerer.infrastructure.utils import generate_unique_name
 from sourcerer.presentation.di_container import DiContainer
+from sourcerer.presentation.screens.shared.modal_screens import ExitBoundModalScreen
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.shared.widgets.labeled_input import LabeledInput
 
@@ -36,7 +36,7 @@ class ProviderCredentialsEntry:
     fields: dict[str, str]
 
 
-class ProviderCredsRegistrationScreen(ModalScreen):
+class ProviderCredsRegistrationScreen(ExitBoundModalScreen):
     CSS_PATH = "styles.tcss"
 
     MAIN_CONTAINER_ID = "ProviderCredsRegistrationScreen"
@@ -182,7 +182,7 @@ class ProviderCredsRegistrationScreen(ModalScreen):
                collected authentication fields.
         """
         if event.action == ControlsEnum.CANCEL.name:
-            self.dismiss()
+            self.action_cancel_screen()
         elif event.action == ControlsEnum.CREATE.name:
             if not self.auth_method:
                 self.notify("Please select provider and auth method", severity="error")

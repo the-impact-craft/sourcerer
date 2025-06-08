@@ -7,7 +7,6 @@ from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.reactive import reactive
-from textual.screen import ModalScreen
 from textual.widgets import Label
 
 from sourcerer.domain.storage.entities import Storage
@@ -15,6 +14,9 @@ from sourcerer.infrastructure.access_credentials.services import CredentialsServ
 from sourcerer.infrastructure.storage.services import StoragesService
 from sourcerer.presentation.di_container import DiContainer
 from sourcerer.presentation.screens.question.main import QuestionScreen
+from sourcerer.presentation.screens.shared.modal_screens import (
+    RefreshTriggerableModalScreen,
+)
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.storages_list.messages.reload_storages_request import (
     ReloadStoragesRequest,
@@ -74,7 +76,7 @@ class StorageRow(Horizontal):
         self.post_message(ReloadStoragesRequest())
 
 
-class StoragesListScreen(ModalScreen):
+class StoragesListScreen(RefreshTriggerableModalScreen):
     CSS_PATH = "styles.tcss"
 
     MAIN_CONTAINER_ID = "StoragesListScreen"
@@ -119,13 +121,15 @@ class StoragesListScreen(ModalScreen):
         """
         Initialize the screen by refreshing the credentials list when the screen is composed.
         """
-        self.refresh_storages_list()
+        self.refresh_storages_list(set_refresh_flag=False)
 
-    def refresh_storages_list(self):
+    def refresh_storages_list(self, set_refresh_flag: bool = True):
         """
         Refresh the storages list by retrieving the latest storages from the storage service.
         """
         self.storages_list = self.storage_service.list()
+        if set_refresh_flag:
+            self._requires_storage_refresh = True
 
     @on(ReloadStoragesRequest)
     def on_reload_storages_request(self, _: ReloadStoragesRequest):
@@ -149,7 +153,7 @@ class StoragesListScreen(ModalScreen):
             event (Button.Click): The button click event.
         """
         if event.action == ControlsEnum.CANCEL.name:
-            self.dismiss()
+            self.action_cancel_screen()
         if event.action == ControlsEnum.ADD_STORAGE.name:
             self.app.push_screen(
                 StoragesRegistrationScreen(),

@@ -7,7 +7,6 @@ from textual.app import ComposeResult
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.message import Message
 from textual.reactive import reactive
-from textual.screen import ModalScreen
 from textual.widgets import Checkbox, Label
 
 from sourcerer.domain.access_credentials.entities import Credentials
@@ -22,6 +21,9 @@ from sourcerer.presentation.screens.provider_creds_registration.main import (
     ProviderCredsRegistrationScreen,
 )
 from sourcerer.presentation.screens.question.main import QuestionScreen
+from sourcerer.presentation.screens.shared.modal_screens import (
+    RefreshTriggerableModalScreen,
+)
 from sourcerer.presentation.screens.shared.widgets.button import Button
 
 
@@ -98,7 +100,7 @@ class ProviderCredentialsRow(Horizontal):
         self.post_message(ReloadCredentialsRequest())
 
 
-class ProviderCredsListScreen(ModalScreen):
+class ProviderCredsListScreen(RefreshTriggerableModalScreen):
     CSS_PATH = "styles.tcss"
 
     MAIN_CONTAINER_ID = "ProviderCredsListScreen"
@@ -151,13 +153,15 @@ class ProviderCredsListScreen(ModalScreen):
         """
         Initialize the screen by refreshing the credentials list when the screen is composed.
         """
-        self.refresh_credentials_list()
+        self.refresh_credentials_list(set_refresh_flag=False)
 
-    def refresh_credentials_list(self):
+    def refresh_credentials_list(self, set_refresh_flag: bool = True):
         """
         Refresh the credentials list by retrieving the latest credentials from the credentials service.
         """
         self.credentials_list = self.credentials_service.list()
+        if set_refresh_flag:
+            self._requires_storage_refresh = True
 
     def create_provider_creds_registration(
         self,
@@ -195,7 +199,7 @@ class ProviderCredsListScreen(ModalScreen):
             event (Button.Click): The button click event.
         """
         if event.action == ControlsEnum.CANCEL.name:
-            self.dismiss()
+            self.action_cancel_screen()
         if event.action == "add_registration":
             self.app.push_screen(
                 ProviderCredsRegistrationScreen(),

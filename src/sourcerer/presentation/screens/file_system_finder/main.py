@@ -1,16 +1,13 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
-from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal
 from textual.css.query import NoMatches
 from textual.reactive import reactive
-from textual.screen import ModalScreen
 from textual.widgets import Static
 
 from sourcerer.infrastructure.file_system.services import FileSystemService
@@ -18,6 +15,7 @@ from sourcerer.presentation.di_container import DiContainer
 from sourcerer.presentation.screens.file_system_finder.widgets.file_system_navigator import (
     FileSystemNavigator,
 )
+from sourcerer.presentation.screens.shared.modal_screens import ExitBoundModalScreen
 from sourcerer.presentation.screens.shared.widgets.button import Button
 
 
@@ -27,13 +25,9 @@ class FileSystemSelectionValidationRule:
     error_message: str
 
 
-class FileSystemNavigationModal(ModalScreen):
+class FileSystemNavigationModal(ExitBoundModalScreen):
     CONTAINER_ID = "file_system_view_container"
     CSS_PATH = "styles.tcss"
-
-    BINDINGS: ClassVar[list[BindingType]] = [
-        Binding("escape", "app.pop_screen", "Pop screen"),
-    ]
 
     active_path: reactive[Path] = reactive(Path())
 
@@ -126,7 +120,7 @@ class FileSystemNavigationModal(ModalScreen):
             event (Button.Click): The event containing the button that was clicked.
         """
         if event.action == "close":
-            self.on_close()
+            self.action_cancel_screen()
         else:
             self.on_apply()
 

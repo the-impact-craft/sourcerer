@@ -184,10 +184,23 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         This method is typically used to allow users to add their
         cloud storage credentials, which will then be reflected in the storage
         """
-        self.app.push_screen(ProviderCredsListScreen(), callback=self.refresh_storages)
+        self.app.push_screen(
+            ProviderCredsListScreen(), callback=self.modal_screen_callback
+        )
 
     def action_storages(self):
-        self.app.push_screen(StoragesListScreen(), callback=self.refresh_storages)
+        self.app.push_screen(StoragesListScreen(), callback=self.modal_screen_callback)
+
+    def modal_screen_callback(self, requires_storage_refresh: bool | None = True):
+        """
+        Callback for modal screens to refresh the storage list if required.
+
+        This method is called when a modal screen is closed. If the
+        `requires_storage_refresh` flag is set to True, it refreshes the
+        storage list by calling the `refresh_storages` method.
+        """
+        if requires_storage_refresh:
+            self.refresh_storages()
 
     def refresh_storages(self, *args, **kwargs):
         """
@@ -197,6 +210,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         configurations.
         """
         self.storage_list_sidebar.storages = {}
+        self.storage_list_sidebar.last_update_timestamp = time.time()
         self.init_storages_list()
 
     @work(thread=True)
