@@ -561,6 +561,8 @@ class StorageContentContainer(Vertical):
     }
     """
 
+    search_input_id: ClassVar[str] = "search_input"
+
     def compose(self) -> ComposeResult:
         if not self.storage:
             return
@@ -584,7 +586,7 @@ class StorageContentContainer(Vertical):
             with Horizontal():
                 yield Label("Search:")
                 yield Input(
-                    id="search_input",
+                    id=self.search_input_id,
                     placeholder="input path prefix here...",
                     value=self.search_prefix,
                 )
