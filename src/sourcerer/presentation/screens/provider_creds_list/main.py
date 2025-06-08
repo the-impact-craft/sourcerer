@@ -128,6 +128,7 @@ class ProviderCredsListScreen(ModalScreen):
     ):
         super().__init__(*args, **kwargs)
         self.credentials_service = credentials_service
+        self._requires_storage_refresh = False
 
     def compose(self) -> ComposeResult:
         with Container(id=self.MAIN_CONTAINER_ID):
@@ -157,13 +158,15 @@ class ProviderCredsListScreen(ModalScreen):
         """
         Initialize the screen by refreshing the credentials list when the screen is composed.
         """
-        self.refresh_credentials_list()
+        self.refresh_credentials_list(set_refresh_flag=False)
 
-    def refresh_credentials_list(self):
+    def refresh_credentials_list(self, set_refresh_flag: bool = True):
         """
         Refresh the credentials list by retrieving the latest credentials from the credentials service.
         """
         self.credentials_list = self.credentials_service.list()
+        if set_refresh_flag:
+            self._requires_storage_refresh = True
 
     def create_provider_creds_registration(
         self,
@@ -235,4 +238,6 @@ class ProviderCredsListScreen(ModalScreen):
         self.refresh_credentials_list()
 
     def action_cancel_screen(self):
-        self.dismiss()
+        requires_storage_refresh = self._requires_storage_refresh
+        self._requires_storage_refresh = False
+        self.dismiss(requires_storage_refresh)

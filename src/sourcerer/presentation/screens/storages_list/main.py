@@ -100,6 +100,7 @@ class StoragesListScreen(ModalScreen):
         super().__init__(*args, **kwargs)
         self.storage_service = storages_service
         self.credentials_service = credentials_service
+        self._requires_storage_refresh = False
 
     def compose(self) -> ComposeResult:
         with Container(id=self.MAIN_CONTAINER_ID):
@@ -125,13 +126,15 @@ class StoragesListScreen(ModalScreen):
         """
         Initialize the screen by refreshing the credentials list when the screen is composed.
         """
-        self.refresh_storages_list()
+        self.refresh_storages_list(set_refresh_flag=False)
 
-    def refresh_storages_list(self):
+    def refresh_storages_list(self, set_refresh_flag: bool = True):
         """
         Refresh the storages list by retrieving the latest storages from the storage service.
         """
         self.storages_list = self.storage_service.list()
+        if set_refresh_flag:
+            self._requires_storage_refresh = True
 
     @on(ReloadStoragesRequest)
     def on_reload_storages_request(self, _: ReloadStoragesRequest):
@@ -186,4 +189,6 @@ class StoragesListScreen(ModalScreen):
         self.refresh_storages_list()
 
     def action_cancel_screen(self):
-        self.dismiss()
+        requires_storage_refresh = self._requires_storage_refresh
+        self._requires_storage_refresh = False
+        self.dismiss(requires_storage_refresh)
