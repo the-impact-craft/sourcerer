@@ -43,8 +43,8 @@ class ClickableLabel(Label):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def on_click(self, event: events.Click) -> None:
-        self.post_message(self.Click(name=self.name))
+    def on_click(self, _: events.Click) -> None:
+        self.post_message(self.Click(name=self.name))  # type: ignore
 
 
 class Search(Container):
