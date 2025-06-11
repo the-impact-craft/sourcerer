@@ -17,11 +17,37 @@ PreviewContentScreen {
     border: solid $secondary-background;
     border-title-color: $primary-lighten-2;
 
-    RichLog {
-      background: transparent;
-      width: 95;
+
+    #search-bar {
+      height: auto;
+      display: none;
+
+      &.-visible {
+        display: block;
+      }
     }
 
+    Horizontal{
+      height: auto;
+
+      & > Static {
+        width: auto;
+      }
+    }
+
+    Input {
+      height: 1;
+      border: none;
+      background: transparent;
+      width: 78%;
+    }
+
+    TextArea {
+      background-tint: $background;
+
+      &:focus {
+        border: tall $border-blurred;
+      }
+    }
   }
 }
-
