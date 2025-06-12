@@ -1,3 +1,4 @@
+import contextlib
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -10,6 +11,7 @@ from textual import events, on
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal
+from textual.css.query import NoMatches
 from textual.document._document import Selection
 from textual.message import Message
 from textual.reactive import reactive
@@ -112,7 +114,9 @@ class Search(Container):
 
         if not self.search_result_lines:
             self.notify("No matches found", severity="warning")
+            self.total, self.current = 0, 0
             return
+
         self.total = len(self.search_result_lines)
         self.current = 1
 
@@ -132,10 +136,11 @@ class Search(Container):
         self.current = self.current - 1 if self.current > 1 else self.total
 
     def watch_current(self):
+        with contextlib.suppress(NoMatches):
+            search_result = self.query_one("#search-result", Label)
+            search_result.update(f"{self.current}/{self.total}")
         if not self.search_result_lines:
             return
-        search_result = self.query_one("#search-result", Label)
-        search_result.update(f"{self.current}/{self.total}")
         line, start = self.search_result_lines[self.current - 1]
         self.post_message(
             HighlightResult(line, start=start, end=start + len(self.search_value))
