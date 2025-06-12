@@ -59,7 +59,7 @@ class Search(Container):
     current = reactive(0, recompose=False)
     content = reactive("", recompose=False)
 
-    def __init__(self, content: str | None, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.search_result_lines = []
         self.search_value = ""
@@ -173,7 +173,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
 
     def compose(self) -> ComposeResult:
         with Container(id="PreviewContentScreen"):
-            yield Search(content=self.content, id="search-bar")
+            yield Search(id="search-bar")
             yield LoadingIndicator(id="loading")
             yield TextArea(read_only=True, show_line_numbers=True)
             with Horizontal(id="controls"):
