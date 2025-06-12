@@ -12,16 +12,51 @@ PreviewContentScreen {
   & > #PreviewContentScreen {
     padding: 1 2 0 2;
     margin: 0 0;
-    width: 100;
+    width: 70%;
     height: 40;
     border: solid $secondary-background;
     border-title-color: $primary-lighten-2;
 
-    RichLog {
-      background: transparent;
-      width: 95;
+
+    #search-bar {
+      height: auto;
+      display: none;
+
+      &.-visible {
+        display: block;
+      }
     }
 
+    Horizontal{
+      height: auto;
+
+      & > Static {
+        width: auto;
+      }
+
+      #left {
+        align: left middle;
+        width: 90%;
+      }
+      #right {
+          align: right middle;
+          width: 10%;
+      }
+    }
+
+    Input {
+      height: 1;
+      border: none;
+      background: transparent;
+      width: 78%;
+    }
+
+    TextArea {
+      background-tint: $background;
+
+      &:focus {
+        border: tall $border-blurred;
+      }
+    }
   }
 }
-
