@@ -12,6 +12,7 @@ from dataclasses import dataclass
 from enum import Enum, auto
 from typing import ClassVar, Self
 
+import humanize
 from textual import events, on
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
@@ -308,6 +309,7 @@ class FileItem(StorageContentItem):
         """Message sent when a file preview is selected."""
 
         name: str
+        size: int
 
     @dataclass
     class Unselect(Message):
@@ -333,7 +335,9 @@ class FileItem(StorageContentItem):
         yield FileMetaLabel(
             f"{FILE_ICON} {self.file.key}", classes="file_name", markup=False
         )
-        yield FileMetaLabel(f"{self.file.size}", classes="file_size", markup=False)
+        yield FileMetaLabel(
+            f"{humanize.naturalsize(self.file.size)}", classes="file_size", markup=False
+        )
         yield FileMetaLabel(
             str(self.file.date_modified), classes="file_date", markup=False
         )
@@ -360,7 +364,7 @@ class FileItem(StorageContentItem):
             preview_button = self.query_one(Button)
 
         if widget is preview_button:
-            self.post_message(self.Preview(self.file.key))
+            self.post_message(self.Preview(self.file.key, self.file.size))
             return
 
         checkbox = self.query_one(UnfocusableCheckbox)
@@ -665,6 +669,7 @@ class StorageContentContainer(Vertical):
                 self.storage,
                 self.access_credentials_uuid,
                 os.path.join(self.path, event.name) if self.path else event.name,
+                event.size,
             )
         )
 

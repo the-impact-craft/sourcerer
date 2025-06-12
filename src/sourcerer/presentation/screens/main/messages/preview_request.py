@@ -8,3 +8,4 @@ class PreviewRequest(Message):
     storage_name: str
     access_credentials_uuid: str
     path: str
+    size: int

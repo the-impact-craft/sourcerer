@@ -10,7 +10,6 @@ from itertools import groupby
 from pathlib import Path
 from typing import Any
 
-import humanize
 from platformdirs import user_downloads_dir
 
 from sourcerer.domain.shared.entities import StorageProvider
@@ -173,7 +172,7 @@ class S3ProviderService(BaseStorageProviderService):
             File(
                 generate_uuid(),
                 i.get("Key").replace(path, ""),
-                humanize.naturalsize(i.get("Size")),
+                i.get("Size"),
                 is_text_file(i.get("Key")),
                 i.get("LastModified"),
             )

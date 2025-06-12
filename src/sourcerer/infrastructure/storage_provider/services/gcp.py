@@ -9,7 +9,6 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-import humanize
 from platformdirs import user_downloads_dir
 
 from sourcerer.domain.shared.entities import StorageProvider
@@ -136,7 +135,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
                     File(
                         generate_uuid(),
                         blob.name[len(path) :],
-                        size=humanize.naturalsize(blob.size),
+                        size=blob.size,
                         date_modified=blob.updated.date(),
                         is_text=is_text_file(blob.name),
                     )
