@@ -212,7 +212,6 @@ class PreviewContentScreen(ExitBoundModalScreen):
             text_log.language = lexer
         else:
             text_log.language = "python"
-        text_log.text = self.content
         text_log.blur()
         text_log.load_text(self.content)
 
