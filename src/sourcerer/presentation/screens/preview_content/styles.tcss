@@ -12,7 +12,7 @@ PreviewContentScreen {
   & > #PreviewContentScreen {
     padding: 1 2 0 2;
     margin: 0 0;
-    width: 100;
+    width: 70%;
     height: 40;
     border: solid $secondary-background;
     border-title-color: $primary-lighten-2;
@@ -32,6 +32,15 @@ PreviewContentScreen {
 
       & > Static {
         width: auto;
+      }
+
+      #left {
+        align: left middle;
+        width: 90%;
+      }
+      #right {
+          align: right middle;
+          width: 10%;
       }
     }
 

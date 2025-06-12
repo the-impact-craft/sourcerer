@@ -35,6 +35,11 @@ class HighlightResult(Message):
     end: int
 
 
+@dataclass
+class HideSearchBar(Message):
+    pass
+
+
 class ClickableLabel(Label):
     @dataclass
     class Click(Message):
@@ -59,15 +64,20 @@ class Search(Container):
 
     def compose(self) -> ComposeResult:
         with Horizontal():
-            yield Label("Search:")
-            yield Input(placeholder="...")
-            with Horizontal():
+            with Horizontal(id="left"):
+                yield Label("Search:")
+                yield Input(placeholder="...")
+
+            with Horizontal(id="right"):
                 yield ClickableLabel(
                     "◀", id="previous", name="previous", classes="search-button"
                 )
                 yield Label(f"{self.current}/{self.total}", id="search-result")
                 yield ClickableLabel(
                     "▶", id="next", name="next", classes="search-button"
+                )
+                yield ClickableLabel(
+                    "❌", id="hide", name="hide", classes="search-button"
                 )
         yield Rule()
 
@@ -110,6 +120,8 @@ class Search(Container):
             self._increment_current()
         elif event.name == "previous":
             self._decrement_current()
+        elif event.name == "hide":
+            self.post_message(HideSearchBar())
 
     def _increment_current(self):
         self.current = self.current + 1 if self.current < self.total else 1
@@ -157,7 +169,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
 
     def compose(self) -> ComposeResult:
         with Container(id="PreviewContentScreen"):
-            yield Search(content=self.content, id="search-bar", classes="-visible")
+            yield Search(content=self.content, id="search-bar")
             yield LoadingIndicator(id="loading")
             yield TextArea(read_only=True, show_line_numbers=True)
             with Horizontal(id="controls"):
@@ -210,6 +222,17 @@ class PreviewContentScreen(ExitBoundModalScreen):
         if event.action == "cancel":
             self.action_cancel_screen()
 
+    @on(HideSearchBar)
+    def on_hide_search_bar(self, _: HideSearchBar) -> None:
+        """Handle hide search bar events."""
+        search_bar = self.query_one("#search-bar", Search)
+        search_bar.remove_class("-visible")
+        search_bar.query_one(Input).value = ""
+        search_bar.total = 0
+        search_bar.current = 0
+        search_bar.search_result_lines = []
+        search_bar.search_value = ""
+
     @on(HighlightResult)
     def on_highlight_result(self, event: HighlightResult) -> None:
         """Handle highlight result events."""
@@ -220,7 +243,6 @@ class PreviewContentScreen(ExitBoundModalScreen):
         )
 
     def action_find(self):
-        self.notify("Find")
         self.query_one("#search-bar").add_class("-visible")
         self.query_one(Input).focus()
 
