@@ -408,6 +408,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             PreviewContentScreen(
                 storage_name=event.storage_name,
                 key=event.path,
+                file_size=event.size,
                 access_credentials_uuid=event.access_credentials_uuid,
             )
         )

@@ -10,7 +10,6 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
-import humanize
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.blob import BlobServiceClient
 from platformdirs import user_downloads_dir
@@ -38,7 +37,6 @@ from sourcerer.infrastructure.utils import generate_uuid, is_text_file
 
 @storage_provider(StorageProvider.AzureStorage)
 class AzureStorageProviderService(BaseStorageProviderService):
-
     def __init__(self, credentials: Any):
         """
         Initialize the service with Azure credentials.
@@ -137,7 +135,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
                         File(
                             generate_uuid(),
                             remaining_path,
-                            size=humanize.naturalsize(blob.size),
+                            size=blob.size,
                             date_modified=blob.last_modified,
                             is_text=is_text_file(blob.name),
                         )

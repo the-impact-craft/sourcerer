@@ -63,7 +63,7 @@ class File(Struct):
 
     uuid: str
     key: str
-    size: str
+    size: int
     is_text: bool
     date_modified: datetime | None = None
 

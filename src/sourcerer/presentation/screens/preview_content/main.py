@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar
 
+import humanize
 from dependency_injector.wiring import Provide
 from rich.syntax import Syntax
 from textual import events, on
@@ -26,6 +27,7 @@ from sourcerer.presentation.screens.preview_content.text_area_style import (
 from sourcerer.presentation.screens.shared.modal_screens import ExitBoundModalScreen
 from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.utils import get_provider_service_by_access_uuid
+from sourcerer.settings import PREVIEW_LENGTH_LIMIT, PREVIEW_LIMIT_SIZE
 
 
 @dataclass
@@ -152,6 +154,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
         self,
         storage_name,
         key,
+        file_size,
         access_credentials_uuid,
         *args,
         credentials_service: CredentialsService = Provide[
@@ -163,6 +166,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
 
         self.storage_name = storage_name
         self.key = key
+        self.file_size = file_size
         self.access_credentials_uuid = access_credentials_uuid
         self.credentials_service = credentials_service
         self.content = None
@@ -192,6 +196,14 @@ class PreviewContentScreen(ExitBoundModalScreen):
             self.content = provider_service.read_storage_item(
                 self.storage_name, self.key
             )
+            if self.file_size > PREVIEW_LIMIT_SIZE:
+                self.content = self.content[:PREVIEW_LENGTH_LIMIT]
+                self.notify(
+                    f"The file size {humanize.naturalsize(self.file_size)} "
+                    f"exceeds {humanize.naturalsize(PREVIEW_LIMIT_SIZE)} preview limit. "
+                    f"The content is truncated to {PREVIEW_LENGTH_LIMIT} characters.",
+                    severity="warning",
+                )
             search.content = self.content
         except ReadStorageItemsError:
             self.notify("Could not read file :(", severity="error")
