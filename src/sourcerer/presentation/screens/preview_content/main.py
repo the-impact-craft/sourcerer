@@ -154,7 +154,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
         self,
         storage_name,
         key,
-        key_size,
+        file_size,
         access_credentials_uuid,
         *args,
         credentials_service: CredentialsService = Provide[
@@ -166,7 +166,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
 
         self.storage_name = storage_name
         self.key = key
-        self.key_size = key_size
+        self.file_size = file_size
         self.access_credentials_uuid = access_credentials_uuid
         self.credentials_service = credentials_service
         self.content = None
@@ -196,10 +196,10 @@ class PreviewContentScreen(ExitBoundModalScreen):
             self.content = provider_service.read_storage_item(
                 self.storage_name, self.key
             )
-            if self.key_size > PREVIEW_LIMIT_SIZE:
+            if self.file_size > PREVIEW_LIMIT_SIZE:
                 self.content = self.content[:PREVIEW_LENGTH_LIMIT]
                 self.notify(
-                    f"The file size {humanize.naturalsize(self.key_size)} "
+                    f"The file size {humanize.naturalsize(self.file_size)} "
                     f"exceeds {humanize.naturalsize(PREVIEW_LIMIT_SIZE)} preview limit. "
                     f"The content is truncated to {PREVIEW_LENGTH_LIMIT} characters.",
                     severity="warning",
