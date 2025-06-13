@@ -152,7 +152,6 @@ class PreviewContentScreen(ExitBoundModalScreen):
 
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding("escape", "cancel", "Close the screen"),
-        Binding("super+f", "find", "Find"),
     ]
 
     def __init__(
@@ -264,3 +263,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
 
     def action_cancel(self):
         self.action_cancel_screen()
+
+    def on_key(self, event: events.Key) -> None:
+        if event.key in ("ctrl+f", "super+f"):
+            self.action_find()
