@@ -60,4 +60,7 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/the-impact-craft/sourcerer
+  analytics:
+    provider: google
+    property: G-Y30SCK0LZP
 copyright: Copyright &copy; 2025 The Impact Craft
