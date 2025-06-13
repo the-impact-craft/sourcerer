@@ -12,4 +12,4 @@ The application is structured using a clean architecture approach with:
 - Presentation layer: User interface components
 """
 
-__version__ = "0.3.0"
+__version__ = "0.4.0"
