@@ -34,9 +34,9 @@ Our roadmap unveils the features, improvements, and integrations designed to emp
 
 - [ ] **Plugin system** – Extend Sourcerer with your own storage providers
 
-- [ ] **Keyboard shortcuts** – Improve navigation and productivity with magic keybindings.
+- ✅ **Keyboard shortcuts** – Improve navigation and productivity with magic keybindings.
 
-- [ ] **Keyboard navigation** – Improve navigation using keyboard only.
+- ✅ **Keyboard navigation** – Improve navigation using keyboard only.
 
 - [ ] **Error and retry handling** – Automatic retries for flaky cloud responses and graceful error dialogs.
 
@@ -48,4 +48,4 @@ Our roadmap unveils the features, improvements, and integrations designed to emp
 
 - [ ] **Auto-updater** – Keep users' apps upgraded with the latest features.
 
-- [ ] **Register storages** – Some storage providers may not return storages if the user is not a creator (but still has access). This feature will allow user to register storages manually.
+- ✅ **Register storages** – Some storage providers may not return storages if the user is not a creator (but still has access). This feature will allow user to register storages manually.
