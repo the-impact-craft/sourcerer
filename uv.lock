@@ -721,7 +721,6 @@ wheels = [
 
 [[package]]
 name = "data-sourcerer"
-version = "0.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "azure-identity" },
@@ -733,6 +732,7 @@ dependencies = [
     { name = "google-cloud-storage" },
     { name = "humanize" },
     { name = "msgspec" },
+    { name = "packaging" },
     { name = "pyopenssl", marker = "sys_platform == 'linux'" },
     { name = "sqlalchemy" },
     { name = "sqlalchemy-utils" },
@@ -785,6 +785,7 @@ requires-dist = [
     { name = "humanize", specifier = ">=4.12.1,<5.0.0" },
     { name = "mkdocs-material", marker = "extra == 'dev'", specifier = ">=9.6.12" },
     { name = "msgspec", specifier = ">=0.19.0" },
+    { name = "packaging", specifier = ">=25.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.2.0" },
     { name = "pylint", marker = "extra == 'dev'", specifier = ">=3.3.6" },
     { name = "pyopenssl", marker = "sys_platform == 'linux'", specifier = ">=22.1.0" },

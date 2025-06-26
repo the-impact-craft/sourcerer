@@ -1,7 +1,9 @@
-# Generate and store encryption key in a file
+import contextlib
 import os
 import uuid
 from pathlib import Path
+
+import requests
 
 
 def get_encryption_key(path: Path) -> str:
@@ -30,3 +32,19 @@ def get_encryption_key(path: Path) -> str:
         f.write(new_key)
 
     return new_key
+
+
+def get_last_package_version(name):
+    """
+    Fetch the latest version of a package from PyPI.
+    Args:
+        name (str): The name of the package.
+    Returns:
+        str: The latest version of the package, or None if an error occurs.
+    """
+    with contextlib.suppress(Exception):
+        url = f"https://pypi.org/pypi/{name}/json"
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        return response.json()["info"]["version"]
+    return None
