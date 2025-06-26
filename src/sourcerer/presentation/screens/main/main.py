@@ -1,19 +1,22 @@
 import contextlib
 import time
 import traceback
+from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on, work
-from textual.app import App, ComposeResult
+from textual.app import App, ComposeResult, SystemCommand
 from textual.binding import Binding, BindingType
 from textual.containers import Horizontal
 from textual.css.query import NoMatches
 from textual.reactive import reactive
+from textual.screen import Screen
 from textual.widgets import Footer
 
+from sourcerer.domain.package_meta.services import BasePackageMetaService
 from sourcerer.domain.storage_provider.entities import Storage
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
 from sourcerer.infrastructure.storage_provider.exceptions import (
@@ -21,6 +24,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
 )
 from sourcerer.infrastructure.utils import generate_uuid
 from sourcerer.presentation.di_container import DiContainer
+from sourcerer.presentation.screens.about.main import AboutScreen
 from sourcerer.presentation.screens.critical_error.main import CriticalErrorScreen
 from sourcerer.presentation.screens.file_system_finder.main import (
     FileSystemNavigationModal,
@@ -105,6 +109,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         Binding("ctrl+r", "registrations", "Registrations list"),
         Binding("ctrl+s", "storages", "Storages list"),
         Binding("ctrl+f", "find", show=False),
+        Binding("ctrl+a", "about", "About"),
         Binding(
             KeyBindings.ARROW_LEFT.value, "focus_sidebar", "Focus sidebar", show=False
         ),
@@ -119,11 +124,15 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         credentials_service: CredentialsService = Provide[
             DiContainer.credentials_service
         ],
+        package_meta_service: BasePackageMetaService = Provide[
+            DiContainer.package_meta_service
+        ],
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
         self.credentials_service = credentials_service
+        self.package_meta_service = package_meta_service
         self.storage_list_sidebar = StorageListSidebar(id="storage_list_sidebar")
         self.storage_content = StorageContentContainer(id="storage_content_container")
         self.load_percentage = 0
@@ -145,14 +154,25 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
     def _handle_exception(self, error: Exception) -> None:
         self.push_screen(CriticalErrorScreen(str(error), traceback.format_exc()))
 
+    def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
+        yield from super().get_system_commands(screen)
+        yield SystemCommand("About", "About sourcerer", self.action_about)
+
     def on_mount(self):
         """
         Initializes the application theme and storage list on mount.
         """
 
         self.register_theme(github_dark_theme)  # pyright: ignore [reportArgumentType]
-
         self.theme = "github-dark"
+
+        package_meta = self.package_meta_service.get_package_meta()
+        if package_meta.has_available_update:
+            self.notify(
+                f"Sourcerer {package_meta.version} "
+                f"is running while {package_meta.latest_version} is available",
+                severity="warning",
+            )
         self.init_storages_list()
 
     def action_find(self):
@@ -190,6 +210,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
 
     def action_storages(self):
         self.app.push_screen(StoragesListScreen(), callback=self.modal_screen_callback)
+
+    def action_about(self):
+        self.push_screen(AboutScreen())
 
     def modal_screen_callback(self, requires_storage_refresh: bool | None = True):
         """
