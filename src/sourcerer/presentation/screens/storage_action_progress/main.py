@@ -359,7 +359,8 @@ class StorageActionProgressScreen(ModalScreen):
         self.active_executor = None
 
     def delete_file(self, key, uuid, main_progress_bar):
-        """
+        (
+            """
         Delete a file from storage and update progress bars.
 
         This method handles the deletion of a single file, updating progress bars
@@ -369,7 +370,9 @@ class StorageActionProgressScreen(ModalScreen):
             key (str): The key/path of the file to delete
             uuid (str): Unique identifier for the file
             main_progress_bar (ProgressBar): The main progress bar to update
-        """ ""
+        """
+            ""
+        )
         if not self.provider_service:
             self.notify(f"Failed to delete {key}", severity="error")
             main_progress_bar.advance(1)
@@ -418,7 +421,6 @@ class StorageActionProgressScreen(ModalScreen):
                 finally:
                     self.files_has_been_processed = True
             elif source_path.is_dir():
-
                 files_n = len([i for i in source_path.rglob("*") if i.is_file()])
                 progress_bar = self.query_one(f"#progress_bar_{key.uuid}", ProgressBar)
                 progress_bar.total = files_n

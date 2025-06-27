@@ -17,6 +17,8 @@ from sourcerer.infrastructure.access_credentials.services import CredentialsServ
 from sourcerer.infrastructure.db.config import Database
 from sourcerer.infrastructure.file_system.services import FileSystemService
 from sourcerer.infrastructure.package_meta.services import PackageMetaService
+from sourcerer.infrastructure.settings.repositories import SQLAlchemySettingsRepository
+from sourcerer.infrastructure.settings.services import SettingsService
 from sourcerer.infrastructure.storage.repositories import SQLAlchemyStoragesRepository
 from sourcerer.infrastructure.storage.services import StoragesService
 from sourcerer.settings import APP_DIR, DB_NAME
@@ -51,6 +53,10 @@ class DiContainer(containers.DeclarativeContainer):
         SQLAlchemyStoragesRepository, session_factory
     )
 
+    settings_repository = providers.Factory(
+        SQLAlchemySettingsRepository, session_factory
+    )
+
     credentials_service = providers.Factory(
         CredentialsService, repository=credentials_repository
     )
@@ -62,3 +68,7 @@ class DiContainer(containers.DeclarativeContainer):
     file_system_service = providers.Factory(FileSystemService, Path.home())
 
     package_meta_service = providers.Factory(PackageMetaService)
+    settings_service = providers.Factory(
+        SettingsService,
+        repository=settings_repository,
+    )

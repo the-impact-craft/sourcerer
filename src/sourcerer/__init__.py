@@ -11,6 +11,7 @@ The application is structured using a clean architecture approach with:
 - Infrastructure layer: Implementation details and external services
 - Presentation layer: User interface components
 """
+
 name = "sourcerer"
 package_name = "data_sourcerer"
 __version__ = "0.4.0"

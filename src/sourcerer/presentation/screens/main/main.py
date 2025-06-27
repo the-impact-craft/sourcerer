@@ -17,8 +17,10 @@ from textual.screen import Screen
 from textual.widgets import Footer
 
 from sourcerer.domain.package_meta.services import BasePackageMetaService
+from sourcerer.domain.settings.entities import SettingsFields
 from sourcerer.domain.storage_provider.entities import Storage
 from sourcerer.infrastructure.access_credentials.services import CredentialsService
+from sourcerer.infrastructure.settings.services import SettingsService
 from sourcerer.infrastructure.storage_provider.exceptions import (
     ListStorageItemsError,
 )
@@ -59,6 +61,7 @@ from sourcerer.presentation.screens.preview_content.main import PreviewContentSc
 from sourcerer.presentation.screens.provider_creds_list.main import (
     ProviderCredsListScreen,
 )
+from sourcerer.presentation.screens.settings.main import SettingsScreen
 from sourcerer.presentation.screens.storage_action_progress.main import (
     DeleteKey,
     DownloadKey,
@@ -107,8 +110,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
     CSS_PATH = "styles.tcss"
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding("ctrl+r", "registrations", "Registrations list"),
-        Binding("ctrl+s", "storages", "Storages list"),
+        Binding("ctrl+l", "storages", "Storages list"),
         Binding("ctrl+f", "find", show=False),
+        Binding("ctrl+s", "settings", "Settings"),
         Binding("ctrl+a", "about", "About"),
         Binding(
             KeyBindings.ARROW_LEFT.value, "focus_sidebar", "Focus sidebar", show=False
@@ -121,6 +125,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
 
     def __init__(
         self,
+        settings_service: SettingsService = Provide[DiContainer.settings_service],
         credentials_service: CredentialsService = Provide[
             DiContainer.credentials_service
         ],
@@ -131,9 +136,13 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
+        self.settings_service = settings_service
         self.credentials_service = credentials_service
         self.package_meta_service = package_meta_service
-        self.storage_list_sidebar = StorageListSidebar(id="storage_list_sidebar")
+        self.settings = self.settings_service.load_settings()
+        self.storage_list_sidebar = StorageListSidebar(
+            self.settings.group_by_access_credentials, id="storage_list_sidebar"
+        )
         self.storage_content = StorageContentContainer(id="storage_content_container")
         self.load_percentage = 0
         self.active_resizing_rule: ResizingRule | None = None
@@ -164,7 +173,8 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         """
 
         self.register_theme(github_dark_theme)  # pyright: ignore [reportArgumentType]
-        self.theme = "github-dark"
+        if self.settings.theme in self._registered_themes:
+            self.theme = self.settings.theme
 
         package_meta = self.package_meta_service.get_package_meta()
         if package_meta.has_available_update:
@@ -208,11 +218,36 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             ProviderCredsListScreen(), callback=self.modal_screen_callback
         )
 
+    def action_settings(self):
+        """
+        Opens the file system finder modal screen and refreshes the storage list.
+        This method is triggered by the key binding "ctrl+s" and allows the user
+        to access the settings of the application. It pushes the
+        FileSystemNavigationModal to the application stack.
+        """
+        settings = self.settings_service.load_settings()
+        self.app.push_screen(SettingsScreen(settings), callback=self.settings_callback)
+
     def action_storages(self):
         self.app.push_screen(StoragesListScreen(), callback=self.modal_screen_callback)
 
     def action_about(self):
         self.push_screen(AboutScreen())
+
+    def settings_callback(self, settings: dict | None):
+        default_settings = self.settings_service.load_settings()
+        if settings is None:
+            self.app.theme = default_settings.theme
+            return
+        self.app.theme = settings[SettingsFields.theme]
+        if (theme := settings.get(SettingsFields.theme)) != default_settings.theme:
+            self.settings_service.set_setting(SettingsFields.theme, theme)  # type: ignore
+
+        if (
+            group_by := settings.get(SettingsFields.group_by_access_credentials)
+        ) != default_settings.group_by_access_credentials:
+            self.settings_service.set_setting(SettingsFields.group_by_access_credentials, group_by)  # type: ignore
+            self.storage_list_sidebar.groupby_access_credentials = group_by  # type: ignore
 
     def modal_screen_callback(self, requires_storage_refresh: bool | None = True):
         """
@@ -610,7 +645,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                 for storage in credentials.storages
                 if storage.name not in storage_names
             ]
-            self.storage_list_sidebar.storages[credentials.uuid] = (
+            self.storage_list_sidebar.storages[(credentials.uuid, credentials.name)] = (
                 storages + registered_storages
             )
             self.storage_list_sidebar.last_update_timestamp = time.time()

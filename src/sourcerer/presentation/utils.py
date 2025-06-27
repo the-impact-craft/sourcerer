@@ -4,6 +4,7 @@ Utility functions for the presentation layer.
 This module provides helper functions for the presentation layer,
 particularly for retrieving and initializing storage provider services.
 """
+
 from dependency_injector.wiring import Provide
 
 from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository

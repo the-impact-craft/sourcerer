@@ -3,6 +3,7 @@
 This module contains various configuration constants and settings used throughout
 the application, including UI elements and display configurations.
 """
+
 from enum import Enum
 
 NO_DATA_LOGO = """

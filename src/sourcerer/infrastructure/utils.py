@@ -4,6 +4,7 @@ Utility functions for the Sourcerer application.
 This module provides various utility functions used throughout the application,
 including UUID generation, MIME type detection, and file type checking.
 """
+
 import mimetypes
 import secrets
 import uuid

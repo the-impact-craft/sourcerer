@@ -77,8 +77,6 @@ class LabeledInput(Container):
         """
         input_area = self.query_one(".form_input")
         text = (
-            input_area.document.text
-            if isinstance(input_area, TextArea)
-            else input_area.value  # type: ignore
+            input_area.document.text if isinstance(input_area, TextArea) else input_area.value  # type: ignore
         )
         return self.Value(name=self.key, value=text)

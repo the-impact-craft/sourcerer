@@ -140,7 +140,8 @@ class StorageListSidebar(Vertical):
     """
 
     is_loading: reactive[bool] = reactive(False, recompose=True)
-    storages: reactive[dict[str, list[Storage]]] = reactive({})
+    groupby_access_credentials: reactive[bool] = reactive(False, recompose=True)
+    storages: reactive[dict[tuple[str, str], list[Storage]]] = reactive({})
     last_update_timestamp: reactive[float] = reactive(  # ty: ignore[invalid-assignment]
         0.0, recompose=True
     )
@@ -151,12 +152,43 @@ class StorageListSidebar(Vertical):
         margin-right: 0;
         height: 100%;
         margin-bottom: 1;
-        #rule-left {
+        .rule-left {
             width: 1;
+            color: $background-lighten-3;
+        }
+
+        .storage-credentials-container {
+            margin-top: 1;
+
+            & > :first-of-type {
+                margin-top: 0;
+            }
         }
 
         ScrollVerticalContainerWithNoBindings{
             height: 95%;
+
+            & > Horizontal {
+              height: auto;
+
+              & > .storage-credentials-name {
+                    color: $secondary;
+                    padding: 0 1;
+                }
+
+              & > Rule {
+                    color: $background-lighten-3;
+              }
+
+              & > Rule.storage-credentials-rule-left {
+                    width: 1;
+                    color: $secondary;
+                }
+              & > Rule.storage-credentials-rule-right {
+                    color: $secondary;
+                }
+
+            }
         }
 
         Horizontal {
@@ -186,6 +218,80 @@ class StorageListSidebar(Vertical):
     }
     """
 
+    def __init__(self, groupby_access_credentials, *args, **kwargs):
+        """Initialize the StorageListSidebar widget."""
+        super().__init__(*args, **kwargs)
+        self.groupby_access_credentials = groupby_access_credentials
+
+    def render_ungrouped_storages(self) -> ComposeResult:
+        StorageData = namedtuple("Storage", ["access_credentials_uuid", "storage"])
+        storages = [
+            StorageData(access_credentials_uuid, storage)
+            for (
+                access_credentials_uuid,
+                access_credentials_name,
+            ), storages in self.storages.items()
+            for storage in storages
+        ]
+        storages = sorted(storages, key=lambda x: x.storage.storage)
+        with ScrollVerticalContainerWithNoBindings():
+            for letter, storages_group in groupby(
+                storages, key=lambda x: x.storage.storage[0]
+            ):
+                yield Horizontal(
+                    Rule(classes="rule-left"),
+                    Label(letter.upper(), classes="storage-letter"),
+                    Rule(),
+                    classes="storage-letter-container",
+                )
+                for item in storages_group:
+                    yield StorageItem(
+                        renderable=f"{STORAGE_ICONS.get(item.storage.provider, '')} {item.storage.storage}",
+                        storage_name=item.storage.storage,
+                        access_credentials_uuid=item.access_credentials_uuid,
+                    )
+
+    def render_grouped_by_access_credentials_storages(self) -> ComposeResult:
+        """Render storages grouped by access credentials."""
+        StorageData = namedtuple("Storage", ["access_credentials_uuid", "storage"])
+
+        with ScrollVerticalContainerWithNoBindings():
+            for (
+                access_credentials_uuid,
+                access_credentials_name,
+            ), storages in self.storages.items():
+                storages = sorted(
+                    [
+                        StorageData(access_credentials_uuid, storage)
+                        for storage in storages
+                    ],
+                    key=lambda x: x.storage.storage,
+                )
+                yield Horizontal(
+                    Rule(classes="storage-credentials-rule-left"),
+                    Label(
+                        access_credentials_name.upper(),
+                        classes="storage-credentials-name",
+                    ),
+                    Rule(classes="storage-credentials-rule-right"),
+                    classes="storage-credentials-container",
+                )
+                for letter, storages_group in groupby(
+                    storages, key=lambda x: x.storage.storage[0]
+                ):
+                    yield Horizontal(
+                        Rule(classes="rule-left"),
+                        Label(letter.upper(), classes="storage-letter"),
+                        Rule(),
+                        classes="storage-letter-container",
+                    )
+                    for item in storages_group:
+                        yield StorageItem(
+                            renderable=f"{STORAGE_ICONS.get(item.storage.provider, '')} {item.storage.storage}",
+                            storage_name=item.storage.storage,
+                            access_credentials_uuid=item.access_credentials_uuid,
+                        )
+
     def compose(self) -> ComposeResult:
         with Horizontal(id="header"):
             if self.is_loading:
@@ -195,31 +301,10 @@ class StorageListSidebar(Vertical):
                 id="left-middle",
                 name="header_click",
             )
-
-        StorageData = namedtuple("Storage", ["access_credentials_uuid", "storage"])
-        storages = [
-            StorageData(access_credentials_uuid, storage)
-            for access_credentials_uuid, storages in self.storages.items()
-            for storage in storages
-        ]
-        storages = sorted(storages, key=lambda x: x.storage.storage)
-        with ScrollVerticalContainerWithNoBindings():
-            for letter, storages_group in groupby(
-                storages, key=lambda x: x.storage.storage[0]
-            ):
-
-                yield Horizontal(
-                    Rule(id="rule-left"),
-                    Label(letter.upper(), classes="storage-letter"),
-                    Rule(),
-                )
-
-                for item in storages_group:
-                    yield StorageItem(
-                        renderable=f'{STORAGE_ICONS.get(item.storage.provider, "")} {item.storage.storage}',
-                        storage_name=item.storage.storage,
-                        access_credentials_uuid=item.access_credentials_uuid,
-                    )
+        if self.groupby_access_credentials:
+            yield from self.render_grouped_by_access_credentials_storages()
+        else:
+            yield from self.render_ungrouped_storages()
 
     def focus(self, scroll_visible: bool = True) -> Self:
         try:
