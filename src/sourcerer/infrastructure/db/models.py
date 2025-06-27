@@ -76,3 +76,26 @@ class Storage(Base):
         cascade="save-update",
         backref=backref("storages", passive_deletes=True),
     )
+
+
+class Settings(Base):
+    """
+    SQLAlchemy model for storing application settings.
+
+    This model represents the settings table in the database,
+    storing key-value pairs for application configuration.
+
+    Attributes:
+        id (int): Primary key
+        key (str): Setting key
+        value (str): Setting value
+        created_at (datetime): Timestamp when the setting was created
+        updated_at (datetime): Timestamp when the setting was last updated
+    """
+
+    __tablename__ = "settings"
+    id = Column(Integer, primary_key=True)
+    key = Column(String, unique=True, nullable=False)
+    value = Column(String, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

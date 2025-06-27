@@ -118,7 +118,6 @@ class GCPStorageProviderService(BaseStorageProviderService):
             ListStorageItemsError: If an error occurs while listing items
         """
         try:
-
             files = []
             folders = []
             if path and not path.endswith("/"):

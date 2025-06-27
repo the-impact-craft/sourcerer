@@ -1,0 +1,52 @@
+SettingsScreen {
+  align: center middle;
+  content-align: center top;
+
+  & > Container {
+    padding: 1 2 0 2;
+    margin: 0 0;
+    width: 70%;
+    height: auto;
+    border: solid $border;
+
+    & > Static {
+      text-align: center;
+      text-wrap: wrap;
+    }
+
+    & > Horizontal {
+      align: center bottom;
+      height: auto;
+
+      & > Static {
+        width: 10%;
+        padding-top: 1;
+      }
+
+      & > Checkbox {
+        width: 100%;
+        border: none;
+        background: transparent;
+
+        &:focus {
+          background: transparent;
+
+          & > .toggle--label {
+            color: $text-secondary;
+            background: transparent;
+          }
+        }
+
+      }
+
+      & > Button {
+        border: solid $border;
+        padding-top: 0;
+        width: 15;
+        text-align: center;
+        color: $border;
+      }
+    }
+  }
+
+}
