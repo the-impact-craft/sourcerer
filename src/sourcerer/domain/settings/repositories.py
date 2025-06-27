@@ -6,7 +6,7 @@ from sourcerer.domain.settings.entities import Settings
 class BaseSettingsRepository(metaclass=ABCMeta):
     @abstractmethod
     def get_settings(self) -> Settings:
-        """Retrieve all settings as a dictionary."""
+        """Retrieve all settings as a Settings."""
         raise NotImplementedError()
 
     @abstractmethod

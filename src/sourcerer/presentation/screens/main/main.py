@@ -220,10 +220,12 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
 
     def action_settings(self):
         """
-        Opens the file system finder modal screen and refreshes the storage list.
+        Opens the settings screen.
         This method is triggered by the key binding "ctrl+s" and allows the user
-        to access the settings of the application. It pushes the
-        FileSystemNavigationModal to the application stack.
+        to modify application settings such as theme and grouping of storage items.
+        It retrieves the current settings from the settings service and pushes
+        the SettingsScreen to the application stack. A callback is set to handle
+        the settings changes when the screen is closed.
         """
         settings = self.settings_service.load_settings()
         self.app.push_screen(SettingsScreen(settings), callback=self.settings_callback)

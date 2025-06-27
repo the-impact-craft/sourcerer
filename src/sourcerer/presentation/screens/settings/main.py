@@ -45,7 +45,7 @@ class SettingsScreen(ExitBoundModalScreen):
         """Handle button clicked events."""
         if event.action == "close":
             self.action_cancel_screen()
-        if event.action == "save":
+        elif event.action == "save":
             self.dismiss(
                 {
                     SettingsFields.theme: self.query_one("Select#theme", Select).value,

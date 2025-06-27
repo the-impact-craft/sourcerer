@@ -16,7 +16,7 @@ class SQLAlchemySettingsRepository(BaseSettingsRepository):
         self.db = db
 
     def get_settings(self) -> Settings:
-        """Retrieve all settings as a dictionary."""
+        """Retrieve all settings as a Settings."""
 
         with self.db() as session:
             settings = session.query(DBSettings).all()

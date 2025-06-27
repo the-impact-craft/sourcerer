@@ -32,12 +32,14 @@ from sourcerer.presentation.screens.shared.widgets.button import Button
 from sourcerer.presentation.screens.shared.widgets.spinner import Spinner
 from sourcerer.presentation.settings import KeyBindings
 
+"""Mapping of storage provider types to their display icons."""
 STORAGE_ICONS = {
     StorageProvider.S3: "🟠",
     StorageProvider.GoogleCloudStorage: "🔵",
     StorageProvider.AzureStorage: "⚪️",
 }
-"""Mapping of storage provider types to their display icons."""
+
+StorageData = namedtuple("Storage", ["access_credentials_uuid", "storage"])
 
 
 class StorageItem(Label):
@@ -224,7 +226,6 @@ class StorageListSidebar(Vertical):
         self.groupby_access_credentials = groupby_access_credentials
 
     def render_ungrouped_storages(self) -> ComposeResult:
-        StorageData = namedtuple("Storage", ["access_credentials_uuid", "storage"])
         storages = [
             StorageData(access_credentials_uuid, storage)
             for (
@@ -253,8 +254,6 @@ class StorageListSidebar(Vertical):
 
     def render_grouped_by_access_credentials_storages(self) -> ComposeResult:
         """Render storages grouped by access credentials."""
-        StorageData = namedtuple("Storage", ["access_credentials_uuid", "storage"])
-
         with ScrollVerticalContainerWithNoBindings():
             for (
                 access_credentials_uuid,
