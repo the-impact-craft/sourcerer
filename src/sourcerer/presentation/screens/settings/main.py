@@ -67,4 +67,4 @@ class SettingsScreen(ExitBoundModalScreen):
     def on_select_changed(self, event: Select.Changed) -> None:
         """Handle select changed events."""
         if event.select.id == "theme":
-            self.app.theme = event.value
+            self.app.theme = event.value  # type: ignore[assignment]
