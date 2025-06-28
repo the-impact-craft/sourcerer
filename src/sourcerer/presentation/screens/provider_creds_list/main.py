@@ -1,9 +1,11 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
+from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.message import Message
 from textual.reactive import reactive
@@ -112,6 +114,11 @@ class ProviderCredsListScreen(RefreshTriggerableModalScreen):
     PROVIDERS_NAME = "providers"
     AUTH_METHODS_NAME = "auth_methods"
 
+    BINDINGS: ClassVar[list[BindingType]] = [
+        *RefreshTriggerableModalScreen.BINDINGS,
+        Binding("ctrl+n", "add_credentials", "Add new credentials"),
+    ]
+
     credentials_list = reactive([], recompose=True)
 
     def __init__(
@@ -201,10 +208,7 @@ class ProviderCredsListScreen(RefreshTriggerableModalScreen):
         if event.action == ControlsEnum.CANCEL.name:
             self.action_cancel_screen()
         if event.action == "add_registration":
-            self.app.push_screen(
-                ProviderCredsRegistrationScreen(),
-                callback=self.create_provider_creds_registration,  # type: ignore
-            )
+            self.action_add_credentials()
 
     @on(ProviderCredentialsRow.ChangeActiveStatus)
     def on_change_active_status(self, event: ProviderCredentialsRow.ChangeActiveStatus):
@@ -231,3 +235,9 @@ class ProviderCredsListScreen(RefreshTriggerableModalScreen):
             _ (ReloadCredentialsRequest): The reload credentials request event.
         """
         self.refresh_credentials_list()
+
+    def action_add_credentials(self):
+        self.app.push_screen(
+            ProviderCredsRegistrationScreen(),
+            callback=self.create_provider_creds_registration,  # type: ignore
+        )
