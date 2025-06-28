@@ -30,6 +30,7 @@ ProviderCredsListScreen {
 
     ProviderCredentialsRow.active {
       background: $primary-lighten-2;
+      color: $background-darken-3;
     }
 
     ProviderCredentialsRow, Horizontal {

@@ -12,9 +12,18 @@ StorageContent {
   align-horizontal: center;
 
   & > Button {
+    color: $primary;
     border: solid $primary;
-    width: 10;
-    content-align-horizontal: center;
+    padding-top: 0;
+    width: 15;
+    text-align: center;
+
+    &:hover {
+        color: $text;
+    }
+    &:focus {
+        color: $text;
+    }
   }
 }
 

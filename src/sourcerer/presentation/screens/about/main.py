@@ -50,7 +50,7 @@ class AboutScreen(ExitBoundModalScreen):
                     justify="center",
                 )
             )
-            with Horizontal():
+            with Horizontal(id="controls"):
                 yield Button("Close", name="close")
 
     @on(Button.Click)

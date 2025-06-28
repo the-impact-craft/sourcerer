@@ -38,23 +38,6 @@ SettingsScreen {
         }
 
       }
-
-      & > Button {
-        border: solid $border;
-        padding-top: 0;
-        width: 15;
-        text-align: center;
-        color: $border;
-
-        &:hover {
-            color: $accent;
-            border: solid $accent;
-        }
-        &:focus {
-            color: $accent;
-            border: solid $accent;
-        }
-      }
     }
   }
 

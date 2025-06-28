@@ -36,7 +36,7 @@ class SettingsScreen(ExitBoundModalScreen):
                 )
 
             yield Rule()
-            with Horizontal():
+            with Horizontal(id="controls"):
                 yield Button("Save", name="save")
                 yield Button("Close", name="close")
 
