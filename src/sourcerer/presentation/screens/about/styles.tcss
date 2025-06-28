@@ -7,19 +7,24 @@ AboutScreen {
     margin: 0 0;
     width: 50;
     height: 10;
-    border: solid $warning-darken-1;
+    border: solid $border;
 
     & > Static {
       text-align: center;
       text-wrap: wrap;
     }
 
-    & > Horizontal {
+    & > Horizontal#controls {
+      padding-top: 1;
       align: center bottom;
 
       & > Button {
-        width: 5;
-        color: $warning-darken-1;
+        color: $border;
+        border: none;
+
+        & > :focus {
+            color: $border;
+        }
       }
     }
   }
