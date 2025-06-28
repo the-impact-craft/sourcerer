@@ -23,6 +23,13 @@ StoragesListScreen {
 
       .add_storage_button {
         color: $success-darken-2;
+
+        &:hover {
+            color: $primary;
+        }
+        &:focus {
+            color: $primary;
+        }
       }
 
       margin-bottom: 1;

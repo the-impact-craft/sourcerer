@@ -1,10 +1,12 @@
 import datetime
 import uuid
 from enum import Enum
+from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on
 from textual.app import ComposeResult
+from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal, VerticalScroll
 from textual.reactive import reactive
 from textual.widgets import Label
@@ -82,6 +84,11 @@ class StoragesListScreen(RefreshTriggerableModalScreen):
     MAIN_CONTAINER_ID = "StoragesListScreen"
     SETTINGS_CONTAINER_ID = "settings"
 
+    BINDINGS: ClassVar[list[BindingType]] = [
+        *RefreshTriggerableModalScreen.BINDINGS,
+        Binding("ctrl+n", "add_storage", "Add new storage"),
+    ]
+
     storages_list = reactive([], recompose=True)
 
     def __init__(
@@ -104,6 +111,7 @@ class StoragesListScreen(RefreshTriggerableModalScreen):
                     "+Add new storage",
                     name=ControlsEnum.ADD_STORAGE.name,
                     classes="add_storage_button",
+                    id="add_storage_button",
                 ),
                 id="right-top",
             )
@@ -155,10 +163,7 @@ class StoragesListScreen(RefreshTriggerableModalScreen):
         if event.action == ControlsEnum.CANCEL.name:
             self.action_cancel_screen()
         if event.action == ControlsEnum.ADD_STORAGE.name:
-            self.app.push_screen(
-                StoragesRegistrationScreen(),
-                callback=self.create_storage_entry,  # type: ignore
-            )
+            self.action_add_storage()
 
     def create_storage_entry(self, storage: StorageEntry | None):
         """
@@ -182,3 +187,9 @@ class StoragesListScreen(RefreshTriggerableModalScreen):
             )
         )
         self.refresh_storages_list()
+
+    def action_add_storage(self):
+        self.app.push_screen(
+            StoragesRegistrationScreen(),
+            callback=self.create_storage_entry,  # type: ignore
+        )
