@@ -28,6 +28,7 @@ class Button(Label):
         }
     }
     """
+    can_focus = True
 
     @dataclass
     class Click(Message):
@@ -52,3 +53,13 @@ class Button(Label):
             _: An instance of events.Click representing the click event.
         """
         self.post_message(self.Click(self.name))  # type: ignore
+
+    def on_key(self, event: events.Key) -> None:
+        """
+        Handle key events to trigger click action when the button is focused and activated.
+
+        Args:
+            event (events.Key): The key event to handle.
+        """
+        if event.key == "enter":
+            self.post_message(self.Click(self.name))  # type: ignore
