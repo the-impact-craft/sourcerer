@@ -19,7 +19,7 @@ from sourcerer.infrastructure.storage_provider.services.gcp import (
     GCPStorageProviderService,
 )
 from sourcerer.infrastructure.storage_provider.services.s3 import S3ProviderService
-from sourcerer.settings import PAGE_SIZE
+from sourcerer.settings import MULTIPART_UPLOAD_BLOCK_SIZE, PAGE_SIZE
 
 
 class DummyBlob:
@@ -292,7 +292,7 @@ class TestS3ProviderService(unittest.TestCase):
         stat_mock = MagicMock()
         stat_mock.st_size = 1
 
-        with patch("pathlib.Path.stat", return_value=stat_mock):
+        with (patch("pathlib.Path.stat", return_value=stat_mock)):
             # Act
             self.service.upload_storage_item(
                 self.test_bucket, "", source_path, dest_path
@@ -302,6 +302,20 @@ class TestS3ProviderService(unittest.TestCase):
             self.mock_client.upload_file.assert_called_once_with(
                 source_path, self.test_bucket, dest_path
             )
+
+        mock_file = mock_open(read_data=b"mocked file content")
+        stat_mock.st_size = MULTIPART_UPLOAD_BLOCK_SIZE + 1
+        with (
+            patch("pathlib.Path.stat", return_value=stat_mock),
+            patch("builtins.open", mock_file),
+        ):
+            # Act
+            self.service.upload_storage_item(
+                self.test_bucket, "", source_path, dest_path
+            )
+
+            # Assert
+            self.mock_client.create_multipart_upload.assert_called_once()
 
     def test_upload_storage_item_default_dest(self):
         """Test upload_storage_item method with default destination path."""
