@@ -6,7 +6,7 @@ QuestionScreen {
     padding: 1 2 0 2;
     margin: 0 0;
     width: 50;
-    height: 8;
+    height: 10;
     border: solid $warning-darken-1;
 
     & > Static {

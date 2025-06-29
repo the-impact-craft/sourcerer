@@ -6,12 +6,14 @@ interface for various cloud storage providers.
 """
 
 import os.path
+import threading
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.blob import BlobServiceClient
+from cachetools import LRUCache
 from platformdirs import user_downloads_dir
 
 from sourcerer.domain.shared.entities import StorageProvider
@@ -37,6 +39,8 @@ from sourcerer.infrastructure.utils import generate_uuid, is_text_file
 
 @storage_provider(StorageProvider.AzureStorage)
 class AzureStorageProviderService(BaseStorageProviderService):
+    MAX_CACHE_SIZE = 10
+
     def __init__(self, credentials: Any):
         """
         Initialize the service with Azure credentials.
@@ -48,6 +52,12 @@ class AzureStorageProviderService(BaseStorageProviderService):
         self.subscription_id = credentials.subscription_id
         self.cloud_suffix = credentials.cloud_suffix
 
+        self._storage_management_client: StorageManagementClient | None = None
+        self._blob_service_clients_lock = threading.Lock()
+        self._blob_service_clients: LRUCache[str, BlobServiceClient] = LRUCache(
+            maxsize=self.MAX_CACHE_SIZE
+        )
+
     def get_accounts_client(self) -> StorageManagementClient:
         """
         Get the Azure accounts client.
@@ -55,7 +65,13 @@ class AzureStorageProviderService(BaseStorageProviderService):
         Returns:
             Any: Azure accounts client
         """
-        return StorageManagementClient(self.credentials, self.subscription_id)
+        if self._storage_management_client:
+            return self._storage_management_client
+
+        self._storage_management_client = StorageManagementClient(
+            self.credentials, self.subscription_id
+        )
+        return self._storage_management_client
 
     def get_containers_client(self, storage: str):
         """
@@ -69,12 +85,19 @@ class AzureStorageProviderService(BaseStorageProviderService):
             BlobServiceClient: An instance of the BlobServiceClient, configured with the
             account URL and credentials.
         """
+        with self._blob_service_clients_lock:
+            if (client := self._blob_service_clients.get(storage)) is not None:
+                return client
+
         account_url = "https://{account}.{cloud_suffix}"
-        return BlobServiceClient(
+        client = BlobServiceClient(
             account_url.format(account=storage, cloud_suffix=self.cloud_suffix),
             credential=self.credentials,
             retry_connect=0,
         )
+        with self._blob_service_clients_lock:
+            self._blob_service_clients[storage] = client
+        return client
 
     def list_storages(self) -> list[Storage]:
         """
