@@ -164,8 +164,31 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         self.push_screen(CriticalErrorScreen(str(error), traceback.format_exc()))
 
     def get_system_commands(self, screen: Screen) -> Iterable[SystemCommand]:
-        yield from super().get_system_commands(screen)
+        yield SystemCommand(
+            "Quit the application",
+            "Quit the application as soon as possible",
+            self.action_quit,
+        )
+
+        if screen.query("HelpPanel"):
+            yield SystemCommand(
+                "Hide keys and help panel",
+                "Hide the keys and widget help panel",
+                self.action_hide_help_panel,
+            )
+        else:
+            yield SystemCommand(
+                "Show keys and help panel",
+                "Show help for the focused widget and a summary of available keys",
+                self.action_show_help_panel,
+            )
+        yield SystemCommand(
+            "Save screenshot",
+            "Save an SVG 'screenshot' of the current screen",
+            self.deliver_screenshot,
+        )
         yield SystemCommand("About", "About sourcerer", self.action_about)
+        yield SystemCommand("Settings", "Sourcerer settings", self.action_settings)
 
     def on_mount(self):
         """
