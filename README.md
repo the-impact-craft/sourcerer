@@ -23,6 +23,10 @@ engineers to view and manage files across multiple cloud providers like
 ## 🪄 Installation
 
 ```bash
+pipx install data-sourcerer
+```
+or
+```bash
 pip install data-sourcerer
 ```
 --
