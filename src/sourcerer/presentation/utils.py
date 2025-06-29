@@ -4,7 +4,9 @@ Utility functions for the presentation layer.
 This module provides helper functions for the presentation layer,
 particularly for retrieving and initializing storage provider services.
 """
+from threading import Lock
 
+from cachetools import LRUCache
 from dependency_injector.wiring import Provide
 
 from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository
@@ -15,6 +17,10 @@ from sourcerer.infrastructure.access_credentials.registry import (
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider_registry
 from sourcerer.presentation.di_container import DiContainer
+from sourcerer.settings import MAX_CREDENTIALS_CACHE_SIZE
+
+_provider_service_cache: LRUCache = LRUCache(maxsize=MAX_CREDENTIALS_CACHE_SIZE)
+_provider_service_cache_lock = Lock()
 
 
 def get_provider_service_by_access_uuid(
@@ -60,6 +66,10 @@ def get_provider_service_by_access_credentials(
            authenticated credentials.
     """
 
+    with _provider_service_cache_lock:
+        if credentials.uuid in _provider_service_cache:
+            return _provider_service_cache[credentials.uuid]
+
     credentials_service = access_credential_method_registry.get_by_provider_and_name(
         credentials.provider, credentials.credentials_type
     )
@@ -79,4 +89,7 @@ def get_provider_service_by_access_credentials(
         )
     except CredentialsAuthError:
         return None
-    return provider_service_class(auth_credentials)
+    service = provider_service_class(auth_credentials)
+    with _provider_service_cache_lock:
+        _provider_service_cache[credentials.uuid] = service
+    return service
