@@ -4,7 +4,7 @@ Base storage provider service interface.
 This module defines the abstract base class for storage provider services,
 providing a common interface for cloud storage operations.
 """
-
+import threading
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from pathlib import Path
@@ -93,6 +93,8 @@ class BaseStorageProviderService(ABC):
         storage_path: str,
         source_path: Path,
         dest_path: str | None = None,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
     ) -> None:
         """
         Upload a file to the specified storage path.
@@ -102,6 +104,8 @@ class BaseStorageProviderService(ABC):
             storage_path (str): The path within the storage to upload
             source_path (Path): Local file path to upload
             dest_path (str, optional): Destination path in storage. Defaults to None.
+            cancel_event (threading.Event, optional): Event to signal upload cancellation. Defaults to None.
+            progress_callback (callable, optional): Callback function for progress updates. Defaults to None.
         """
 
     @abstractmethod

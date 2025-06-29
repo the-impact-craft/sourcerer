@@ -7,12 +7,13 @@ interface for various cloud storage providers.
 
 import os.path
 import threading
+import uuid
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
 from azure.mgmt.storage import StorageManagementClient
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobBlock, BlobServiceClient
 from cachetools import LRUCache
 from platformdirs import user_downloads_dir
 
@@ -35,6 +36,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
+from sourcerer.settings import MULTIPART_UPLOAD_BLOCK_SIZE
 
 
 @storage_provider(StorageProvider.AzureStorage)
@@ -208,6 +210,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
         storage_path: str,
         source_path: Path,
         dest_path: str | None = None,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
     ) -> None:
         """
         Upload a file to the specified Azure container path.
@@ -216,6 +220,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
             storage_path (str): The path within the container to upload
             source_path (Path): Local file path to upload
             dest_path (str, optional): Destination path in storage. Defaults to None.
+            cancel_event (threading.Event, optional): Event to signal upload cancellation. Defaults to None.
+            progress_callback (Callable, optional): Callback function for progress updates. Defaults to None.
         """
         try:
             if not storage_path:
@@ -232,11 +238,22 @@ class AzureStorageProviderService(BaseStorageProviderService):
             storage_path = storage_path_parts[1] if len(storage_path_parts) > 1 else ""
             blob_name = os.path.join(storage_path, dest_path or source_path.name)
 
-            blob_client = containers_client.get_container_client(container)
-            with open(source_path, "rb") as file_handle:
-                blob_client.upload_blob(
-                    blob_name or source_path.name, file_handle, overwrite=True
+            if source_path.stat().st_size > MULTIPART_UPLOAD_BLOCK_SIZE:
+                self._upload_storage_multipart(
+                    containers_client,
+                    container,
+                    source_path,
+                    blob_name,
+                    MULTIPART_UPLOAD_BLOCK_SIZE,
+                    cancel_event,
+                    progress_callback,
                 )
+            else:
+                blob_client = containers_client.get_container_client(container)
+                with open(source_path, "rb") as file_handle:
+                    blob_client.upload_blob(
+                        blob_name or source_path.name, file_handle, overwrite=True
+                    )
         except Exception as ex:
             raise UploadStorageItemsError(str(ex)) from ex
 
@@ -282,3 +299,39 @@ class AzureStorageProviderService(BaseStorageProviderService):
             return props.size
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex
+
+    def _upload_storage_multipart(
+        self,
+        client,
+        container,
+        source_path,
+        blob_name,
+        block_size,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
+    ):
+        """
+        Upload a file to Azure Blob Storage in multiple parts.
+
+        Args:
+            client (BlobServiceClient): The Azure Blob Service Client
+            container (str): The name of the Azure container
+            source_path (Path): Local file path to upload
+            blob_name (str): The name of the blob in Azure
+            block_size (int): Size of each block in bytes
+            cancel_event (threading.Event, optional): Event to signal upload cancellation. Defaults to None.
+            progress_callback (Callable, optional): Callback function for progress updates. Defaults to None.
+        """
+        block_ids = []
+        blob_client = client.get_blob_client(container=container, blob=blob_name)
+        with open(source_path, "rb") as file_handle:
+            while chunk := file_handle.read(block_size):
+                if cancel_event and cancel_event.is_set():
+                    raise UploadStorageItemsError("Upload cancelled")
+                block_id = uuid.uuid4().hex
+                encoded_block_id = block_id.encode("utf-8").hex()[:64]
+                blob_client.stage_block(block_id=encoded_block_id, data=chunk)
+                block_ids.append(BlobBlock(block_id=encoded_block_id))
+                if progress_callback:
+                    progress_callback(block_size)
+        blob_client.commit_block_list(block_ids)

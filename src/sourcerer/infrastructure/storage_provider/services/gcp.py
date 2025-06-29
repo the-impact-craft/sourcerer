@@ -4,7 +4,7 @@ Implementation of GCP storage provider services.
 This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
-
+import threading
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -31,7 +31,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
-from sourcerer.settings import PAGE_SIZE, PATH_DELIMITER
+from sourcerer.settings import MULTIPART_UPLOAD_BLOCK_SIZE, PAGE_SIZE, PATH_DELIMITER
 
 
 @storage_provider(StorageProvider.GoogleCloudStorage)
@@ -201,6 +201,8 @@ class GCPStorageProviderService(BaseStorageProviderService):
         storage_path: str,
         source_path: Path,
         dest_path: str | None = None,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
     ) -> None:
         """
         Upload a file to the specified GCP bucket path.
@@ -210,16 +212,21 @@ class GCPStorageProviderService(BaseStorageProviderService):
             storage_path (str): The path within the bucket
             source_path (Path): Local file path to upload
             dest_path (str, optional): Destination path in GCP. Defaults to None.
+            cancel_event (threading.Event, optional): Event to signal upload cancellation. Defaults to None.
+            progress_callback (Callable, optional): Callback function for progress updates. Defaults to None.
 
         Raises:
             UploadStorageItemsError: If an error occurs while uploading the item
         """
         try:
-            bucket = self.client.bucket(storage)
-            storage_path = str(
-                Path(storage_path or "") / (dest_path or source_path.name)
-            )
-            bucket.blob(storage_path).upload_from_filename(source_path)
+            if source_path.stat().st_size > MULTIPART_UPLOAD_BLOCK_SIZE:
+                self._upload_storage_item_multipart()
+            else:
+                bucket = self.client.bucket(storage)
+                storage_path = str(
+                    Path(storage_path or "") / (dest_path or source_path.name)
+                )
+                bucket.blob(storage_path).upload_from_filename(source_path)
         except Exception as ex:
             raise UploadStorageItemsError(str(ex)) from ex
 
@@ -273,3 +280,12 @@ class GCPStorageProviderService(BaseStorageProviderService):
             return blob.size
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex
+
+    def _upload_storage_item_multipart(self):
+        """
+        Upload a file to the specified GCP bucket path using multipart upload.
+
+        This method is not implemented in the current version.
+        """
+        # Todo: implement
+        pass
