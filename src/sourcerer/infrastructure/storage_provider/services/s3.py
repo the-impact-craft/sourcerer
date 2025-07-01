@@ -258,7 +258,11 @@ class S3ProviderService(BaseStorageProviderService):
             raise UploadStorageItemsError(str(ex)) from ex
 
     def download_storage_item(
-        self, storage: str, key: str, progress_callback: Callable | None = None
+        self,
+        storage: str,
+        key: str,
+        progress_callback: Callable | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> str:
         """
         Download a file from S3 to local filesystem.
@@ -274,11 +278,16 @@ class S3ProviderService(BaseStorageProviderService):
         Raises:
             ReadStorageItemsError: If an error occurs while downloading the item
         """
+
+        def callback(size):
+            if progress_callback:
+                progress_callback(size)
+            if cancel_event and cancel_event.is_set():
+                raise ReadStorageItemsError("Download cancelled")
+
         try:
             download_path = Path(user_downloads_dir()) / Path(key).name
-            self.client.download_file(
-                storage, key, download_path, Callback=progress_callback
-            )
+            self.client.download_file(storage, key, download_path, Callback=callback)
             return str(download_path)
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex

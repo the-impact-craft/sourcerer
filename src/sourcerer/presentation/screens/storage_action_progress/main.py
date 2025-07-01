@@ -315,6 +315,7 @@ class StorageActionProgressScreen(ModalScreen):
                     lambda chunk, progress_bar=progress_bar: self.progress_callback(
                         progress_bar, chunk
                     ),
+                    cancel_event=self.cancel_event,
                 )
             except Exception as ex:
                 self.notify(f"Failed to download {key}: {ex}", severity="error")

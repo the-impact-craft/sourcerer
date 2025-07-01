@@ -97,7 +97,7 @@ class BaseStorageProviderService(ABC):
         progress_callback: Callable | None = None,
     ) -> None:
         """
-        Upload a file to the specified storage path.
+        upload a file to the specified storage path.
 
         Args:
             storage (str): The storage identifier
@@ -110,7 +110,11 @@ class BaseStorageProviderService(ABC):
 
     @abstractmethod
     def download_storage_item(
-        self, storage: str, key: str, progress_callback: Callable | None = None
+        self,
+        storage: str,
+        key: str,
+        progress_callback: Callable | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> str:
         """
         Download a file from storage to local filesystem.
@@ -119,7 +123,7 @@ class BaseStorageProviderService(ABC):
             storage (str): The storage identifier
             key (str): The key/path of the item to download
             progress_callback (callable, optional): Callback function for progress updates. Defaults to None.
-
+            cancel_event (threading.Event, optional): Event to signal download cancellation. Defaults to None.
         Returns:
             str: Path to the downloaded file
         """

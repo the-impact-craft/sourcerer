@@ -258,7 +258,11 @@ class AzureStorageProviderService(BaseStorageProviderService):
             raise UploadStorageItemsError(str(ex)) from ex
 
     def download_storage_item(
-        self, storage: str, key: str, progress_callback: Callable | None = None
+        self,
+        storage: str,
+        key: str,
+        progress_callback: Callable | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> str:
         """
         Download a file from Azure to the local filesystem.
@@ -267,6 +271,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             storage (str): The container name
             key (str): The key/path of the item to download
             progress_callback (Callable, optional): Callback function for progress updates. Defaults to None.
+            cancel_event (threading.Event, optional): Event to signal download cancellation. Defaults to None.
         """
         try:
             download_path = Path(user_downloads_dir()) / Path(key).name
