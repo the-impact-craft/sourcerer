@@ -219,14 +219,17 @@ class GCPStorageProviderService(BaseStorageProviderService):
             UploadStorageItemsError: If an error occurs while uploading the item
         """
         try:
+            bucket = self.client.bucket(storage)
+            storage_path = str(
+                Path(storage_path or "") / (dest_path or source_path.name)
+            )
+            blob = bucket.blob(storage_path)
             if source_path.stat().st_size > MULTIPART_UPLOAD_BLOCK_SIZE:
-                self._upload_storage_item_multipart()
-            else:
-                bucket = self.client.bucket(storage)
-                storage_path = str(
-                    Path(storage_path or "") / (dest_path or source_path.name)
+                self._upload_storage_item_multipart(
+                    blob, source_path, cancel_event, progress_callback=progress_callback
                 )
-                bucket.blob(storage_path).upload_from_filename(source_path)
+            else:
+                blob.upload_from_filename(source_path)
         except Exception as ex:
             raise UploadStorageItemsError(str(ex)) from ex
 
@@ -285,11 +288,68 @@ class GCPStorageProviderService(BaseStorageProviderService):
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex
 
-    def _upload_storage_item_multipart(self):
+    def _upload_storage_item_multipart(
+        self,
+        blob,
+        source_path,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
+    ):
         """
         Upload a file to the specified GCP bucket path using multipart upload.
 
         This method is not implemented in the current version.
         """
-        # Todo: implement
-        pass
+        blob.chunk_size = MULTIPART_UPLOAD_BLOCK_SIZE
+
+        with CancelableFileReader(
+            source_path,
+            cancel_event,
+            chunk_size=MULTIPART_UPLOAD_BLOCK_SIZE,
+            progress_callback=progress_callback,
+        ) as stream:
+            blob.upload_from_file(
+                stream,
+                rewind=True,  # allow re-seek to beginning if needed
+                content_type="application/octet-stream",
+            )
+
+
+class CancelableFileReader:
+    def __init__(
+        self,
+        file_path,
+        cancel_event: threading.Event | None,
+        chunk_size,
+        progress_callback: Callable | None = None,
+    ):
+
+        self.file = open(file_path, "rb")  # noqa: SIM115
+        self.cancel_event = cancel_event
+        self.chunk_size = chunk_size
+        self.progress_callback = progress_callback
+
+    def read(self, size=None):
+        if self.cancel_event and self.cancel_event.is_set():
+            raise RuntimeError("Upload cancelled")
+
+        chunk_size = size or self.chunk_size
+        data = self.file.read(chunk_size)
+        if data and self.progress_callback:
+            self.progress_callback(chunk_size)
+        return data
+
+    def seek(self, offset, whence=0):
+        return self.file.seek(offset, whence)
+
+    def tell(self):
+        return self.file.tell()
+
+    def close(self):
+        return self.file.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()

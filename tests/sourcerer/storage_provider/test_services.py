@@ -632,8 +632,13 @@ class TestGCPStorageProviderService(unittest.TestCase):
         self.mock_client.bucket.return_value = mock_bucket
         mock_bucket.blob.return_value = mock_blob
 
-        # Act & Assert
-        with self.assertRaises(UploadStorageItemsError):
+        stat_mock = MagicMock()
+        stat_mock.st_size = 1
+
+        with (
+            patch("pathlib.Path.stat", return_value=stat_mock),
+            self.assertRaises(UploadStorageItemsError),
+        ):
             self.service.upload_storage_item(self.test_bucket, "", source_path)
 
     @patch("sourcerer.infrastructure.storage_provider.services.gcp.user_downloads_dir")
