@@ -1,6 +1,6 @@
 import unittest
 from pathlib import Path
-from unittest.mock import MagicMock, mock_open, patch
+from unittest.mock import ANY, MagicMock, mock_open, patch
 
 from sourcerer.domain.shared.entities import StorageProvider
 from sourcerer.domain.storage_provider.entities import StorageContent
@@ -356,7 +356,7 @@ class TestS3ProviderService(unittest.TestCase):
             self.test_bucket,
             self.test_key,
             Path("/test/downloads/file.txt"),
-            Callback=None,
+            Callback=ANY,
         )
 
     def test_get_file_size(self):
@@ -1034,8 +1034,11 @@ class TestAzureStorageProviderService(unittest.TestCase):
         # Arrange
         mock_user_downloads_dir.return_value = "/test/downloads"
         mock_download_stream = MagicMock()
-        mock_download_stream.readall.return_value = b"test content"
+        mock_download_stream.read.return_value = b"test content"
         self.mock_container_client.download_blob.return_value = mock_download_stream
+        self.mock_container_client.download_blob.return_value.properties.size = len(
+            b"test content"
+        )
 
         with (
             patch.object(
