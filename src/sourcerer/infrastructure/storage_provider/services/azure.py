@@ -36,7 +36,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
-from sourcerer.settings import MULTIPART_UPLOAD_BLOCK_SIZE
+from sourcerer.settings import DOWNLOAD_BLOCK_SIZE, MULTIPART_UPLOAD_BLOCK_SIZE
 
 
 @storage_provider(StorageProvider.AzureStorage)
@@ -273,18 +273,37 @@ class AzureStorageProviderService(BaseStorageProviderService):
             progress_callback (Callable, optional): Callback function for progress updates. Defaults to None.
             cancel_event (threading.Event, optional): Event to signal download cancellation. Defaults to None.
         """
+        download_path = None
         try:
             download_path = Path(user_downloads_dir()) / Path(key).name
-
             containers_client = self.get_containers_client(storage)
             path_parts = key.split("/", 1)
             container, blob_name = path_parts
             blob_client = containers_client.get_container_client(container)
+            blob_stream = blob_client.download_blob(blob_name)
+            total_bytes = blob_stream.properties.size
+
+            downloaded = 0
             with open(download_path, "wb") as file:
-                download_stream = blob_client.download_blob(blob_name)
-                file.write(download_stream.readall())
+                while downloaded < total_bytes:
+                    if cancel_event and cancel_event.is_set():
+                        raise Exception("Download cancelled")
+
+                    chunk = blob_stream.read(DOWNLOAD_BLOCK_SIZE)
+                    if not chunk:
+                        break
+
+                    file.write(chunk)
+
+                    chunk_size = len(chunk)
+                    downloaded += chunk_size
+
+                    if progress_callback:
+                        progress_callback(chunk_size)
             return str(download_path)
         except Exception as ex:
+            if download_path and download_path.exists():
+                download_path.unlink()
             raise ReadStorageItemsError(str(ex)) from ex
 
     def get_file_size(self, storage: str, key: str) -> int:
