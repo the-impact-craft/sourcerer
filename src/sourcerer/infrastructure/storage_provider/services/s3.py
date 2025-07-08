@@ -330,7 +330,7 @@ class S3ProviderService(BaseStorageProviderService):
         source_path,
         storage: str,
         dest_path: str,
-        block_size=5 * 1024 * 1024,
+        block_size: int,
         cancel_event: threading.Event | None = None,
         progress_callback: Callable | None = None,
     ):
@@ -367,7 +367,7 @@ class S3ProviderService(BaseStorageProviderService):
                     )
 
                     if progress_callback:
-                        progress_callback(block_size)
+                        progress_callback(len(chunk))
 
                     part_number += 1
 
