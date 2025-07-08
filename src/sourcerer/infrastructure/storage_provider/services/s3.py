@@ -4,6 +4,8 @@ Implementation of S3 compatible storage provider services.
 This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
+import shutil
+import tempfile
 import threading
 from collections.abc import Callable
 from itertools import groupby
@@ -287,7 +289,16 @@ class S3ProviderService(BaseStorageProviderService):
 
         try:
             download_path = Path(user_downloads_dir()) / Path(key).name
-            self.client.download_file(storage, key, download_path, Callback=callback)
+            suffix = Path(key).suffix
+            download_tmp_path = (
+                Path(user_downloads_dir())
+                / f"{next(tempfile._get_candidate_names())}{suffix}"
+            )
+
+            self.client.download_file(
+                storage, key, download_tmp_path, Callback=callback
+            )
+            shutil.move(download_tmp_path, download_path)
             return str(download_path)
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex

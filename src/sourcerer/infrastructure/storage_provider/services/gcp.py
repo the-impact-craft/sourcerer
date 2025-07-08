@@ -4,6 +4,8 @@ Implementation of GCP storage provider services.
 This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
+import shutil
+import tempfile
 import threading
 from collections.abc import Callable
 from pathlib import Path
@@ -31,7 +33,12 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
-from sourcerer.settings import MULTIPART_UPLOAD_BLOCK_SIZE, PAGE_SIZE, PATH_DELIMITER
+from sourcerer.settings import (
+    DOWNLOAD_BLOCK_SIZE,
+    MULTIPART_UPLOAD_BLOCK_SIZE,
+    PAGE_SIZE,
+    PATH_DELIMITER,
+)
 
 
 @storage_provider(StorageProvider.GoogleCloudStorage)
@@ -259,10 +266,39 @@ class GCPStorageProviderService(BaseStorageProviderService):
             blob = bucket.get_blob(key)
             if not blob:
                 raise BlobNotFoundError(key)
+
             download_path = Path(user_downloads_dir()) / Path(key).name
-            blob.download_to_filename(str(download_path))
+            suffix = Path(key).suffix
+            download_tmp_path = (
+                Path(user_downloads_dir())
+                / f"{next(tempfile._get_candidate_names())}{suffix}"
+            )
+
+            downloaded = 0
+
+            with open(download_tmp_path, "wb") as file:
+                reader = blob.open("rb")  # streaming mode
+                while True:
+                    if cancel_event and cancel_event.is_set():
+                        raise Exception("Download cancelled")
+
+                    chunk = reader.read(DOWNLOAD_BLOCK_SIZE)
+                    if not chunk:
+                        break
+
+                    file.write(chunk)
+                    chunk_size = len(chunk)
+                    downloaded += chunk_size
+
+                    if progress_callback:
+                        progress_callback(chunk_size)
+
+            shutil.move(download_tmp_path, download_path)
             return str(download_path)
+
         except Exception as ex:
+            if Path(download_path).exists():
+                Path(download_path).unlink()
             raise ReadStorageItemsError(str(ex)) from ex
 
     def get_file_size(self, storage: str, key: str) -> int:

@@ -6,6 +6,8 @@ interface for various cloud storage providers.
 """
 
 import os.path
+import shutil
+import tempfile
 import threading
 import uuid
 from collections.abc import Callable
@@ -276,6 +278,12 @@ class AzureStorageProviderService(BaseStorageProviderService):
         download_path = None
         try:
             download_path = Path(user_downloads_dir()) / Path(key).name
+            suffix = Path(key).suffix
+            download_tmp_path = (
+                Path(user_downloads_dir())
+                / f"{next(tempfile._get_candidate_names())}{suffix}"
+            )
+
             containers_client = self.get_containers_client(storage)
             path_parts = key.split("/", 1)
             container, blob_name = path_parts
@@ -300,6 +308,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
 
                     if progress_callback:
                         progress_callback(chunk_size)
+            shutil.move(download_tmp_path, download_path)
             return str(download_path)
         except Exception as ex:
             if download_path and download_path.exists():
