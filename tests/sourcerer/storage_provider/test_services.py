@@ -19,7 +19,11 @@ from sourcerer.infrastructure.storage_provider.services.gcp import (
     GCPStorageProviderService,
 )
 from sourcerer.infrastructure.storage_provider.services.s3 import S3ProviderService
-from sourcerer.settings import MULTIPART_UPLOAD_BLOCK_SIZE, PAGE_SIZE
+from sourcerer.settings import (
+    DOWNLOAD_BLOCK_SIZE,
+    MULTIPART_UPLOAD_BLOCK_SIZE,
+    PAGE_SIZE,
+)
 
 
 class DummyBlob:
@@ -349,13 +353,14 @@ class TestS3ProviderService(unittest.TestCase):
         mock_user_downloads_dir.return_value = "/test/downloads"
 
         # Act
-        self.service.download_storage_item(self.test_bucket, self.test_key)
+        with patch("sourcerer.infrastructure.storage_provider.services.s3.shutil.move"):
+            self.service.download_storage_item(self.test_bucket, self.test_key)
 
         # Assert
         self.mock_client.download_file.assert_called_once_with(
             self.test_bucket,
             self.test_key,
-            Path("/test/downloads/file.txt"),
+            ANY,
             Callback=ANY,
         )
 
@@ -649,19 +654,24 @@ class TestGCPStorageProviderService(unittest.TestCase):
 
         mock_bucket = MagicMock()
         mock_blob = MagicMock()
+        reader_mock = MagicMock()
 
         self.mock_client.bucket.return_value = mock_bucket
         mock_bucket.get_blob.return_value = mock_blob
-
+        mock_blob.open.return_value = reader_mock
+        reader_mock.read.return_value = b""
+        file_mock = mock_open()
         # Act
-        self.service.download_storage_item(self.test_bucket, self.test_key)
+        with (
+            patch("sourcerer.infrastructure.storage_provider.services.gcp.shutil.move"),
+            patch("builtins.open", file_mock),
+        ):
+            self.service.download_storage_item(self.test_bucket, self.test_key)
 
         # Assert
         self.mock_client.bucket.assert_called_once_with(self.test_bucket)
         mock_bucket.get_blob.assert_called_once_with(self.test_key)
-        mock_blob.download_to_filename.assert_called_once_with(
-            "/test/downloads/file.txt"
-        )
+        reader_mock.read.assert_called_once_with(DOWNLOAD_BLOCK_SIZE)
 
     def test_get_file_size(self):
         """Test get_file_size method."""
@@ -1052,6 +1062,7 @@ class TestAzureStorageProviderService(unittest.TestCase):
                 return_value=self.mock_blob_service_client,
             ),
             patch("builtins.open", mock_open()) as mock_file,
+            patch("sourcerer.infrastructure.storage_provider.services.s3.shutil.move"),
         ):
             # Act
             result = self.service.download_storage_item(
