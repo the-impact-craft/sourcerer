@@ -1,8 +1,7 @@
 import contextlib
 import os
 import threading
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from concurrent.futures._base import Future
+from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 from msgspec._core import Struct
