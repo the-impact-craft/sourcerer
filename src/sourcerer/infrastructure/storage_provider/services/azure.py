@@ -4,7 +4,7 @@ Implementation of Azure storage provider services.
 This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
-
+import base64
 import os.path
 import shutil
 import tempfile
@@ -361,10 +361,10 @@ class AzureStorageProviderService(BaseStorageProviderService):
             while chunk := file_handle.read(block_size):
                 if cancel_event and cancel_event.is_set():
                     raise UploadStorageItemsError("Upload cancelled")
-                block_id = uuid.uuid4().hex
-                encoded_block_id = block_id.encode("utf-8").hex()[:64]
+                block_id = str(uuid.uuid4().hex)
+                encoded_block_id = base64.b64encode(block_id.encode()).decode()
                 blob_client.stage_block(block_id=encoded_block_id, data=chunk)
                 block_ids.append(BlobBlock(block_id=encoded_block_id))
                 if progress_callback:
-                    progress_callback(block_size)
+                    progress_callback(len(chunk))
         blob_client.commit_block_list(block_ids)
