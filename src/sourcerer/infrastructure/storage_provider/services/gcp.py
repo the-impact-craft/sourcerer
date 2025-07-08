@@ -373,7 +373,7 @@ class CancelableFileReader:
         chunk_size = size or self.chunk_size
         data = self.file.read(chunk_size)
         if data and self.progress_callback:
-            self.progress_callback(chunk_size)
+            self.progress_callback(len(data))
         return data
 
     def seek(self, offset, whence=0):
