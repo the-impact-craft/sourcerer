@@ -292,7 +292,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             total_bytes = blob_stream.properties.size
 
             downloaded = 0
-            with open(download_path, "wb") as file:
+            with open(download_tmp_path, "wb") as file:
                 while downloaded < total_bytes:
                     if cancel_event and cancel_event.is_set():
                         raise Exception("Download cancelled")
