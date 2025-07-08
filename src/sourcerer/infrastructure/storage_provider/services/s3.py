@@ -323,8 +323,6 @@ class S3ProviderService(BaseStorageProviderService):
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex
 
-            raise UploadStorageItemsError(str(ex)) from ex
-
     def _upload_storage_item_multipart(
         self,
         source_path,
