@@ -261,6 +261,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
         Raises:
             ReadStorageItemsError: If an error occurs while downloading the item
         """
+        download_path = None
         try:
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
@@ -271,7 +272,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             suffix = Path(key).suffix
             download_tmp_path = (
                 Path(user_downloads_dir())
-                / f"{next(tempfile._get_candidate_names())}{suffix}"
+                / f"{next(tempfile._get_candidate_names())}{suffix}"  # type: ignore
             )
 
             downloaded = 0
@@ -297,7 +298,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
             return str(download_path)
 
         except Exception as ex:
-            if Path(download_path).exists():
+            if download_path and Path(download_path).exists():
                 Path(download_path).unlink()
             raise ReadStorageItemsError(str(ex)) from ex
 

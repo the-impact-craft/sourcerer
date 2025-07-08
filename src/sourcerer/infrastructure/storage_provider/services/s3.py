@@ -292,7 +292,7 @@ class S3ProviderService(BaseStorageProviderService):
             suffix = Path(key).suffix
             download_tmp_path = (
                 Path(user_downloads_dir())
-                / f"{next(tempfile._get_candidate_names())}{suffix}"
+                / f"{next(tempfile._get_candidate_names())}{suffix}"  # type: ignore
             )
 
             self.client.download_file(

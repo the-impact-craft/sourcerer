@@ -281,7 +281,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             suffix = Path(key).suffix
             download_tmp_path = (
                 Path(user_downloads_dir())
-                / f"{next(tempfile._get_candidate_names())}{suffix}"
+                / f"{next(tempfile._get_candidate_names())}{suffix}"  # type: ignore
             )
 
             containers_client = self.get_containers_client(storage)
