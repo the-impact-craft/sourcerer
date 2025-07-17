@@ -4,7 +4,9 @@ Implementation of S3 compatible storage provider services.
 This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
-
+import shutil
+import tempfile
+import threading
 from collections.abc import Callable
 from itertools import groupby
 from pathlib import Path
@@ -32,7 +34,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
-from sourcerer.settings import PAGE_SIZE, PATH_DELIMITER
+from sourcerer.settings import MULTIPART_UPLOAD_BLOCK_SIZE, PAGE_SIZE, PATH_DELIMITER
 
 
 @storage_provider(StorageProvider.S3)
@@ -223,6 +225,8 @@ class S3ProviderService(BaseStorageProviderService):
         storage_path: str,
         source_path: Path,
         dest_path: str | None = None,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
     ) -> None:
         """
         Upload a file to the specified S3 bucket path.
@@ -232,18 +236,34 @@ class S3ProviderService(BaseStorageProviderService):
             storage_path (str): The path within the bucket
             source_path (Path): Local file path to upload
             dest_path (str, optional): Destination path in S3. Defaults to None.
+            cancel_event (threading.Event, optional): Event to signal upload cancellation. Defaults to None.
+            progress_callback (Callable, optional): Callback function for upload progress. Defaults to None.
 
         Raises:
             UploadStorageItemsError: If an error occurs while uploading the item
         """
         try:
             dest_path = str(Path(storage_path or "") / (dest_path or source_path.name))
-            self.client.upload_file(source_path, storage, dest_path)
+            if source_path.stat().st_size <= MULTIPART_UPLOAD_BLOCK_SIZE:
+                self.client.upload_file(source_path, storage, dest_path)
+            else:
+                self._upload_storage_item_multipart(
+                    source_path,
+                    storage,
+                    dest_path,
+                    MULTIPART_UPLOAD_BLOCK_SIZE,
+                    cancel_event,
+                    progress_callback,
+                )
         except Exception as ex:
             raise UploadStorageItemsError(str(ex)) from ex
 
     def download_storage_item(
-        self, storage: str, key: str, progress_callback: Callable | None = None
+        self,
+        storage: str,
+        key: str,
+        progress_callback: Callable | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> str:
         """
         Download a file from S3 to local filesystem.
@@ -259,11 +279,25 @@ class S3ProviderService(BaseStorageProviderService):
         Raises:
             ReadStorageItemsError: If an error occurs while downloading the item
         """
+
+        def callback(size):
+            if progress_callback:
+                progress_callback(size)
+            if cancel_event and cancel_event.is_set():
+                raise ReadStorageItemsError("Download cancelled")
+
         try:
             download_path = Path(user_downloads_dir()) / Path(key).name
-            self.client.download_file(
-                storage, key, download_path, Callback=progress_callback
+            suffix = Path(key).suffix
+            download_tmp_path = (
+                Path(user_downloads_dir())
+                / f"{next(tempfile._get_candidate_names())}{suffix}"  # type: ignore
             )
+
+            self.client.download_file(
+                storage, key, download_tmp_path, Callback=callback
+            )
+            shutil.move(download_tmp_path, download_path)
             return str(download_path)
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex
@@ -287,3 +321,68 @@ class S3ProviderService(BaseStorageProviderService):
             return metadata.get("ContentLength")
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex
+
+    def _upload_storage_item_multipart(
+        self,
+        source_path,
+        storage: str,
+        dest_path: str,
+        block_size: int,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
+    ):
+        upload_id = None
+        try:
+            parts = []
+
+            with open(source_path, "rb") as file_handle:
+                # Initiate multipart upload
+                response = self.client.create_multipart_upload(
+                    Bucket=storage, Key=dest_path
+                )
+                upload_id = response["UploadId"]
+
+                part_number = 1
+
+                while chunk := file_handle.read(block_size):
+                    if cancel_event and cancel_event.is_set():
+                        raise UploadStorageItemsError("Upload cancelled")
+
+                    part_response = self.client.upload_part(
+                        Bucket=storage,
+                        Key=dest_path,
+                        PartNumber=part_number,
+                        UploadId=upload_id,
+                        Body=chunk,
+                    )
+
+                    parts.append(
+                        {
+                            "PartNumber": part_number,
+                            "ETag": part_response["ETag"],
+                        }
+                    )
+
+                    if progress_callback:
+                        progress_callback(len(chunk))
+
+                    part_number += 1
+
+                # Finalize upload
+                if cancel_event and cancel_event.is_set():
+                    raise Exception("Upload canceled before completion")
+
+                self.client.complete_multipart_upload(
+                    Bucket=storage,
+                    Key=dest_path,
+                    UploadId=upload_id,
+                    MultipartUpload={"Parts": parts},
+                )
+
+        except Exception:
+            # Abort multipart if error or cancel
+            if upload_id:
+                self.client.abort_multipart_upload(
+                    Bucket=storage, Key=dest_path, UploadId=upload_id
+                )
+            raise

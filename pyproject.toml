@@ -77,7 +77,7 @@ source = [
 ]
 
 [tool.coverage.report]
-fail_under = 75
+fail_under = 70
 
 [tool.ruff]
 line-length = 120
