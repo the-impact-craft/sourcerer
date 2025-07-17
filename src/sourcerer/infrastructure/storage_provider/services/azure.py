@@ -151,8 +151,6 @@ class AzureStorageProviderService(BaseStorageProviderService):
                 for blob in blobs_client.walk_blobs(
                     name_starts_with=prefix, delimiter="/"
                 ):
-                    if not isinstance(blob, BlobProperties):
-                        continue
                     remaining_path = blob.name[len(prefix) :]
                     if "/" in remaining_path:
                         folder_name = remaining_path.split("/")[0]
@@ -160,6 +158,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
                             folders.add(folder_name)
                         continue  # skip subfolders
 
+                    if not isinstance(blob, BlobProperties):
+                        continue
                     files.append(
                         File(
                             generate_uuid(),
