@@ -371,6 +371,8 @@ class CancelableFileReader:
         if self.cancel_event and self.cancel_event.is_set():
             raise RuntimeError("Upload cancelled")
 
+        if self.file is None:
+            raise RuntimeError("File is not opened")
         chunk_size = size or self.chunk_size
         data = self.file.read(chunk_size)
         if data and self.progress_callback:
@@ -378,9 +380,13 @@ class CancelableFileReader:
         return data
 
     def seek(self, offset, whence=0):
+        if self.file is None:
+            raise RuntimeError("File is not opened")
         return self.file.seek(offset, whence)
 
     def tell(self):
+        if self.file is None:
+            raise RuntimeError("File is not opened")
         return self.file.tell()
 
     def close(self):
