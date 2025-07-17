@@ -361,8 +361,8 @@ class CancelableFileReader:
         chunk_size,
         progress_callback: Callable | None = None,
     ):
-
-        self.file = open(file_path, "rb")  # noqa: SIM115
+        self.file_path = file_path
+        self.file = None
         self.cancel_event = cancel_event
         self.chunk_size = chunk_size
         self.progress_callback = progress_callback
@@ -384,9 +384,12 @@ class CancelableFileReader:
         return self.file.tell()
 
     def close(self):
+        if self.file is None:
+            return None
         return self.file.close()
 
     def __enter__(self):
+        self.file = open(self.file_path, "rb")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):

@@ -249,17 +249,24 @@ class AzureStorageProviderService(BaseStorageProviderService):
                         blob_name or source_path.name, file_handle, overwrite=True
                     )
             else:
-                asyncio.create_task(  # noqa: RUF006
-                    self.upload_large_file_azure(
-                        containers_client,
-                        container,
-                        source_path,
-                        blob_name,
-                        MULTIPART_UPLOAD_BLOCK_SIZE,
-                        cancel_event,
-                        progress_callback,
+
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    loop.run_until_complete(
+                        self.upload_large_file_azure(
+                            containers_client,
+                            container,
+                            source_path,
+                            blob_name,
+                            MULTIPART_UPLOAD_BLOCK_SIZE,
+                            cancel_event,
+                            progress_callback,
+                        )
                     )
-                )
+                except Exception:
+                    loop.close()
+                    raise
         except Exception as ex:
             raise UploadStorageItemsError(str(ex)) from ex
 
@@ -280,6 +287,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             cancel_event (threading.Event, optional): Event to signal download cancellation. Defaults to None.
         """
         download_path = None
+        download_tmp_path = None
         try:
             download_path = Path(user_downloads_dir()) / Path(key).name
             suffix = Path(key).suffix
@@ -295,7 +303,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             blob_stream = blob_client.download_blob(blob_name)
             total_bytes = blob_stream.properties.size
 
-            with open(download_path, "wb") as file:
+            with open(download_tmp_path, "wb") as file:
                 if total_bytes <= DOWNLOAD_BLOCK_SIZE:
                     file.write(blob_stream.readall())
                 else:
@@ -320,6 +328,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
         except Exception as ex:
             if download_path and download_path.exists():
                 download_path.unlink()
+            if download_tmp_path and download_tmp_path.exists():
+                download_tmp_path.unlink()
             raise ReadStorageItemsError(str(ex)) from ex
 
     def get_file_size(self, storage: str, key: str) -> int:
@@ -378,5 +388,5 @@ class AzureStorageProviderService(BaseStorageProviderService):
             return await asyncio.gather(*tasks)
 
         block_ids = await read_and_upload()
-        block_ids.sort(key=lambda b: b.id)
+        block_ids.sort(key=lambda x: int(x.block_id.encode().decode("base64")))
         blob_client.commit_block_list(block_ids)

@@ -394,7 +394,8 @@ class StorageActionProgressScreen(ModalScreen):
             main_progress_bar.advance(1)
 
     def progress_callback(self, progress_bar, chunk):
-        progress_bar.advance(chunk)
+        with contextlib.suppress(Exception):
+            progress_bar.advance(chunk)
 
     async def upload_files(self):
         """
