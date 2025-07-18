@@ -288,10 +288,7 @@ class TestS3ProviderService(unittest.TestCase):
 
     def test_upload_storage_item(self):
         """Test upload_storage_item method."""
-        # Arrange
-        source_path = Path("/test/source/file.txt")
         dest_path = "test/dest/file.txt"
-
         source_path = Path("/test/source/file.txt")
         stat_mock = MagicMock()
         stat_mock.st_size = 1

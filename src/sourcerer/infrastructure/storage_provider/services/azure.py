@@ -159,8 +159,6 @@ class AzureStorageProviderService(BaseStorageProviderService):
                             folders.add(folder_name)
                         continue  # skip subfolders
 
-                    # if not isinstance(blob, BlobProperties):
-                    #     continue
                     files.append(
                         File(
                             generate_uuid(),
