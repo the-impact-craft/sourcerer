@@ -252,7 +252,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             else:
                 try:
                     run_async_sync_safe(
-                        self.upload_large_file_azure(
+                        self.upload_multipart(
                             containers_client,
                             container,
                             source_path,
@@ -347,7 +347,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex
 
-    async def upload_large_file_azure(
+    async def upload_multipart(
         self,
         client,
         container: str,
