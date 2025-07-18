@@ -165,8 +165,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
                         File(
                             generate_uuid(),
                             remaining_path,
-                            size=blob.size,
-                            date_modified=blob.last_modified,
+                            size=blob.size,  # type: ignore
+                            date_modified=blob.last_modified,  # type: ignore
                             is_text=is_text_file(blob.name),
                         )
                     )
