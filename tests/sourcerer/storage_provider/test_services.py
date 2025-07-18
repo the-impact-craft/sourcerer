@@ -583,7 +583,6 @@ class TestGCPStorageProviderService(unittest.TestCase):
         self.mock_client.bucket.return_value = mock_bucket
         mock_bucket.blob.return_value = mock_blob
 
-        source_path = Path("/test/source/file.txt")
         stat_mock = MagicMock()
         stat_mock.st_size = 1
 
