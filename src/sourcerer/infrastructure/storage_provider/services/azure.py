@@ -142,6 +142,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             files = []
 
             folders = set()
+            print("!!" * 10)
             if not path:
                 folders.update([i.name for i in containers_client.list_containers()])
             else:
@@ -155,9 +156,13 @@ class AzureStorageProviderService(BaseStorageProviderService):
                 for blob in blobs_client.walk_blobs(
                     name_starts_with=base_path + prefix, delimiter="/"
                 ):
-                    remaining_path = blob.name[len(base_path) :]
+                    prefix_folders_len = (
+                        len(prefix.rsplit("/")[0]) if "/" in prefix else 0
+                    )
+                    remaining_path = blob.name[len(base_path) + prefix_folders_len :]
+
                     if "/" in remaining_path:
-                        folder_name = remaining_path.split("/")[0]
+                        folder_name = remaining_path.lstrip("/").split("/")[0]
                         if folder_name not in folders:
                             folders.add(folder_name)
                         continue  # skip subfolders
