@@ -6,13 +6,15 @@ and selection of storage items.
 """
 
 from collections import namedtuple
+from dataclasses import dataclass
 from itertools import groupby
 from typing import Self
 
 from textual import events, on
 from textual.app import ComposeResult
-from textual.containers import Horizontal, Vertical
+from textual.containers import Container, Horizontal, Vertical
 from textual.css.query import NoMatches
+from textual.message import Message
 from textual.reactive import reactive
 from textual.widgets import Label, Rule
 
@@ -131,6 +133,31 @@ class StorageItem(Label):
         )
 
 
+class StorageCredentialsDivider(Horizontal):
+    @dataclass
+    class Click(Message):
+        credentials_uuid: str
+
+    collapsed: reactive[bool] = reactive(False, recompose=True)
+
+    def __init__(self, credential_name, credentials_uuid, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.credential_name = credential_name
+        self.credentials_uuid = credentials_uuid
+
+    def compose(self) -> ComposeResult:
+        yield Rule(classes="storage-credentials-rule-left")
+        yield Label(
+            renderable=("> " if self.collapsed else "⌄ ")
+            + self.credential_name.upper(),
+            classes="storage-credentials-name",
+        )
+        yield Rule(classes="storage-credentials-rule-right")
+
+    def on_click(self):
+        self.post_message(self.Click(self.credentials_uuid))
+
+
 class StorageListSidebar(Vertical):
     """Sidebar widget for displaying the list of storage providers.
 
@@ -159,11 +186,19 @@ class StorageListSidebar(Vertical):
             color: $background-lighten-3;
         }
 
-        .storage-credentials-container {
+        .storage-credentials-container-name {
             margin-top: 1;
 
             & > :first-of-type {
                 margin-top: 0;
+            }
+        }
+
+        .storage-credentials-container {
+            display: none;
+            height: auto;
+            &.-visible {
+                display: block;
             }
         }
 
@@ -266,30 +301,39 @@ class StorageListSidebar(Vertical):
                     ],
                     key=lambda x: x.storage.storage,
                 )
-                yield Horizontal(
-                    Rule(classes="storage-credentials-rule-left"),
-                    Label(
-                        access_credentials_name.upper(),
-                        classes="storage-credentials-name",
-                    ),
-                    Rule(classes="storage-credentials-rule-right"),
-                    classes="storage-credentials-container",
+                yield StorageCredentialsDivider(
+                    credential_name=access_credentials_name,
+                    credentials_uuid=access_credentials_uuid,
+                    classes="storage-credentials-container-name -visible",
+                    id=f"{access_credentials_uuid}_container_title",
                 )
-                for letter, storages_group in groupby(
-                    storages, key=lambda x: x.storage.storage[0]
+                with Container(
+                    classes="storage-credentials-container -visible",
+                    id=f"{access_credentials_uuid}_container",
                 ):
-                    yield Horizontal(
-                        Rule(classes="rule-left"),
-                        Label(letter.upper(), classes="storage-letter"),
-                        Rule(),
-                        classes="storage-letter-container",
-                    )
-                    for item in storages_group:
-                        yield StorageItem(
-                            renderable=f"{STORAGE_ICONS.get(item.storage.provider, '')} {item.storage.storage}",
-                            storage_name=item.storage.storage,
-                            access_credentials_uuid=item.access_credentials_uuid,
+                    for letter, storages_group in groupby(
+                        storages, key=lambda x: x.storage.storage[0]
+                    ):
+                        yield Horizontal(
+                            Rule(classes="rule-left"),
+                            Label(letter.upper(), classes="storage-letter"),
+                            Rule(),
+                            classes="storage-letter-container",
                         )
+                        for item in storages_group:
+                            yield StorageItem(
+                                renderable=f"{STORAGE_ICONS.get(item.storage.provider, '')} {item.storage.storage}",
+                                storage_name=item.storage.storage,
+                                access_credentials_uuid=item.access_credentials_uuid,
+                            )
+
+    @on(StorageCredentialsDivider.Click)
+    def on_credentials_divider_click(self, event: StorageCredentialsDivider.Click):
+        uuid = event.credentials_uuid
+        divider = self.query_one(f"#{uuid}_container_title", StorageCredentialsDivider)
+        container = self.query_one(f"#{uuid}_container")
+        divider.collapsed = not divider.collapsed
+        container.toggle_class("-visible")
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="header"):

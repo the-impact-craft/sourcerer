@@ -4,15 +4,19 @@ Implementation of Azure storage provider services.
 This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
-
+import asyncio
+import base64
 import os.path
+import shutil
+import tempfile
 import threading
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
 from azure.mgmt.storage import StorageManagementClient
-from azure.storage.blob import BlobServiceClient
+from azure.storage.blob import BlobBlock, BlobServiceClient
 from cachetools import LRUCache
 from platformdirs import user_downloads_dir
 
@@ -35,6 +39,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
+from sourcerer.settings import DOWNLOAD_BLOCK_SIZE, MULTIPART_UPLOAD_BLOCK_SIZE
 
 
 @storage_provider(StorageProvider.AzureStorage)
@@ -158,8 +163,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
                         File(
                             generate_uuid(),
                             remaining_path,
-                            size=blob.size,
-                            date_modified=blob.last_modified,
+                            size=blob.size,  # type: ignore
+                            date_modified=blob.last_modified,  # type: ignore
                             is_text=is_text_file(blob.name),
                         )
                     )
@@ -208,6 +213,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
         storage_path: str,
         source_path: Path,
         dest_path: str | None = None,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
     ) -> None:
         """
         Upload a file to the specified Azure container path.
@@ -216,6 +223,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
             storage_path (str): The path within the container to upload
             source_path (Path): Local file path to upload
             dest_path (str, optional): Destination path in storage. Defaults to None.
+            cancel_event (threading.Event, optional): Event to signal upload cancellation. Defaults to None.
+            progress_callback (Callable, optional): Callback function for progress updates. Defaults to None.
         """
         try:
             if not storage_path:
@@ -232,16 +241,38 @@ class AzureStorageProviderService(BaseStorageProviderService):
             storage_path = storage_path_parts[1] if len(storage_path_parts) > 1 else ""
             blob_name = os.path.join(storage_path, dest_path or source_path.name)
 
-            blob_client = containers_client.get_container_client(container)
-            with open(source_path, "rb") as file_handle:
-                blob_client.upload_blob(
-                    blob_name or source_path.name, file_handle, overwrite=True
-                )
+            if source_path.stat().st_size <= MULTIPART_UPLOAD_BLOCK_SIZE:
+                blob_client = containers_client.get_container_client(container)
+                with open(source_path, "rb") as file_handle:
+                    blob_client.upload_blob(
+                        blob_name or source_path.name, file_handle, overwrite=True
+                    )
+                if progress_callback:
+                    progress_callback(source_path.stat().st_size)
+            else:
+                try:
+                    run_async_sync_safe(
+                        self.upload_large_file_azure(
+                            containers_client,
+                            container,
+                            source_path,
+                            blob_name,
+                            MULTIPART_UPLOAD_BLOCK_SIZE,
+                            cancel_event,
+                            progress_callback,
+                        )
+                    )
+                except Exception:
+                    raise
         except Exception as ex:
             raise UploadStorageItemsError(str(ex)) from ex
 
     def download_storage_item(
-        self, storage: str, key: str, progress_callback: Callable | None = None
+        self,
+        storage: str,
+        key: str,
+        progress_callback: Callable | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> str:
         """
         Download a file from Azure to the local filesystem.
@@ -250,19 +281,52 @@ class AzureStorageProviderService(BaseStorageProviderService):
             storage (str): The container name
             key (str): The key/path of the item to download
             progress_callback (Callable, optional): Callback function for progress updates. Defaults to None.
+            cancel_event (threading.Event, optional): Event to signal download cancellation. Defaults to None.
         """
+        download_path = None
+        download_tmp_path = None
         try:
             download_path = Path(user_downloads_dir()) / Path(key).name
+            suffix = Path(key).suffix
+            download_tmp_path = (
+                Path(user_downloads_dir())
+                / f"{next(tempfile._get_candidate_names())}{suffix}"  # type: ignore
+            )
 
             containers_client = self.get_containers_client(storage)
             path_parts = key.split("/", 1)
             container, blob_name = path_parts
             blob_client = containers_client.get_container_client(container)
-            with open(download_path, "wb") as file:
-                download_stream = blob_client.download_blob(blob_name)
-                file.write(download_stream.readall())
+            blob_stream = blob_client.download_blob(blob_name)
+            total_bytes = blob_stream.properties.size
+
+            with open(download_tmp_path, "wb") as file:
+                if total_bytes <= DOWNLOAD_BLOCK_SIZE:
+                    file.write(blob_stream.readall())
+                else:
+                    downloaded = 0
+                    while downloaded < total_bytes:
+                        if cancel_event and cancel_event.is_set():
+                            raise Exception("Download cancelled")
+
+                        chunk = blob_stream.read(DOWNLOAD_BLOCK_SIZE)
+                        if not chunk:
+                            break
+
+                        file.write(chunk)
+
+                        chunk_size = len(chunk)
+                        downloaded += chunk_size
+
+                        if progress_callback:
+                            progress_callback(chunk_size)
+            shutil.move(download_tmp_path, download_path)
             return str(download_path)
         except Exception as ex:
+            if download_path and download_path.exists():
+                download_path.unlink()
+            if download_tmp_path and download_tmp_path.exists():
+                download_tmp_path.unlink()
             raise ReadStorageItemsError(str(ex)) from ex
 
     def get_file_size(self, storage: str, key: str) -> int:
@@ -282,3 +346,53 @@ class AzureStorageProviderService(BaseStorageProviderService):
             return props.size
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex
+
+    async def upload_large_file_azure(
+        self,
+        client,
+        container: str,
+        source_path: Path,
+        blob_name: str,
+        block_size: int,
+        cancel_event=None,
+        progress_callback=None,
+    ):
+        max_workers = 8
+
+        blob_client = client.get_blob_client(container, blob_name)
+        semaphore = asyncio.Semaphore(max_workers)
+
+        async def upload_block(offset, data):
+            async with semaphore:
+                block_id = f"{offset:08d}"
+                encoded_block_id = base64.b64encode(block_id.encode()).decode()
+                blob_client.stage_block(block_id=encoded_block_id, data=data)
+                if progress_callback:
+                    progress_callback(len(data))
+                if cancel_event and cancel_event.is_set():
+                    raise Exception("Upload cancelled")
+                return BlobBlock(block_id=encoded_block_id)
+
+        async def read_and_upload():
+            tasks = []
+            with open(source_path, "rb") as f:
+                offset = 0
+                while chunk := f.read(block_size):
+                    tasks.append(upload_block(offset, chunk))
+                    offset += len(chunk)
+                    if cancel_event and cancel_event.is_set():
+                        raise Exception("Upload cancelled")
+            return await asyncio.gather(*tasks)
+
+        block_ids = await read_and_upload()
+        blob_client.commit_block_list(block_ids)
+
+
+# Todo: tmp solution, we need to move to async
+def run_async_sync_safe(coro):
+    def runner():
+        return asyncio.run(coro)
+
+    with ThreadPoolExecutor(1) as executor:
+        future = executor.submit(runner)
+        return future.result()
