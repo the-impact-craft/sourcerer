@@ -4,7 +4,9 @@ Implementation of GCP storage provider services.
 This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
-
+import shutil
+import tempfile
+import threading
 from collections.abc import Callable
 from pathlib import Path
 from typing import Any
@@ -31,7 +33,12 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
-from sourcerer.settings import PAGE_SIZE, PATH_DELIMITER
+from sourcerer.settings import (
+    DOWNLOAD_BLOCK_SIZE,
+    MULTIPART_UPLOAD_BLOCK_SIZE,
+    PAGE_SIZE,
+    PATH_DELIMITER,
+)
 
 
 @storage_provider(StorageProvider.GoogleCloudStorage)
@@ -201,6 +208,8 @@ class GCPStorageProviderService(BaseStorageProviderService):
         storage_path: str,
         source_path: Path,
         dest_path: str | None = None,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
     ) -> None:
         """
         Upload a file to the specified GCP bucket path.
@@ -210,6 +219,8 @@ class GCPStorageProviderService(BaseStorageProviderService):
             storage_path (str): The path within the bucket
             source_path (Path): Local file path to upload
             dest_path (str, optional): Destination path in GCP. Defaults to None.
+            cancel_event (threading.Event, optional): Event to signal upload cancellation. Defaults to None.
+            progress_callback (Callable, optional): Callback function for progress updates. Defaults to None.
 
         Raises:
             UploadStorageItemsError: If an error occurs while uploading the item
@@ -219,12 +230,22 @@ class GCPStorageProviderService(BaseStorageProviderService):
             storage_path = str(
                 Path(storage_path or "") / (dest_path or source_path.name)
             )
-            bucket.blob(storage_path).upload_from_filename(source_path)
+            blob = bucket.blob(storage_path)
+            if source_path.stat().st_size <= MULTIPART_UPLOAD_BLOCK_SIZE:
+                blob.upload_from_filename(source_path)
+            else:
+                self._upload_storage_item_multipart(
+                    blob, source_path, cancel_event, progress_callback=progress_callback
+                )
         except Exception as ex:
             raise UploadStorageItemsError(str(ex)) from ex
 
     def download_storage_item(
-        self, storage: str, key: str, progress_callback: Callable | None = None
+        self,
+        storage: str,
+        key: str,
+        progress_callback: Callable | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> str:
         """
         Download a file from GCP to the local filesystem.
@@ -233,22 +254,53 @@ class GCPStorageProviderService(BaseStorageProviderService):
             storage (str): The bucket name
             key (str): The key/path of the item to download
             progress_callback (Callable, optional): Callback function for progress updates. Defaults to None.
-
+            cancel_event (threading.Event, optional): Event to signal download cancellation. Defaults to None.
         Returns:
             str: Path to the downloaded file
 
         Raises:
             ReadStorageItemsError: If an error occurs while downloading the item
         """
+        download_path = None
         try:
             bucket = self.client.bucket(storage)
             blob = bucket.get_blob(key)
             if not blob:
                 raise BlobNotFoundError(key)
+
             download_path = Path(user_downloads_dir()) / Path(key).name
-            blob.download_to_filename(str(download_path))
+
+            suffix = Path(key).suffix
+            download_tmp_path = (
+                Path(user_downloads_dir())
+                / f"{next(tempfile._get_candidate_names())}{suffix}"  # type: ignore
+            )
+
+            downloaded = 0
+
+            with open(download_tmp_path, "wb") as file:
+                reader = blob.open("rb")  # streaming mode
+                while True:
+                    if cancel_event and cancel_event.is_set():
+                        raise Exception("Download cancelled")
+
+                    chunk = reader.read(DOWNLOAD_BLOCK_SIZE)
+                    if not chunk:
+                        break
+
+                    file.write(chunk)
+                    chunk_size = len(chunk)
+                    downloaded += chunk_size
+
+                    if progress_callback:
+                        progress_callback(chunk_size)
+
+            shutil.move(download_tmp_path, download_path)
             return str(download_path)
+
         except Exception as ex:
+            if download_path and Path(download_path).exists():
+                Path(download_path).unlink()
             raise ReadStorageItemsError(str(ex)) from ex
 
     def get_file_size(self, storage: str, key: str) -> int:
@@ -273,3 +325,78 @@ class GCPStorageProviderService(BaseStorageProviderService):
             return blob.size
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex
+
+    def _upload_storage_item_multipart(
+        self,
+        blob,
+        source_path,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
+    ):
+        """
+        Upload a file to the specified GCP bucket path using multipart upload.
+
+        This method is not implemented in the current version.
+        """
+        blob.chunk_size = MULTIPART_UPLOAD_BLOCK_SIZE
+
+        with CancelableFileReader(
+            source_path,
+            cancel_event,
+            chunk_size=MULTIPART_UPLOAD_BLOCK_SIZE,
+            progress_callback=progress_callback,
+        ) as stream:
+            blob.upload_from_file(
+                stream,
+                rewind=True,  # allow re-seek to beginning if needed
+                content_type="application/octet-stream",
+            )
+
+
+class CancelableFileReader:
+    def __init__(
+        self,
+        file_path,
+        cancel_event: threading.Event | None,
+        chunk_size,
+        progress_callback: Callable | None = None,
+    ):
+        self.file_path = file_path
+        self.file = None
+        self.cancel_event = cancel_event
+        self.chunk_size = chunk_size
+        self.progress_callback = progress_callback
+
+    def read(self, size=None):
+        if self.cancel_event and self.cancel_event.is_set():
+            raise RuntimeError("Upload cancelled")
+
+        if self.file is None:
+            raise RuntimeError("File is not opened")
+        chunk_size = size or self.chunk_size
+        data = self.file.read(chunk_size)
+        if data and self.progress_callback:
+            self.progress_callback(len(data))
+        return data
+
+    def seek(self, offset, whence=0):
+        if self.file is None:
+            raise RuntimeError("File is not opened")
+        return self.file.seek(offset, whence)
+
+    def tell(self):
+        if self.file is None:
+            raise RuntimeError("File is not opened")
+        return self.file.tell()
+
+    def close(self):
+        if self.file is None:
+            return None
+        return self.file.close()
+
+    def __enter__(self):
+        self.file = open(self.file_path, "rb")
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()

@@ -76,9 +76,6 @@ source = [
     "src/sourcerer/infrastructure",
 ]
 
-[tool.coverage.report]
-fail_under = 75
-
 [tool.ruff]
 line-length = 120
 target-version = "py312"

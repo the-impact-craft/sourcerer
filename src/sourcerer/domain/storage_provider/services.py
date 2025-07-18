@@ -4,7 +4,7 @@ Base storage provider service interface.
 This module defines the abstract base class for storage provider services,
 providing a common interface for cloud storage operations.
 """
-
+import threading
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from pathlib import Path
@@ -93,20 +93,28 @@ class BaseStorageProviderService(ABC):
         storage_path: str,
         source_path: Path,
         dest_path: str | None = None,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
     ) -> None:
         """
-        Upload a file to the specified storage path.
+        upload a file to the specified storage path.
 
         Args:
             storage (str): The storage identifier
             storage_path (str): The path within the storage to upload
             source_path (Path): Local file path to upload
             dest_path (str, optional): Destination path in storage. Defaults to None.
+            cancel_event (threading.Event, optional): Event to signal upload cancellation. Defaults to None.
+            progress_callback (callable, optional): Callback function for progress updates. Defaults to None.
         """
 
     @abstractmethod
     def download_storage_item(
-        self, storage: str, key: str, progress_callback: Callable | None = None
+        self,
+        storage: str,
+        key: str,
+        progress_callback: Callable | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> str:
         """
         Download a file from storage to local filesystem.
@@ -115,7 +123,7 @@ class BaseStorageProviderService(ABC):
             storage (str): The storage identifier
             key (str): The key/path of the item to download
             progress_callback (callable, optional): Callback function for progress updates. Defaults to None.
-
+            cancel_event (threading.Event, optional): Event to signal download cancellation. Defaults to None.
         Returns:
             str: Path to the downloaded file
         """
