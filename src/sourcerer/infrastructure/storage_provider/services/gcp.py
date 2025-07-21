@@ -125,31 +125,35 @@ class GCPStorageProviderService(BaseStorageProviderService):
             ListStorageItemsError: If an error occurs while listing items
         """
         try:
-            files = []
-            folders = []
-            if path and not path.endswith("/"):
-                path += "/"
+            path = self._normalize_path(path)
+            parent_path, prefix_folders_len = self._get_parent_path(path, prefix)
 
             bucket = self.client.bucket(storage)
 
             blobs = bucket.list_blobs(
-                prefix=path + prefix, delimiter=PATH_DELIMITER, max_results=PAGE_SIZE
+                prefix=(path + prefix).lstrip("/"),
+                delimiter=PATH_DELIMITER,
+                max_results=PAGE_SIZE,
             )
 
-            for blob in blobs:
-                files.append(
-                    File(
-                        generate_uuid(),
-                        blob.name[len(path) :],
-                        size=blob.size,
-                        date_modified=blob.updated.date(),
-                        is_text=is_text_file(blob.name),
-                    )
+            files = [
+                File(
+                    generate_uuid(),
+                    blob.name[prefix_folders_len:],
+                    size=blob.size,
+                    date_modified=blob.updated.date(),
+                    is_text=is_text_file(blob.name),
+                    parent_path=parent_path,
                 )
+                for blob in blobs
+            ]
 
-            for folder in blobs.prefixes:
-                relative_path = folder[len(path) :]
-                folders.append(Folder(relative_path))
+            folders = [
+                Folder(
+                    key=folder[prefix_folders_len:].strip("/"), parent_path=parent_path
+                )
+                for folder in blobs.prefixes
+            ]
 
             return StorageContent(files=files, folders=folders)
 

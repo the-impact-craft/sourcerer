@@ -153,12 +153,13 @@ class S3ProviderService(BaseStorageProviderService):
         Raises:
             ListStorageItemsError: If an error occurs while listing items
         """
-        if path and not path.endswith("/"):
-            path += "/"
+        path = self._normalize_path(path)
+        parent_path, prefix_folders_len = self._get_parent_path(path, prefix)
+
         try:
             result = self.client.list_objects_v2(
                 Bucket=storage,
-                Prefix=path + prefix,
+                Prefix=(path + prefix).lstrip("/"),
                 Delimiter=PATH_DELIMITER,
                 MaxKeys=PAGE_SIZE,
             )
@@ -166,20 +167,25 @@ class S3ProviderService(BaseStorageProviderService):
             raise ListStorageItemsError(str(ex)) from ex
 
         folders = [
-            Folder(i.get("Prefix").replace(path, ""))
-            for i in result.get("CommonPrefixes", [])
-            if i.get("Prefix")
+            Folder(
+                key=path.get("Prefix")[prefix_folders_len:].strip("/"),
+                parent_path=parent_path,
+            )
+            for path in result.get("CommonPrefixes", [])
+            if path.get("Prefix")
         ]
+
         files = [
             File(
-                generate_uuid(),
-                i.get("Key").replace(path, ""),
-                i.get("Size"),
-                is_text_file(i.get("Key")),
-                i.get("LastModified"),
+                uuid=generate_uuid(),
+                key=i.get("Key")[prefix_folders_len:],
+                size=i.get("Size"),
+                is_text=is_text_file(i.get("Key")),
+                date_modified=i.get("LastModified"),
+                parent_path=parent_path,
             )
             for i in result.get("Contents", [])
-            if i.get("Key").replace(path, "")
+            if i.get("Key")[prefix_folders_len:]
         ]
         return StorageContent(files=files, folders=folders)
 

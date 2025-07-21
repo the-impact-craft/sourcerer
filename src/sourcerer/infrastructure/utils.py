@@ -218,3 +218,13 @@ def generate_unique_name() -> str:
     adjective = secrets.choice(adjectives)
     name = secrets.choice(names)
     return f"{adjective}_{name}"
+
+
+def join_non_empty(items: list, separator: str):
+    """join strings with separator skipping empty values
+
+    Args:
+        items (list): A list of strings.
+        separator(str): The separator to join strings with.
+    """
+    return separator.join([str(i) for i in items if i])

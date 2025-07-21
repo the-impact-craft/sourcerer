@@ -47,6 +47,7 @@ class Folder(Struct):
     """
 
     key: str
+    parent_path: str
 
 
 class File(Struct):
@@ -65,7 +66,8 @@ class File(Struct):
     key: str
     size: int
     is_text: bool
-    date_modified: datetime | None = None
+    date_modified: datetime
+    parent_path: str
 
 
 class StorageContent(Struct):

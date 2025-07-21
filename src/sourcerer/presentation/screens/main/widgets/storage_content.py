@@ -256,13 +256,12 @@ class FolderItem(StorageContentItem):
 
     def _select(self, widget=None):
         """Select the folder."""
-        path = self.folder.key
-        if self.parent_path:
-            path = self.parent_path.strip("/") + "/" + path
-
         self.post_message(
             SelectStorageItem(
-                self.storage, path, self.access_credentials_uuid, focus_content=True
+                self.storage,
+                self.folder.parent_path + self.folder.key,
+                self.access_credentials_uuid,
+                focus_content=True,
             )
         )
 
