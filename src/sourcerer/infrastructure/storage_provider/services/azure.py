@@ -38,7 +38,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
     UploadStorageItemsError,
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
-from sourcerer.infrastructure.utils import generate_uuid, is_text_file
+from sourcerer.infrastructure.utils import generate_uuid, is_text_file, join_non_empty
 from sourcerer.settings import DOWNLOAD_BLOCK_SIZE, MULTIPART_UPLOAD_BLOCK_SIZE
 
 
@@ -140,31 +140,42 @@ class AzureStorageProviderService(BaseStorageProviderService):
         try:
             containers_client = self.get_containers_client(storage)
             files = []
-
             folders = set()
-            print("!!" * 10)
+            parent_path = ""
+            prefix = prefix.strip("/")
+
             if not path:
                 folders.update([i.name for i in containers_client.list_containers()])
+
             else:
                 path_parts = path.split("/", 1)
-
                 container = path_parts[0]
-                base_path = "" if len(path_parts) == 1 else path_parts[1] + "/"
 
                 blobs_client = containers_client.get_container_client(container)
+
+                base_path = "" if len(path_parts) == 1 else path_parts[1] + "/"
+
+                prefix_dirs = prefix.rsplit("/", 1)[0] if "/" in prefix else ""
+                parent_path = join_non_empty(
+                    [
+                        container.strip("/"),
+                        base_path.strip("/"),
+                        prefix_dirs.strip("/"),
+                    ],
+                    "/",
+                )
+                parent_path = parent_path.rstrip("/") + "/"
 
                 for blob in blobs_client.walk_blobs(
                     name_starts_with=base_path + prefix, delimiter="/"
                 ):
-                    prefix_folders_len = (
-                        len(prefix.rsplit("/")[0]) if "/" in prefix else 0
-                    )
-                    remaining_path = blob.name[len(base_path) + prefix_folders_len :]
+                    remaining_path = blob.name[
+                        len(base_path) + len(prefix_dirs) :
+                    ].lstrip("/")
 
                     if "/" in remaining_path:
-                        folder_name = remaining_path.lstrip("/").split("/")[0]
-                        if folder_name not in folders:
-                            folders.add(folder_name)
+                        folder_name = remaining_path.split("/")[0]
+                        folders.add(folder_name)
                         continue  # skip subfolders
 
                     files.append(
@@ -174,9 +185,13 @@ class AzureStorageProviderService(BaseStorageProviderService):
                             size=blob.size,  # type: ignore
                             date_modified=blob.last_modified,  # type: ignore
                             is_text=is_text_file(blob.name),
+                            parent_path=parent_path,
                         )
                     )
-            return StorageContent(files=files, folders=[Folder(key) for key in folders])
+            return StorageContent(
+                files=files,
+                folders=[Folder(key.strip("/"), parent_path) for key in folders],
+            )
         except Exception as ex:
             raise ListStorageItemsError(str(ex)) from ex
 

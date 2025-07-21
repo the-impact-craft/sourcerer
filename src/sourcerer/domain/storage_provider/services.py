@@ -140,3 +140,15 @@ class BaseStorageProviderService(ABC):
         Returns:
             int: Size of the storage item in bytes
         """
+
+    def _normalize_path(self, path: str | None) -> str:
+        if path:
+            return path.rstrip("/") + "/"
+        return ""
+
+    def _get_parent_path(self, path: str, prefix: str) -> tuple[str, int]:
+        prefix = prefix.strip("/")
+        prefix_dirs = prefix.rsplit("/", 1)[0] if "/" in prefix else ""
+        parent_path = (path + prefix_dirs).rstrip("/") + "/"
+        prefix_folders_len = len(parent_path.lstrip("/"))
+        return parent_path, prefix_folders_len

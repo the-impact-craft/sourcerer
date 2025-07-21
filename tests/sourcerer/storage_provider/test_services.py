@@ -209,8 +209,8 @@ class TestS3ProviderService(unittest.TestCase):
             Bucket=self.test_bucket, Prefix="test/", Delimiter="/", MaxKeys=PAGE_SIZE
         )
         self.assertEqual(len(result.folders), 2)
-        self.assertEqual(result.folders[0].key, "folder1/")
-        self.assertEqual(result.folders[1].key, "folder2/")
+        self.assertEqual(result.folders[0].key, "folder1")
+        self.assertEqual(result.folders[1].key, "folder2")
         self.assertEqual(len(result.files), 2)
         self.assertEqual(result.files[0].key, "file1.txt")
         self.assertEqual(result.files[1].key, "file2.txt")
@@ -498,7 +498,7 @@ class TestGCPStorageProviderService(unittest.TestCase):
         assert result.files[1].key == "file2.bin"
         assert result.files[1].is_text is False
         assert len(result.folders) == 1
-        assert result.folders[0].key == "subfolder1/"
+        assert result.folders[0].key == "subfolder1"
 
     def test_list_storage_items_error(self):
         """Test list_storage_items method with error."""
