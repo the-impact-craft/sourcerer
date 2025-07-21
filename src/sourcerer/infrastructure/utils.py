@@ -227,4 +227,4 @@ def join_non_empty(items: list, separator: str):
         items (list): A list of strings.
         separator(str): The separator to join strings with.
     """
-    return separator.join([str(i) for i in items])
+    return separator.join([str(i) for i in items if i])

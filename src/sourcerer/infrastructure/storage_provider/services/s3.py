@@ -185,7 +185,7 @@ class S3ProviderService(BaseStorageProviderService):
                 parent_path=parent_path,
             )
             for i in result.get("Contents", [])
-            if i.get("Key").replace(path, "")
+            if i.get("Key")[prefix_folders_len:]
         ]
         return StorageContent(files=files, folders=folders)
 
