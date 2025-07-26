@@ -34,8 +34,8 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
 from sourcerer.settings import (
-    DOWNLOAD_BLOCK_SIZE,
-    MULTIPART_UPLOAD_BLOCK_SIZE,
+    DEFAULT_DOWNLOAD_CHUNK_SIZE_MB,
+    DEFAULT_UPLOAD_CHUNK_SIZE_MB,
     PAGE_SIZE,
     PATH_DELIMITER,
 )
@@ -50,14 +50,23 @@ class GCPStorageProviderService(BaseStorageProviderService):
     implementing the BaseStorageProviderService interface.
     """
 
-    def __init__(self, credentials: Any):
+    def __init__(
+        self,
+        credentials: Any,
+        upload_chunk_size=DEFAULT_UPLOAD_CHUNK_SIZE_MB,
+        download_chunk_size=DEFAULT_DOWNLOAD_CHUNK_SIZE_MB,
+    ):
         """
         Initialize the service with GCP credentials.
 
         Args:
             credentials (Any): GCP client or credentials object
+            upload_chunk_size (int): upload chunk size
+            download_chunk_size (int): download chunk size
         """
         self.client = credentials
+        self.upload_chunk_size = upload_chunk_size * 1024 * 1024
+        self.download_chunk_size = download_chunk_size * 1024 * 1024
 
     def list_storages(self) -> list[Storage]:
         """
@@ -235,7 +244,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
                 Path(storage_path or "") / (dest_path or source_path.name)
             )
             blob = bucket.blob(storage_path)
-            if source_path.stat().st_size <= MULTIPART_UPLOAD_BLOCK_SIZE:
+            if source_path.stat().st_size <= self.upload_chunk_size:
                 blob.upload_from_filename(source_path)
             else:
                 self._upload_storage_item_multipart(
@@ -288,7 +297,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
                     if cancel_event and cancel_event.is_set():
                         raise Exception("Download cancelled")
 
-                    chunk = reader.read(DOWNLOAD_BLOCK_SIZE)
+                    chunk = reader.read(self.download_chunk_size)
                     if not chunk:
                         break
 
@@ -342,12 +351,12 @@ class GCPStorageProviderService(BaseStorageProviderService):
 
         This method is not implemented in the current version.
         """
-        blob.chunk_size = MULTIPART_UPLOAD_BLOCK_SIZE
+        blob.chunk_size = self.upload_chunk_size
 
         with CancelableFileReader(
             source_path,
             cancel_event,
-            chunk_size=MULTIPART_UPLOAD_BLOCK_SIZE,
+            chunk_size=self.upload_chunk_size,
             progress_callback=progress_callback,
         ) as stream:
             blob.upload_from_file(

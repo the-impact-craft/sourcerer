@@ -10,6 +10,7 @@ from cachetools import LRUCache
 from dependency_injector.wiring import Provide
 
 from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository
+from sourcerer.domain.settings.entities import Settings
 from sourcerer.domain.storage_provider.services import BaseStorageProviderService
 from sourcerer.infrastructure.access_credentials.exceptions import CredentialsAuthError
 from sourcerer.infrastructure.access_credentials.registry import (
@@ -24,7 +25,7 @@ _provider_service_cache_lock = Lock()
 
 
 def get_provider_service_by_access_uuid(
-    uuid, credentials_service
+    uuid, credentials_service, settings
 ) -> BaseStorageProviderService | None:
     """
     Retrieves the provider service associated with the given access credentials UUID.
@@ -32,16 +33,28 @@ def get_provider_service_by_access_uuid(
     Args:
         uuid (str): The UUID of the access credentials.
         credentials_service: Credentials service
+        settings(Settings): The settings associated with the access credentials.
 
     Returns:
         The provider service instance corresponding to the access credentials.
     """
     access_credentials = credentials_service.get(uuid)
-    return get_provider_service_by_access_credentials(access_credentials)
+    return get_provider_service_by_access_credentials(access_credentials, settings)
+
+
+def _provider_service_cache_lru_key(credentials, settings: Settings):
+    return "-".join(
+        [
+            credentials.uuid,
+            str(settings.upload_chunk_size),
+            str(settings.download_chunk_size),
+        ]
+    )
 
 
 def get_provider_service_by_access_credentials(
     credentials,
+    settings: Settings,
     credentials_repo: BaseCredentialsRepository = Provide[
         DiContainer.credentials_repository
     ],
@@ -51,6 +64,8 @@ def get_provider_service_by_access_credentials(
 
     Args:
         credentials: An object containing provider and credentials type information.
+        settings(Settings): The settings associated with the access credentials.
+        credentials_repo: BaseCredentialsRepository
 
     Returns:
         An instance of the storage provider service if both the credentials service
@@ -66,9 +81,10 @@ def get_provider_service_by_access_credentials(
            authenticated credentials.
     """
 
+    cache_key = _provider_service_cache_lru_key(credentials, settings)
     with _provider_service_cache_lock:
-        if credentials.uuid in _provider_service_cache:
-            return _provider_service_cache[credentials.uuid]
+        if cache_key in _provider_service_cache:
+            return _provider_service_cache[cache_key]
 
     credentials_service = access_credential_method_registry.get_by_provider_and_name(
         credentials.provider, credentials.credentials_type
@@ -89,7 +105,9 @@ def get_provider_service_by_access_credentials(
         )
     except CredentialsAuthError:
         return None
-    service = provider_service_class(auth_credentials)
+    service = provider_service_class(
+        auth_credentials, settings.upload_chunk_size, settings.download_chunk_size
+    )
     with _provider_service_cache_lock:
-        _provider_service_cache[credentials.uuid] = service
+        _provider_service_cache[cache_key] = service
     return service

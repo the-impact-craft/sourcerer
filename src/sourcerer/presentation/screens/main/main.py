@@ -274,6 +274,18 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             self.settings_service.set_setting(SettingsFields.group_by_access_credentials, group_by)  # type: ignore
             self.storage_list_sidebar.groupby_access_credentials = group_by  # type: ignore
 
+        if upload_chunk_size := settings.get(SettingsFields.upload_chunk_size):
+            self.settings_service.set_setting(
+                SettingsFields.upload_chunk_size, upload_chunk_size
+            )
+
+        if download_chunk_size := settings.get(SettingsFields.download_chunk_size):
+            self.settings_service.set_setting(
+                SettingsFields.download_chunk_size, download_chunk_size
+            )
+
+        self.settings = self.settings_service.load_settings()
+
     def modal_screen_callback(self, requires_storage_refresh: bool | None = True):
         """
         Callback for modal screens to refresh the storage list if required.
@@ -392,7 +404,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             StorageActionProgressScreen(
                 storage_name=event.storage_name,
                 provider_service=get_provider_service_by_access_uuid(
-                    event.access_credentials_uuid, self.credentials_service
+                    event.access_credentials_uuid,
+                    self.credentials_service,
+                    self.settings,
                 ),
                 path=event.path,
                 keys=[
@@ -422,7 +436,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             StorageActionProgressScreen(
                 storage_name=event.storage_name,
                 provider_service=get_provider_service_by_access_uuid(
-                    event.access_credentials_uuid, self.credentials_service
+                    event.access_credentials_uuid,
+                    self.credentials_service,
+                    self.settings,
                 ),
                 path=event.path,
                 keys=[
@@ -493,6 +509,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                 key=event.path,
                 file_size=event.size,
                 access_credentials_uuid=event.access_credentials_uuid,
+                settings=self.settings,
             )
         )
 
@@ -564,7 +581,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         self.storage_content.focus_content = focus_content
 
         provider_service = get_provider_service_by_access_uuid(
-            access_credentials_uuid, self.credentials_service
+            access_credentials_uuid,
+            self.credentials_service,
+            self.settings,
         )
 
         if not provider_service:
@@ -614,7 +633,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
 
         # Get the provider service
         provider_service = get_provider_service_by_access_uuid(
-            access_credentials_uuid, self.credentials_service
+            access_credentials_uuid,
+            self.credentials_service,
+            self.settings,
         )
         if not provider_service:
             self.notify_error("Could not get provider service for upload")
@@ -657,7 +678,9 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             If an error occurs while retrieving the storages, a notification is shown
             to the user.
         """
-        provider_service = get_provider_service_by_access_credentials(credentials)
+        provider_service = get_provider_service_by_access_credentials(
+            credentials, self.settings
+        )
         if not provider_service:
             self.notify_error(f"Could not get storages list for {credentials.name}!")
             return

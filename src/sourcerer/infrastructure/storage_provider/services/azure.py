@@ -39,19 +39,30 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file, join_non_empty
-from sourcerer.settings import DOWNLOAD_BLOCK_SIZE, MULTIPART_UPLOAD_BLOCK_SIZE
+from sourcerer.settings import (
+    DEFAULT_DOWNLOAD_CHUNK_SIZE_MB,
+    DEFAULT_UPLOAD_CHUNK_SIZE_MB,
+)
 
 
 @storage_provider(StorageProvider.AzureStorage)
 class AzureStorageProviderService(BaseStorageProviderService):
     MAX_CACHE_SIZE = 10
 
-    def __init__(self, credentials: Any):
+    def __init__(
+        self,
+        credentials: Any,
+        upload_chunk_size=DEFAULT_UPLOAD_CHUNK_SIZE_MB,
+        download_chunk_size=DEFAULT_DOWNLOAD_CHUNK_SIZE_MB,
+    ):
         """
         Initialize the service with Azure credentials.
 
         Args:
             credentials (Any): Azure client or credentials object
+            upload_chunk_size (int): upload chunk size
+            download_chunk_size (int): download chunk size
+
         """
         self.credentials = credentials.credentials
         self.subscription_id = credentials.subscription_id
@@ -62,6 +73,9 @@ class AzureStorageProviderService(BaseStorageProviderService):
         self._blob_service_clients: LRUCache[str, BlobServiceClient] = LRUCache(
             maxsize=self.MAX_CACHE_SIZE
         )
+
+        self.upload_chunk_size = upload_chunk_size * 1024 * 1024
+        self.download_chunk_size = download_chunk_size * 1024 * 1024
 
     def get_accounts_client(self) -> StorageManagementClient:
         """
@@ -264,7 +278,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             storage_path = storage_path_parts[1] if len(storage_path_parts) > 1 else ""
             blob_name = os.path.join(storage_path, dest_path or source_path.name)
 
-            if source_path.stat().st_size <= MULTIPART_UPLOAD_BLOCK_SIZE:
+            if source_path.stat().st_size <= self.upload_chunk_size:
                 blob_client = containers_client.get_container_client(container)
                 with open(source_path, "rb") as file_handle:
                     blob_client.upload_blob(
@@ -280,7 +294,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
                             container,
                             source_path,
                             blob_name,
-                            MULTIPART_UPLOAD_BLOCK_SIZE,
+                            self.upload_chunk_size,
                             cancel_event,
                             progress_callback,
                         )
@@ -324,7 +338,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             total_bytes = blob_stream.properties.size
 
             with open(download_tmp_path, "wb") as file:
-                if total_bytes <= DOWNLOAD_BLOCK_SIZE:
+                if total_bytes <= self.download_chunk_size:
                     file.write(blob_stream.readall())
                 else:
                     downloaded = 0
@@ -332,7 +346,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
                         if cancel_event and cancel_event.is_set():
                             raise Exception("Download cancelled")
 
-                        chunk = blob_stream.read(DOWNLOAD_BLOCK_SIZE)
+                        chunk = blob_stream.read(self.download_chunk_size)
                         if not chunk:
                             break
 
