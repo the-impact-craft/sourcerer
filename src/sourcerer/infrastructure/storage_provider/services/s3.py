@@ -28,6 +28,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
     DeleteStorageItemsError,
     ListStorageItemsError,
     ListStoragesError,
+    PresignedUrlError,
     ReadStorageItemsError,
     StoragePermissionError,
     UploadStorageItemsError,
@@ -68,6 +69,7 @@ class S3ProviderService(BaseStorageProviderService):
         self.credentials = credentials
         self.upload_chunk_size = upload_chunk_size * 1024 * 1024
         self.download_chunk_size = download_chunk_size * 1024 * 1024
+        self.presigned_url_expiration_period = 3600
 
     @property
     def client(self):
@@ -341,6 +343,29 @@ class S3ProviderService(BaseStorageProviderService):
             return metadata.get("ContentLength")
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex
+
+    def get_download_presigned_url(self, storage: str, key: str) -> str:
+        """Generate a presigned URL to share an S3 object
+
+        Args:
+            storage (str): The bucket name
+            key (str): The key/path of the item
+
+        Returns:
+            str: pre-signed url
+        """
+
+        try:
+            response = self.client.generate_presigned_url(
+                "get_object",
+                Params={"Bucket": storage, "Key": key},
+                ExpiresIn=self.presigned_url_expiration_period,
+            )
+        except Exception as ex:
+            raise PresignedUrlError(str(ex)) from ex
+
+        # The response contains the presigned URL
+        return response
 
     def _upload_storage_item_multipart(
         self,

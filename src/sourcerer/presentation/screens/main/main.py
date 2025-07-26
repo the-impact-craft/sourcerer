@@ -23,6 +23,7 @@ from sourcerer.infrastructure.access_credentials.services import CredentialsServ
 from sourcerer.infrastructure.settings.services import SettingsService
 from sourcerer.infrastructure.storage_provider.exceptions import (
     ListStorageItemsError,
+    PresignedUrlError,
 )
 from sourcerer.infrastructure.utils import generate_uuid
 from sourcerer.presentation.di_container import DiContainer
@@ -34,6 +35,9 @@ from sourcerer.presentation.screens.file_system_finder.main import (
 from sourcerer.presentation.screens.main.messages.delete_request import DeleteRequest
 from sourcerer.presentation.screens.main.messages.download_request import (
     DownloadRequest,
+)
+from sourcerer.presentation.screens.main.messages.presign_url_request import (
+    PresignedUrlRequest,
 )
 from sourcerer.presentation.screens.main.messages.preview_request import PreviewRequest
 from sourcerer.presentation.screens.main.messages.refresh_storages_list_request import (
@@ -512,6 +516,27 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                 settings=self.settings,
             )
         )
+
+    @on(PresignedUrlRequest)
+    def on_presigned_ur_request(self, event: PresignedUrlRequest):
+        provider_service = get_provider_service_by_access_uuid(
+            event.access_credentials_uuid,
+            self.credentials_service,
+            self.settings,
+        )
+        if provider_service is None:
+            self.notify(f"Could not create presigned url for {event.path}")
+            return
+        try:
+            url = provider_service.get_download_presigned_url(
+                event.storage_name, event.path
+            )
+        except PresignedUrlError:
+            self.notify(f"Could not create presigned url for {event.path}")
+            return
+
+        self.copy_to_clipboard(url)
+        self.notify("🔗Presigned url has been copied to clipboard")
 
     @on(RefreshStoragesListRequest)
     def on_refresh_storages_list_request(self, _: RefreshStoragesListRequest):

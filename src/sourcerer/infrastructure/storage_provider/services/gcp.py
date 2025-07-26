@@ -4,6 +4,7 @@ Implementation of GCP storage provider services.
 This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
+import datetime
 import shutil
 import tempfile
 import threading
@@ -27,6 +28,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
     DeleteStorageItemsError,
     ListStorageItemsError,
     ListStoragesError,
+    PresignedUrlError,
     ReadStorageItemsError,
     StoragePermissionError,
     UploadStorageItemsError,
@@ -67,6 +69,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
         self.client = credentials
         self.upload_chunk_size = upload_chunk_size * 1024 * 1024
         self.download_chunk_size = download_chunk_size * 1024 * 1024
+        self.presigned_url_expiration_period = 3600
 
     def list_storages(self) -> list[Storage]:
         """
@@ -338,6 +341,35 @@ class GCPStorageProviderService(BaseStorageProviderService):
             return blob.size
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex
+
+    def get_download_presigned_url(self, storage: str, key: str) -> str:
+        """Generate a presigned URL to share an S3 object
+
+        Args:
+            storage (str): The bucket name
+            key (str): The key/path of the item
+
+        Returns:
+            str: pre-signed url
+        """
+
+        try:
+            bucket = self.client.bucket(storage)
+            blob = bucket.get_blob(key)
+            if not blob:
+                raise BlobNotFoundError(key)
+
+            response = blob.generate_signed_url(
+                version="v4",
+                expiration=datetime.timedelta(
+                    seconds=self.presigned_url_expiration_period
+                ),
+                method="GET",
+            )
+        except Exception as ex:
+            raise PresignedUrlError(str(ex)) from ex
+
+        return response
 
     def _upload_storage_item_multipart(
         self,

@@ -12,11 +12,17 @@ import tempfile
 import threading
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
 from azure.mgmt.storage import StorageManagementClient
-from azure.storage.blob import BlobBlock, BlobServiceClient
+from azure.storage.blob import (
+    BlobBlock,
+    BlobSasPermissions,
+    BlobServiceClient,
+    generate_blob_sas,
+)
 from cachetools import LRUCache
 from platformdirs import user_downloads_dir
 
@@ -34,6 +40,7 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
     DeleteStorageItemsError,
     ListStorageItemsError,
     ListStoragesError,
+    PresignedUrlError,
     ReadStorageItemsError,
     UploadStorageItemsError,
 )
@@ -76,6 +83,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
 
         self.upload_chunk_size = upload_chunk_size * 1024 * 1024
         self.download_chunk_size = download_chunk_size * 1024 * 1024
+        self.presigned_url_expiration_period = 3600
 
     def get_accounts_client(self) -> StorageManagementClient:
         """
@@ -383,6 +391,44 @@ class AzureStorageProviderService(BaseStorageProviderService):
             return props.size
         except Exception as ex:
             raise ReadStorageItemsError(str(ex)) from ex
+
+    def get_download_presigned_url(self, storage: str, key: str) -> str:
+        """Generate a presigned URL to share an S3 object
+
+        Args:
+            storage (str): The bucket name
+            key (str): The key/path of the item
+
+        Returns:
+            str: pre-signed url
+        """
+
+        try:
+            account_name = storage
+
+            containers_client = self.get_containers_client(storage)
+            path_parts = key.split("/", 1)
+            container, blob_name = path_parts
+
+            user_delegation_key = containers_client.get_user_delegation_key(
+                key_start_time=datetime.utcnow(),
+                key_expiry_time=datetime.utcnow() + timedelta(hours=1),
+            )
+
+            sas_token = generate_blob_sas(
+                account_name=account_name,
+                container_name=container,
+                blob_name=blob_name,
+                permission=BlobSasPermissions(read=True),
+                expiry=datetime.utcnow() + timedelta(hours=1),
+                user_delegation_key=user_delegation_key,
+            )
+            url = f"https://{account_name}.blob.core.windows.net/{container}/{blob_name}?{sas_token}"
+
+        except Exception as ex:
+            raise PresignedUrlError(str(ex)) from ex
+
+        return url
 
     async def upload_multipart(
         self,
