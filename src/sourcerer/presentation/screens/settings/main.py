@@ -1,7 +1,8 @@
 from textual import on
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
-from textual.widgets import Checkbox, Rule, Select, Static
+from textual.validation import Number
+from textual.widgets import Checkbox, Input, Rule, Select, Static
 
 from sourcerer.domain.settings.entities import Settings, SettingsFields
 from sourcerer.presentation.screens.shared.modal_screens import ExitBoundModalScreen
@@ -36,6 +37,28 @@ class SettingsScreen(ExitBoundModalScreen):
                 )
 
             yield Rule()
+            with Horizontal():
+                yield Static("Upload chunk size (MB):")
+                yield Input(
+                    type="integer",
+                    id="upload_chunk_size",
+                    value=str(self.settings.upload_chunk_size),
+                    validators=[
+                        Number(minimum=1, maximum=1000),
+                    ],
+                )
+            with Horizontal():
+                yield Static("Download chunk size (MB):")
+                yield Input(
+                    type="integer",
+                    id="download_chunk_size",
+                    value=str(self.settings.download_chunk_size),
+                    validators=[
+                        Number(minimum=1, maximum=1000),
+                    ],
+                )
+
+            yield Rule()
             with Horizontal(id="controls"):
                 yield Button("Save", name="save")
                 yield Button("Close", name="close")
@@ -46,12 +69,26 @@ class SettingsScreen(ExitBoundModalScreen):
         if event.action == "close":
             self.action_cancel_screen()
         elif event.action == "save":
+            upload_chunk_size = self.query_one("Input#upload_chunk_size", Input).value
+            download_chunk_size = self.query_one(
+                "Input#download_chunk_size", Input
+            ).value
+
+            if not upload_chunk_size.isdigit():
+                self.notify("Invalid upload chunk size", severity="error")
+                return
+            if not download_chunk_size.isdigit():
+                self.notify("Invalid download chunk size", severity="error")
+                return
+
             self.dismiss(
                 {
                     SettingsFields.theme: self.query_one("Select#theme", Select).value,
                     SettingsFields.group_by_access_credentials: self.query_one(
                         Checkbox
                     ).value,
+                    SettingsFields.upload_chunk_size: int(upload_chunk_size),
+                    SettingsFields.download_chunk_size: int(download_chunk_size),
                 }
             )
 

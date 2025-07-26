@@ -20,8 +20,7 @@ from sourcerer.infrastructure.storage_provider.services.gcp import (
 )
 from sourcerer.infrastructure.storage_provider.services.s3 import S3ProviderService
 from sourcerer.settings import (
-    DOWNLOAD_BLOCK_SIZE,
-    MULTIPART_UPLOAD_BLOCK_SIZE,
+    DEFAULT_UPLOAD_CHUNK_SIZE_MB,
     PAGE_SIZE,
 )
 
@@ -305,7 +304,7 @@ class TestS3ProviderService(unittest.TestCase):
             )
 
         mock_file = mock_open(read_data=b"mocked file content")
-        stat_mock.st_size = MULTIPART_UPLOAD_BLOCK_SIZE + 1
+        stat_mock.st_size = DEFAULT_UPLOAD_CHUNK_SIZE_MB * 1024 * 1024 + 1
         with (
             patch("pathlib.Path.stat", return_value=stat_mock),
             patch("builtins.open", mock_file),
@@ -667,7 +666,9 @@ class TestGCPStorageProviderService(unittest.TestCase):
         # Assert
         self.mock_client.bucket.assert_called_once_with(self.test_bucket)
         mock_bucket.get_blob.assert_called_once_with(self.test_key)
-        reader_mock.read.assert_called_once_with(DOWNLOAD_BLOCK_SIZE)
+        reader_mock.read.assert_called_once_with(
+            DEFAULT_UPLOAD_CHUNK_SIZE_MB * 1024 * 1024
+        )
 
     def test_get_file_size(self):
         """Test get_file_size method."""

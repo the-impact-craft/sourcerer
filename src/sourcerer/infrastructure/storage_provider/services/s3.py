@@ -34,7 +34,12 @@ from sourcerer.infrastructure.storage_provider.exceptions import (
 )
 from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
-from sourcerer.settings import MULTIPART_UPLOAD_BLOCK_SIZE, PAGE_SIZE, PATH_DELIMITER
+from sourcerer.settings import (
+    DEFAULT_DOWNLOAD_CHUNK_SIZE_MB,
+    DEFAULT_UPLOAD_CHUNK_SIZE_MB,
+    PAGE_SIZE,
+    PATH_DELIMITER,
+)
 
 
 @storage_provider(StorageProvider.S3)
@@ -46,14 +51,23 @@ class S3ProviderService(BaseStorageProviderService):
     implementing the BaseStorageProviderService interface.
     """
 
-    def __init__(self, credentials: Any):
+    def __init__(
+        self,
+        credentials: Any,
+        upload_chunk_size=DEFAULT_UPLOAD_CHUNK_SIZE_MB,
+        download_chunk_size=DEFAULT_DOWNLOAD_CHUNK_SIZE_MB,
+    ):
         """
         Initialize the service with AWS credentials.
 
         Args:
             credentials (Any): AWS session or credentials object
+            upload_chunk_size (int): upload chunk size
+            download_chunk_size (int): download chunk size
         """
         self.credentials = credentials
+        self.upload_chunk_size = upload_chunk_size * 1024 * 1024
+        self.download_chunk_size = download_chunk_size * 1024 * 1024
 
     @property
     def client(self):
@@ -250,14 +264,14 @@ class S3ProviderService(BaseStorageProviderService):
         """
         try:
             dest_path = str(Path(storage_path or "") / (dest_path or source_path.name))
-            if source_path.stat().st_size <= MULTIPART_UPLOAD_BLOCK_SIZE:
+            if source_path.stat().st_size <= self.upload_chunk_size:
                 self.client.upload_file(source_path, storage, dest_path)
             else:
                 self._upload_storage_item_multipart(
                     source_path,
                     storage,
                     dest_path,
-                    MULTIPART_UPLOAD_BLOCK_SIZE,
+                    self.upload_chunk_size,
                     cancel_event,
                     progress_callback,
                 )

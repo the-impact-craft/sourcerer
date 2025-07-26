@@ -160,6 +160,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
         key,
         file_size,
         access_credentials_uuid,
+        settings,
         *args,
         credentials_service: CredentialsService = Provide[
             DiContainer.credentials_repository
@@ -173,6 +174,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
         self.file_size = file_size
         self.access_credentials_uuid = access_credentials_uuid
         self.credentials_service = credentials_service
+        self.settings = settings
         self.content = None
 
     def compose(self) -> ComposeResult:
@@ -191,7 +193,9 @@ class PreviewContentScreen(ExitBoundModalScreen):
         text_log.theme = SOURCERER_THEME_NAME
 
         provider_service = get_provider_service_by_access_uuid(
-            self.access_credentials_uuid, self.credentials_service
+            self.access_credentials_uuid,
+            self.credentials_service,
+            self.settings,
         )
         if not provider_service:
             self.notify("Could not read file :(", severity="error")
