@@ -151,7 +151,7 @@ class BaseStorageProviderService(ABC):
             key (str): The key/path of the item
 
         Returns:
-            str: presigned url
+            str: Presigned URL for accessing the blob
 
         """
 

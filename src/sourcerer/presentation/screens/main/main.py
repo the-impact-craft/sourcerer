@@ -518,7 +518,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         )
 
     @on(PresignedUrlRequest)
-    def on_presigned_ur_request(self, event: PresignedUrlRequest):
+    def on_presigned_url_request(self, event: PresignedUrlRequest):
         provider_service = get_provider_service_by_access_uuid(
             event.access_credentials_uuid,
             self.credentials_service,

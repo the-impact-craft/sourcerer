@@ -694,7 +694,7 @@ class StorageContentContainer(Vertical):
         )
 
     @on(FileItem.PresignedUrl)
-    def on_file_item_presigned_url(self, event: FileItem.Preview):
+    def on_file_item_presigned_url(self, event: FileItem.PresignedUrl):
         if not self.storage or not self.access_credentials_uuid:
             return
         self.post_message(

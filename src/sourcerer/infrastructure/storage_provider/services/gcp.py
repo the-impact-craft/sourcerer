@@ -343,14 +343,14 @@ class GCPStorageProviderService(BaseStorageProviderService):
             raise ReadStorageItemsError(str(ex)) from ex
 
     def get_download_presigned_url(self, storage: str, key: str) -> str:
-        """Generate a presigned URL to share an S3 object
+        """Generate a presigned URL to share an GCP object
 
         Args:
             storage (str): The bucket name
             key (str): The key/path of the item
 
         Returns:
-            str: pre-signed url
+            str: Presigned URL for accessing the blob
         """
 
         try:

@@ -352,7 +352,7 @@ class S3ProviderService(BaseStorageProviderService):
             key (str): The key/path of the item
 
         Returns:
-            str: pre-signed url
+            str: Presigned URL for accessing the blob
         """
 
         try:
