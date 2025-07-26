@@ -33,6 +33,9 @@ from sourcerer.presentation.screens.main.messages.delete_request import DeleteRe
 from sourcerer.presentation.screens.main.messages.download_request import (
     DownloadRequest,
 )
+from sourcerer.presentation.screens.main.messages.presign_url_request import (
+    PresignedUrlRequest,
+)
 from sourcerer.presentation.screens.main.messages.preview_request import PreviewRequest
 from sourcerer.presentation.screens.main.messages.select_storage_item import (
     SelectStorageItem,
@@ -50,6 +53,7 @@ from sourcerer.settings import (
     DIRECTORY_ICON,
     DOWNLOAD_ICON,
     FILE_ICON,
+    PRESIGNED_URL_ICON,
     PREVIEW_ICON,
     UPLOAD_ICON,
 )
@@ -68,6 +72,7 @@ class ActionType(Enum):
     DOWNLOAD = auto()
     UNCHECK_ALL = auto()
     PREVIEW = auto()
+    PRESIGNED_URL = auto()
 
     @classmethod
     def from_string(cls, action_str: str) -> "ActionType":
@@ -89,6 +94,7 @@ class ActionType(Enum):
             "download": cls.DOWNLOAD,
             "uncheck_all": cls.UNCHECK_ALL,
             "preview": cls.PREVIEW,
+            "presigned_url": cls.PRESIGNED_URL,
         }
 
         if action_str not in action_map:
@@ -165,6 +171,10 @@ class PathSelector(Label):
                 focus_content=True,
             )
         )
+
+
+class FileActionButton(Button):
+    can_focus = False
 
 
 class StorageContentItem(Horizontal):
@@ -311,6 +321,12 @@ class FileItem(StorageContentItem):
         size: int
 
     @dataclass
+    class PresignedUrl(Message):
+        """Message sent when a file preview is selected."""
+
+        name: str
+
+    @dataclass
     class Unselect(Message):
         """Message sent when a file is unselected."""
 
@@ -340,8 +356,11 @@ class FileItem(StorageContentItem):
         yield FileMetaLabel(
             str(self.file.date_modified), classes="file_date", markup=False
         )
+        yield FileActionButton(
+            f"{PRESIGNED_URL_ICON}", name="presigned_url", classes="presigned_url"
+        )
         if self.file.is_text:
-            yield Button(f"{PREVIEW_ICON}", name="preview", classes="download")
+            yield FileActionButton(f"{PREVIEW_ICON}", name="preview", classes="preview")
 
     def on_key(self, event: events.Key) -> None:
         """Handle key events to toggle file selection."""
@@ -359,11 +378,17 @@ class FileItem(StorageContentItem):
 
     def _select(self, widget=None):
         preview_button = None
+        presign_url_button = None
         with contextlib.suppress(NoMatches):
-            preview_button = self.query_one(Button)
+            preview_button = self.query_one(".preview")
+        with contextlib.suppress(NoMatches):
+            presign_url_button = self.query_one(".presigned_url")
 
         if widget is preview_button:
             self.post_message(self.Preview(self.file.key, self.file.size))
+            return
+        if widget is presign_url_button:
+            self.post_message(self.PresignedUrl(self.file.key))
             return
 
         checkbox = self.query_one(UnfocusableCheckbox)
@@ -613,7 +638,7 @@ class StorageContentContainer(Vertical):
             yield FileMetaLabel("Name", classes="file_name")
             yield FileMetaLabel("Size", classes="file_size")
             yield FileMetaLabel("Date modified", classes="file_date")
-            yield FileMetaLabel("Preview", classes="preview")
+            yield FileMetaLabel("Actions", classes="preview")
         with ScrollVerticalContainerWithNoBindings(id="content", can_focus=False):
             for folder in self.storage_content.folders:
                 yield FolderItem(
@@ -669,6 +694,18 @@ class StorageContentContainer(Vertical):
                 self.access_credentials_uuid,
                 os.path.join(self.path, event.name) if self.path else event.name,
                 event.size,
+            )
+        )
+
+    @on(FileItem.PresignedUrl)
+    def on_file_item_presigned_url(self, event: FileItem.PresignedUrl):
+        if not self.storage or not self.access_credentials_uuid:
+            return
+        self.post_message(
+            PresignedUrlRequest(
+                self.storage,
+                self.access_credentials_uuid,
+                os.path.join(self.path, event.name) if self.path else event.name,
             )
         )
 

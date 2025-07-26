@@ -141,6 +141,20 @@ class BaseStorageProviderService(ABC):
             int: Size of the storage item in bytes
         """
 
+    @abstractmethod
+    def get_download_presigned_url(self, storage: str, key: str) -> str:
+        """
+        Create presigned url for file download
+
+         Args:
+            storage (str): The storage identifier
+            key (str): The key/path of the item
+
+        Returns:
+            str: Presigned URL for accessing the blob
+
+        """
+
     def _normalize_path(self, path: str | None) -> str:
         if path:
             return path.rstrip("/") + "/"

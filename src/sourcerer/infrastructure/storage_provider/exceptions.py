@@ -67,6 +67,12 @@ class ReadStorageItemsError(BaseStorageProviderError):
     """
 
 
+class PresignedUrlError(BaseStorageProviderError):
+    """
+    Exception raised for errors encountered during presigned URL operations with cloud storage providers.
+    """
+
+
 class DeleteStorageItemsError(BaseStorageProviderError):
     """
     Exception raised for errors that occur during the deletion of storage items.

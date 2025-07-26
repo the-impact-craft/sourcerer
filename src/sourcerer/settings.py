@@ -38,6 +38,7 @@ FILE_ICON = "📄"
 DOWNLOAD_ICON = "📥"
 UPLOAD_ICON = "📤"
 PREVIEW_ICON = "✨"
+PRESIGNED_URL_ICON = "🔗"
 
 # Time threshold for detecting double-clicks (in seconds)
 DOUBLE_CLICK_THRESHOLD = 1.5
