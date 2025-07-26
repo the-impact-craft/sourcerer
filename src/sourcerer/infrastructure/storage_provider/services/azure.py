@@ -228,6 +228,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
         try:
             containers_client = self.get_containers_client(storage)
             path_parts = key.split("/", 1)
+            if len(path_parts) != 2:
+                raise ValueError("Invalid key format")
             container, blob_name = path_parts
             blobs_client = containers_client.get_container_client(container)
             content = blobs_client.download_blob(blob_name).readall()
@@ -246,6 +248,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
         try:
             containers_client = self.get_containers_client(storage)
             path_parts = key.split("/", 1)
+            if len(path_parts) != 2:
+                raise ValueError("Invalid key format")
             container, blob_name = path_parts
             blob_client = containers_client.get_container_client(container)
             blob_client.delete_blob(blob_name)
@@ -340,6 +344,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
 
             containers_client = self.get_containers_client(storage)
             path_parts = key.split("/", 1)
+            if len(path_parts) != 2:
+                raise ValueError("Invalid key format")
             container, blob_name = path_parts
             blob_client = containers_client.get_container_client(container)
             blob_stream = blob_client.download_blob(blob_name)
@@ -385,6 +391,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
         try:
             containers_client = self.get_containers_client(storage)
             path_parts = key.split("/", 1)
+            if len(path_parts) != 2:
+                raise ValueError("Invalid key format")
             container, blob_name = path_parts
             blob_client = containers_client.get_blob_client(container, blob_name)
             props = blob_client.get_blob_properties()
@@ -408,11 +416,14 @@ class AzureStorageProviderService(BaseStorageProviderService):
 
             containers_client = self.get_containers_client(storage)
             path_parts = key.split("/", 1)
+            if len(path_parts) != 2:
+                raise ValueError("Invalid key format")
             container, blob_name = path_parts
 
             user_delegation_key = containers_client.get_user_delegation_key(
                 key_start_time=datetime.utcnow(),
-                key_expiry_time=datetime.utcnow() + timedelta(hours=1),
+                key_expiry_time=datetime.utcnow()
+                + timedelta(seconds=self.presigned_url_expiration_period),
             )
 
             sas_token = generate_blob_sas(
@@ -420,7 +431,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
                 container_name=container,
                 blob_name=blob_name,
                 permission=BlobSasPermissions(read=True),
-                expiry=datetime.utcnow() + timedelta(hours=1),
+                expiry=datetime.utcnow()
+                + timedelta(seconds=self.presigned_url_expiration_period),
                 user_delegation_key=user_delegation_key,
             )
             url = f"https://{account_name}.blob.core.windows.net/{container}/{blob_name}?{sas_token}"
