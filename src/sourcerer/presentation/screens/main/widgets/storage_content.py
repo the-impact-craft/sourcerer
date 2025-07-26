@@ -173,6 +173,10 @@ class PathSelector(Label):
         )
 
 
+class FileActionButton(Button):
+    can_focus = False
+
+
 class StorageContentItem(Horizontal):
     DEFAULT_CSS = """
         StorageContentItem.active {
@@ -352,11 +356,11 @@ class FileItem(StorageContentItem):
         yield FileMetaLabel(
             str(self.file.date_modified), classes="file_date", markup=False
         )
-        yield Button(
+        yield FileActionButton(
             f"{PRESIGNED_URL_ICON}", name="presigned_url", classes="presigned_url"
         )
         if self.file.is_text:
-            yield Button(f"{PREVIEW_ICON}", name="preview", classes="preview")
+            yield FileActionButton(f"{PREVIEW_ICON}", name="preview", classes="preview")
 
     def on_key(self, event: events.Key) -> None:
         """Handle key events to toggle file selection."""
