@@ -65,6 +65,7 @@ from sourcerer.presentation.screens.preview_content.main import PreviewContentSc
 from sourcerer.presentation.screens.provider_creds_list.main import (
     ProviderCredsListScreen,
 )
+from sourcerer.presentation.screens.question.main import QuestionScreen
 from sourcerer.presentation.screens.settings.main import SettingsScreen
 from sourcerer.presentation.screens.storage_action_progress.main import (
     DeleteKey,
@@ -436,24 +437,33 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         Args:
             event (DeleteRequest): The delete request event containing file details
         """
-        self.push_screen(
-            StorageActionProgressScreen(
-                storage_name=event.storage_name,
-                provider_service=get_provider_service_by_access_uuid(
-                    event.access_credentials_uuid,
-                    self.credentials_service,
-                    self.settings,
+
+        def trigger_delete_action(process_delete_request):
+            if not process_delete_request:
+                return
+            self.push_screen(
+                StorageActionProgressScreen(
+                    storage_name=event.storage_name,
+                    provider_service=get_provider_service_by_access_uuid(
+                        event.access_credentials_uuid,
+                        self.credentials_service,
+                        self.settings,
+                    ),
+                    path=event.path,
+                    keys=[
+                        DeleteKey(display_name=key, uuid=generate_uuid(), path=key)
+                        for key in event.keys
+                    ],
+                    action="delete",
                 ),
-                path=event.path,
-                keys=[
-                    DeleteKey(display_name=key, uuid=generate_uuid(), path=key)
-                    for key in event.keys
-                ],
-                action="delete",
-            ),
-            callback=lambda x: self.after_bulk_operation_callback(
-                event.access_credentials_uuid, event.storage_name, event.path
-            ),
+                callback=lambda x: self.after_bulk_operation_callback(
+                    event.access_credentials_uuid, event.storage_name, event.path
+                ),
+            )
+
+        self.app.push_screen(
+            QuestionScreen(f"Are you sure you want to delete {len(event.keys)} keys?"),
+            callback=trigger_delete_action,
         )
 
     def after_bulk_operation_callback(

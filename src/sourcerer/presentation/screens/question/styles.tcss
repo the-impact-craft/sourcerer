@@ -6,7 +6,7 @@ QuestionScreen {
     padding: 1 2 0 2;
     margin: 0 0;
     width: 50;
-    height: 10;
+    height: auto;
     border: solid $warning-darken-1;
 
     & > Static {
@@ -16,6 +16,7 @@ QuestionScreen {
     }
 
     & > Horizontal {
+      height: auto;
       align: center bottom;
        & > Button {
         width: 5;
