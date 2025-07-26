@@ -9,8 +9,8 @@ from sourcerer.settings import (
 class Settings(Struct):
     theme: str = "github-dark"
     group_by_access_credentials: bool = False
-    upload_chunk_size: int = DEFAULT_DOWNLOAD_CHUNK_SIZE_MB
-    download_chunk_size: int = DEFAULT_UPLOAD_CHUNK_SIZE_MB
+    upload_chunk_size: int = DEFAULT_UPLOAD_CHUNK_SIZE_MB
+    download_chunk_size: int = DEFAULT_DOWNLOAD_CHUNK_SIZE_MB
 
 
 class SettingsFields:
