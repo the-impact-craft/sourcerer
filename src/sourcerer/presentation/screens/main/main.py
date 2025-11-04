@@ -289,6 +289,11 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                 SettingsFields.download_chunk_size, download_chunk_size
             )
 
+        if presigned_url_ttl := settings.get(SettingsFields.presigned_url_ttl_seconds):
+            self.settings_service.set_setting(
+                SettingsFields.presigned_url_ttl_seconds, presigned_url_ttl
+            )
+
         self.settings = self.settings_service.load_settings()
 
     def modal_screen_callback(self, requires_storage_refresh: bool | None = True):

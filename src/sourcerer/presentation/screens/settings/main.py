@@ -57,6 +57,16 @@ class SettingsScreen(ExitBoundModalScreen):
                         Number(minimum=1, maximum=1000),
                     ],
                 )
+            with Horizontal():
+                yield Static("Presigned url ttl (sec):")
+                yield Input(
+                    type="integer",
+                    id="presigned_url_ttl_seconds",
+                    value=str(self.settings.presigned_url_ttl_seconds),
+                    validators=[
+                        Number(minimum=1, maximum=604800),
+                    ],
+                )
 
             yield Rule()
             with Horizontal(id="controls"):
@@ -73,12 +83,18 @@ class SettingsScreen(ExitBoundModalScreen):
             download_chunk_size = self.query_one(
                 "Input#download_chunk_size", Input
             ).value
+            presigned_url_ttl_seconds = self.query_one(
+                "Input#presigned_url_ttl_seconds", Input
+            ).value
 
             if not upload_chunk_size.isdigit():
                 self.notify("Invalid upload chunk size", severity="error")
                 return
             if not download_chunk_size.isdigit():
                 self.notify("Invalid download chunk size", severity="error")
+                return
+            if not presigned_url_ttl_seconds.isdigit():
+                self.notify("Invalid presigned url ttl", severity="error")
                 return
 
             self.dismiss(
@@ -89,6 +105,9 @@ class SettingsScreen(ExitBoundModalScreen):
                     ).value,
                     SettingsFields.upload_chunk_size: int(upload_chunk_size),
                     SettingsFields.download_chunk_size: int(download_chunk_size),
+                    SettingsFields.presigned_url_ttl_seconds: int(
+                        presigned_url_ttl_seconds
+                    ),
                 }
             )
 

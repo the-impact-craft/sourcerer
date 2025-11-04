@@ -37,6 +37,7 @@ from sourcerer.infrastructure.storage_provider.registry import storage_provider
 from sourcerer.infrastructure.utils import generate_uuid, is_text_file
 from sourcerer.settings import (
     DEFAULT_DOWNLOAD_CHUNK_SIZE_MB,
+    DEFAULT_PRESIGNED_URL_TTL_SECONDS,
     DEFAULT_UPLOAD_CHUNK_SIZE_MB,
     PAGE_SIZE,
     PATH_DELIMITER,
@@ -57,6 +58,7 @@ class S3ProviderService(BaseStorageProviderService):
         credentials: Any,
         upload_chunk_size=DEFAULT_UPLOAD_CHUNK_SIZE_MB,
         download_chunk_size=DEFAULT_DOWNLOAD_CHUNK_SIZE_MB,
+        presigned_url_ttl_seconds=DEFAULT_PRESIGNED_URL_TTL_SECONDS,
     ):
         """
         Initialize the service with AWS credentials.
@@ -69,7 +71,7 @@ class S3ProviderService(BaseStorageProviderService):
         self.credentials = credentials
         self.upload_chunk_size = upload_chunk_size * 1024 * 1024
         self.download_chunk_size = download_chunk_size * 1024 * 1024
-        self.presigned_url_expiration_period = 3600
+        self.presigned_url_expiration_period = presigned_url_ttl_seconds
 
     @property
     def client(self):

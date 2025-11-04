@@ -48,6 +48,7 @@ def _provider_service_cache_lru_key(credentials, settings: Settings):
             credentials.uuid,
             str(settings.upload_chunk_size),
             str(settings.download_chunk_size),
+            str(settings.presigned_url_ttl_seconds),
         ]
     )
 
@@ -106,7 +107,10 @@ def get_provider_service_by_access_credentials(
     except CredentialsAuthError:
         return None
     service = provider_service_class(
-        auth_credentials, settings.upload_chunk_size, settings.download_chunk_size
+        auth_credentials,
+        settings.upload_chunk_size,
+        settings.download_chunk_size,
+        settings.presigned_url_ttl_seconds,
     )
     with _provider_service_cache_lock:
         _provider_service_cache[cache_key] = service
