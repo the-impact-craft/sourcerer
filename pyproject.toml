@@ -30,6 +30,12 @@ dependencies = [
     "msgspec>=0.19.0",
     "packaging>=25.0",
     "cachetools>=5.5.2",
+    "azure-core>=1.38.0",
+    "urllib3>=2.6.3",
+    "protobuf>=6.31.1",
+    "aiohttp>=3.13.3",
+    "uv>=0.9.6",
+    "filelock>=3.20.1",
 ]
 
 [project.scripts]
@@ -42,7 +48,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 dev = [
     "bandit>=1.8.3",
-    "black>=25.1.0",
+    "black>=26.3.1",
     "coverage>=7.8.0",
     "hatch>=1.14.1",
     "mkdocs-material>=9.6.12",
@@ -58,7 +64,7 @@ dev = [
 [project.optional-dependencies]
 dev = [
     "bandit>=1.8.3",
-    "black>=25.1.0",
+    "black>=26.3.1",
     "coverage>=7.8.0",
     "hatch>=1.14.1",
     "mkdocs-material>=9.6.12",
