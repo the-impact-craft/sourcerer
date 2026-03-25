@@ -21,9 +21,7 @@ def main():
     4. Creates and runs the main application window
     """
     di_container = DiContainer()
-    di_container.config.access_credential_method_registry.from_value(
-        access_credential_method_registry
-    )
+    di_container.config.access_credential_method_registry.from_value(access_credential_method_registry)
     di_container.wire(packages=["sourcerer"])
 
     DiContainer.db().prepare_db()

@@ -67,14 +67,9 @@ class FileSystemNavigationModal(ExitBoundModalScreen):
         if not validation_rules:
             validation_rules = []
 
-        if not all(
-            isinstance(rule, FileSystemSelectionValidationRule)
-            for rule in validation_rules
-        ):
+        if not all(isinstance(rule, FileSystemSelectionValidationRule) for rule in validation_rules):
             self.log.error("Invalid validation rules provided")
-            raise TypeError(
-                "Each validation rule must be an instance of FileSystemSelectionValidationRule"
-            )
+            raise TypeError("Each validation rule must be an instance of FileSystemSelectionValidationRule")
 
         self.file_system_service = file_system_service
         self.work_dir = file_system_service.work_dir
@@ -100,9 +95,7 @@ class FileSystemNavigationModal(ExitBoundModalScreen):
         """
         with Container(id=self.CONTAINER_ID):
             yield Static("", id="active-path")
-            yield FileSystemNavigator(
-                work_dir=self.work_dir, file_system_service=self.file_system_service
-            )
+            yield FileSystemNavigator(work_dir=self.work_dir, file_system_service=self.file_system_service)
             yield Horizontal(
                 Button("Close", name="close", id="close", classes="button"),
                 Button("Apply", name="apply", id="apply", classes="button"),
@@ -153,20 +146,14 @@ class FileSystemNavigationModal(ExitBoundModalScreen):
             active_path_label = self.query_one("#active-path", Static)
         except NoMatches:
             return
-        label = str(
-            event.path.relative_to(  # ty: ignore[possibly-unbound-attribute]
-                self.work_dir
-            )
-        )
+        label = str(event.path.relative_to(self.work_dir))  # ty: ignore[possibly-unbound-attribute]
         if event.path.is_dir():  # ty: ignore[possibly-unbound-attribute]
             label += "/"
         active_path_label.update(label)
         self.active_path = event.path
 
     @on(FileSystemNavigator.ActivePathFileDoubleClicked)
-    def on_path_double_clicked(
-        self, event: FileSystemNavigator.ActivePathFileDoubleClicked
-    ):
+    def on_path_double_clicked(self, event: FileSystemNavigator.ActivePathFileDoubleClicked):
         """
         Handle the event when a file is double-clicked in the file system navigator.
 

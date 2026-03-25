@@ -35,9 +35,7 @@ class ControlsEnum(Enum):
 
 
 class StorageRow(Horizontal):
-    def __init__(
-        self, storage: Storage, storages_service: StoragesService, *args, **kwargs
-    ):
+    def __init__(self, storage: Storage, storages_service: StoragesService, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.storage = storage
         self.storages_service = storages_service
@@ -93,9 +91,7 @@ class StoragesListScreen(RefreshTriggerableModalScreen):
 
     def __init__(
         self,
-        credentials_service: CredentialsService = Provide[
-            DiContainer.credentials_service
-        ],
+        credentials_service: CredentialsService = Provide[DiContainer.credentials_service],
         storages_service: StoragesService = Provide[DiContainer.storages_service],
         *args,
         **kwargs,

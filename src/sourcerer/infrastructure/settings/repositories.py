@@ -23,9 +23,7 @@ class SQLAlchemySettingsRepository(BaseSettingsRepository):
         type_hints = get_type_hints(Settings)
         return Settings(
             **{
-                setting.key: self.parse_value(
-                    setting.key, setting.value, type_hints.get(setting.key, str)
-                )
+                setting.key: self.parse_value(setting.key, setting.value, type_hints.get(setting.key, str))
                 for setting in settings
             }
         )

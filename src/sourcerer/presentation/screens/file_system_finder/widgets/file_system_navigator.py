@@ -112,9 +112,7 @@ class FileSystemWidget(Widget):
         The method yields a Label widget that combines the predefined icon and the name of the entity
         (file or folder) for display in the user interface.
         """
-        yield Label(
-            f"{self.icon} {self.entity_name.name}", classes="folder-name"
-        ).with_tooltip(self.entity_name.name)
+        yield Label(f"{self.icon} {self.entity_name.name}", classes="folder-name").with_tooltip(self.entity_name.name)
 
     def on_click(self, _: events.Click) -> None:
         """
@@ -175,18 +173,12 @@ class FileSystemWidget(Widget):
         """
         current_click = (time(), self.entity_name)
 
-        self.send_event(
-            self.FolderClick if self.entity_name.is_dir() else self.FileClick
-        )
+        self.send_event(self.FolderClick if self.entity_name.is_dir() else self.FileClick)
         if (
             current_click[0] - self.last_file_click[0] < DOUBLE_CLICK_THRESHOLD
             and current_click[1] == self.last_file_click[1]
         ):
-            self.send_event(
-                self.FolderDoubleClick
-                if self.entity_name.is_dir()
-                else self.FileDoubleClick
-            )
+            self.send_event(self.FolderDoubleClick if self.entity_name.is_dir() else self.FileDoubleClick)
         self.last_file_click = current_click
 
     def send_event(self, event_name):
@@ -237,9 +229,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         Binding(KeyBindings.ARROW_UP.value, "cursor_up", "Cursor up", show=False),
         Binding(KeyBindings.ARROW_DOWN.value, "cursor_down", "Cursor down", show=False),
         Binding(KeyBindings.ARROW_LEFT.value, "cursor_left", "Cursor left", show=False),
-        Binding(
-            KeyBindings.ARROW_RIGHT.value, "cursor_right", "Cursor right", show=False
-        ),
+        Binding(KeyBindings.ARROW_RIGHT.value, "cursor_right", "Cursor right", show=False),
     ]
 
     MAIN_CONTAINER_ID: ClassVar[str] = "dirs_content"
@@ -259,9 +249,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
     class ActivePathFileDoubleClicked(Message):
         path: Path
 
-    def __init__(
-        self, work_dir: Path, file_system_service: FileSystemService, *args, **kwargs
-    ):
+    def __init__(self, work_dir: Path, file_system_service: FileSystemService, *args, **kwargs):
         """
         Initialize a FileSystemNavigator with a working directory and file system service.
 
@@ -304,14 +292,10 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         if not path_listing_container:
             return
 
-        await self._mount_path_listing_container(
-            path_listing_container, mount_divider=False
-        )
+        await self._mount_path_listing_container(path_listing_container, mount_divider=False)
         self._focus_first_child(path_listing_container)
 
-        self.path_listing_containers_uuids[
-            str(self.work_dir)
-        ] = path_listing_container.id
+        self.path_listing_containers_uuids[str(self.work_dir)] = path_listing_container.id
 
     def action_cursor_down(self) -> None:
         """
@@ -333,9 +317,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         if not path_listing_container:
             return
 
-        next_focus = self._get_next_element(
-            path_listing_container.children, self.DIRECTION_DOWN, self._has_focus
-        )
+        next_focus = self._get_next_element(path_listing_container.children, self.DIRECTION_DOWN, self._has_focus)
         if not next_focus:
             return
         next_focus.focus()
@@ -362,9 +344,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         if not focused_container:
             return
 
-        next_focus = self._get_next_element(
-            focused_container.children, self.DIRECTION_UP, self._has_focus
-        )
+        next_focus = self._get_next_element(focused_container.children, self.DIRECTION_UP, self._has_focus)
         if not next_focus:
             return
         next_focus.focus()
@@ -393,9 +373,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         """
         if self.focus_path == self.work_dir:
             return
-        active_path_container_uuid = self.path_listing_containers_uuids.get(
-            str(self.focus_path.parent)
-        )
+        active_path_container_uuid = self.path_listing_containers_uuids.get(str(self.focus_path.parent))
         if not active_path_container_uuid:
             return
 
@@ -423,9 +401,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         Returns:
             None: Moves the cursor focus without returning a value
         """
-        active_path_container_uuid = self.path_listing_containers_uuids.get(
-            str(self.focus_path)
-        )
+        active_path_container_uuid = self.path_listing_containers_uuids.get(str(self.focus_path))
 
         if not active_path_container_uuid:
             return
@@ -458,9 +434,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         container_uuid = self.path_listing_containers_uuids[focus_path]
         return self._get_container_by_uuid(container_uuid)
 
-    def _get_container_by_uuid(
-        self, container_uuid: str
-    ) -> PathListingContainer | None:
+    def _get_container_by_uuid(self, container_uuid: str) -> PathListingContainer | None:
         """
         Safely retrieve a PathListingContainer by its unique identifier.
 
@@ -515,9 +489,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
             name=str(path),
         )
 
-    async def _mount_path_listing_container(
-        self, path_listing_container, mount_divider=True
-    ):
+    async def _mount_path_listing_container(self, path_listing_container, mount_divider=True):
         """
         Mount a new path listing container with an optional vertical divider.
 
@@ -536,9 +508,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
             - Generates a unique divider ID based on the container's ID when a divider is mounted
         """
         if mount_divider:
-            divider = Rule(
-                orientation="vertical", id=f"{path_listing_container.id}-divider"
-            )
+            divider = Rule(orientation="vertical", id=f"{path_listing_container.id}-divider")
             await self.mount(divider)
 
         await self.mount(path_listing_container)
@@ -629,9 +599,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         await self._mount_path_listing_container(path_listing_container)
 
         if str(folder_path) not in self.path_listing_containers_uuids:
-            self.path_listing_containers_uuids[
-                str(folder_path)
-            ] = path_listing_container.id
+            self.path_listing_containers_uuids[str(folder_path)] = path_listing_container.id
 
     @on(FileSystemWidget.Focus)
     def on_folder_focus(self, event: FileSystemWidget.Focus):
@@ -724,9 +692,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         if not elements:
             return
 
-        focused_children = [
-            index for index, child in enumerate(elements) if selector(child)
-        ]
+        focused_children = [index for index, child in enumerate(elements) if selector(child)]
         if not focused_children:
             return elements[0]
 

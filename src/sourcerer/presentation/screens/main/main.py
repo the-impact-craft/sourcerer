@@ -119,24 +119,16 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         Binding("ctrl+f", "find", show=False),
         Binding("ctrl+s", "settings", "Settings"),
         Binding("ctrl+a", "about", "About"),
-        Binding(
-            KeyBindings.ARROW_LEFT.value, "focus_sidebar", "Focus sidebar", show=False
-        ),
-        Binding(
-            KeyBindings.ARROW_RIGHT.value, "focus_content", "Focus content", show=False
-        ),
+        Binding(KeyBindings.ARROW_LEFT.value, "focus_sidebar", "Focus sidebar", show=False),
+        Binding(KeyBindings.ARROW_RIGHT.value, "focus_content", "Focus content", show=False),
     ]
     is_storage_list_loading = reactive(False, recompose=True)
 
     def __init__(
         self,
         settings_service: SettingsService = Provide[DiContainer.settings_service],
-        credentials_service: CredentialsService = Provide[
-            DiContainer.credentials_service
-        ],
-        package_meta_service: BasePackageMetaService = Provide[
-            DiContainer.package_meta_service
-        ],
+        credentials_service: CredentialsService = Provide[DiContainer.credentials_service],
+        package_meta_service: BasePackageMetaService = Provide[DiContainer.package_meta_service],
         *args,
         **kwargs,
     ):
@@ -207,8 +199,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         package_meta = self.package_meta_service.get_package_meta()
         if package_meta.has_available_update:
             self.notify(
-                f"Sourcerer {package_meta.version} "
-                f"is running while {package_meta.latest_version} is available",
+                f"Sourcerer {package_meta.version} " f"is running while {package_meta.latest_version} is available",
                 severity="warning",
             )
         self.init_storages_list()
@@ -242,9 +233,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         This method is typically used to allow users to add their
         cloud storage credentials, which will then be reflected in the storage
         """
-        self.app.push_screen(
-            ProviderCredsListScreen(), callback=self.modal_screen_callback
-        )
+        self.app.push_screen(ProviderCredsListScreen(), callback=self.modal_screen_callback)
 
     def action_settings(self):
         """
@@ -280,19 +269,13 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             self.storage_list_sidebar.groupby_access_credentials = group_by  # type: ignore
 
         if upload_chunk_size := settings.get(SettingsFields.upload_chunk_size):
-            self.settings_service.set_setting(
-                SettingsFields.upload_chunk_size, upload_chunk_size
-            )
+            self.settings_service.set_setting(SettingsFields.upload_chunk_size, upload_chunk_size)
 
         if download_chunk_size := settings.get(SettingsFields.download_chunk_size):
-            self.settings_service.set_setting(
-                SettingsFields.download_chunk_size, download_chunk_size
-            )
+            self.settings_service.set_setting(SettingsFields.download_chunk_size, download_chunk_size)
 
         if presigned_url_ttl := settings.get(SettingsFields.presigned_url_ttl_seconds):
-            self.settings_service.set_setting(
-                SettingsFields.presigned_url_ttl_seconds, presigned_url_ttl
-            )
+            self.settings_service.set_setting(SettingsFields.presigned_url_ttl_seconds, presigned_url_ttl)
 
         self.settings = self.settings_service.load_settings()
 
@@ -343,13 +326,8 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
 
         self.storage_list_sidebar.is_loading = True
 
-        with ThreadPoolExecutor(
-            max_workers=MAX_PARALLEL_STORAGE_LIST_OPERATIONS
-        ) as executor:
-            futures = [
-                executor.submit(self._load_storages, credentials)
-                for credentials in access_credentials
-            ]
+        with ThreadPoolExecutor(max_workers=MAX_PARALLEL_STORAGE_LIST_OPERATIONS) as executor:
+            futures = [executor.submit(self._load_storages, credentials) for credentials in access_credentials]
 
             for future in futures:
                 future.result()
@@ -419,10 +397,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                     self.settings,
                 ),
                 path=event.path,
-                keys=[
-                    DownloadKey(display_name=key, uuid=generate_uuid(), path=key)
-                    for key in event.keys
-                ],
+                keys=[DownloadKey(display_name=key, uuid=generate_uuid(), path=key) for key in event.keys],
                 action="download",
             ),
             callback=lambda x: self.after_bulk_operation_callback(
@@ -455,10 +430,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                         self.settings,
                     ),
                     path=event.path,
-                    keys=[
-                        DeleteKey(display_name=key, uuid=generate_uuid(), path=key)
-                        for key in event.keys
-                    ],
+                    keys=[DeleteKey(display_name=key, uuid=generate_uuid(), path=key) for key in event.keys],
                     action="delete",
                 ),
                 callback=lambda x: self.after_bulk_operation_callback(
@@ -471,9 +443,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             callback=trigger_delete_action,
         )
 
-    def after_bulk_operation_callback(
-        self, access_credentials_uuid, storage_name, path
-    ):
+    def after_bulk_operation_callback(self, access_credentials_uuid, storage_name, path):
         """
         Callback method executed after bulk operations (download, upload, delete) complete.
 
@@ -543,9 +513,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             self.notify(f"Could not create presigned url for {event.path}")
             return
         try:
-            url = provider_service.get_download_presigned_url(
-                event.storage_name, event.path
-            )
+            url = provider_service.get_download_presigned_url(event.storage_name, event.path)
         except PresignedUrlError:
             self.notify(f"Could not create presigned url for {event.path}")
             return
@@ -631,9 +599,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             return
         params = {"storage": storage_name, "path": path or "", "prefix": prefix or ""}
         try:
-            self.storage_content.storage_content = provider_service.list_storage_items(
-                **params
-            )
+            self.storage_content.storage_content = provider_service.list_storage_items(**params)
         except ListStorageItemsError as e:
             self.notify_error(f"""Could not extract storage content \n{e}""")
 
@@ -698,9 +664,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                 keys=[upload_key],
                 action="upload",
             ),
-            callback=lambda x: self.after_bulk_operation_callback(
-                access_credentials_uuid, storage_name, path
-            ),
+            callback=lambda x: self.after_bulk_operation_callback(access_credentials_uuid, storage_name, path),
         )
 
     def _load_storages(self, credentials):
@@ -718,9 +682,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
             If an error occurs while retrieving the storages, a notification is shown
             to the user.
         """
-        provider_service = get_provider_service_by_access_credentials(
-            credentials, self.settings
-        )
+        provider_service = get_provider_service_by_access_credentials(credentials, self.settings)
         if not provider_service:
             self.notify_error(f"Could not get storages list for {credentials.name}!")
             return
@@ -733,9 +695,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
                 for storage in credentials.storages
                 if storage.name not in storage_names
             ]
-            self.storage_list_sidebar.storages[(credentials.uuid, credentials.name)] = (
-                storages + registered_storages
-            )
+            self.storage_list_sidebar.storages[(credentials.uuid, credentials.name)] = storages + registered_storages
             self.storage_list_sidebar.last_update_timestamp = time.time()
         except Exception:
             self.notify_error(f"Could not get storages list for {credentials.name}!")

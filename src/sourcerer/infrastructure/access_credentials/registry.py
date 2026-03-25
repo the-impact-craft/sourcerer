@@ -53,9 +53,7 @@ class AccessCredentialsRegistry(metaclass=Singleton):
         """
         if access_credentials_method.provider not in self._items_:
             self._items_[access_credentials_method.provider] = {}
-        self._items_[access_credentials_method.provider].update(
-            {access_credentials_method.name: cls}
-        )
+        self._items_[access_credentials_method.provider].update({access_credentials_method.name: cls})
 
     def get(self):
         """

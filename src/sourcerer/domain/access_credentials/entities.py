@@ -4,6 +4,7 @@ Access credentials entity classes.
 This module defines data classes representing access credentials
 used for authentication with various cloud providers.
 """
+
 from datetime import datetime
 
 import boto3

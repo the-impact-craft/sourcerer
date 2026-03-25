@@ -360,18 +360,10 @@ class FileItem(StorageContentItem):
 
     def compose(self):
         yield UnfocusableCheckbox()
-        yield FileMetaLabel(
-            f"{FILE_ICON} {self.file.key}", classes="file_name", markup=False
-        )
-        yield FileMetaLabel(
-            f"{humanize.naturalsize(self.file.size)}", classes="file_size", markup=False
-        )
-        yield FileMetaLabel(
-            str(self.file.date_modified), classes="file_date", markup=False
-        )
-        yield FileActionButton(
-            f"{PRESIGNED_URL_ICON}", name="presigned_url", classes="presigned_url"
-        )
+        yield FileMetaLabel(f"{FILE_ICON} {self.file.key}", classes="file_name", markup=False)
+        yield FileMetaLabel(f"{humanize.naturalsize(self.file.size)}", classes="file_size", markup=False)
+        yield FileMetaLabel(str(self.file.date_modified), classes="file_date", markup=False)
+        yield FileActionButton(f"{PRESIGNED_URL_ICON}", name="presigned_url", classes="presigned_url")
         if self.file.is_text:
             yield FileActionButton(f"{PREVIEW_ICON}", name="preview", classes="preview")
 
@@ -444,21 +436,11 @@ class StorageContentContainer(Vertical):
         selected_files_n: Number of selected files
     """
 
-    storage: reactive[str | None] = reactive(  # ty: ignore[invalid-assignment]
-        None, recompose=True
-    )
-    path: reactive[str | None] = reactive(  # ty: ignore[invalid-assignment]
-        None, recompose=False
-    )
-    search_prefix: reactive[str | None] = reactive(  # ty: ignore[invalid-assignment]
-        None, recompose=False
-    )
-    access_credentials_uuid: reactive[  # ty: ignore[invalid-assignment]
-        str | None
-    ] = reactive("", recompose=False)
-    storage_content: reactive[  # ty: ignore[invalid-assignment]
-        StorageContent | None
-    ] = reactive(None, recompose=True)
+    storage: reactive[str | None] = reactive(None, recompose=True)  # ty: ignore[invalid-assignment]
+    path: reactive[str | None] = reactive(None, recompose=False)  # ty: ignore[invalid-assignment]
+    search_prefix: reactive[str | None] = reactive(None, recompose=False)  # ty: ignore[invalid-assignment]
+    access_credentials_uuid: reactive[str | None] = reactive("", recompose=False)  # ty: ignore[invalid-assignment]
+    storage_content: reactive[StorageContent | None] = reactive(None, recompose=True)  # ty: ignore[invalid-assignment]
     selected_files: reactive[set] = reactive(set(), recompose=False)
     selected_files_n: reactive[int] = reactive(0, recompose=False)
     focus_content: reactive[bool] = reactive(False, recompose=False)
@@ -646,9 +628,7 @@ class StorageContentContainer(Vertical):
                     yield Button("🗑️ Delete", name="delete")
             with Horizontal(id="default_actions", classes="-visible"):
                 yield Button(f"{UPLOAD_ICON} Upload", name="upload")
-        if not self.storage_content or (
-            not self.storage_content.files and not self.storage_content.folders
-        ):
+        if not self.storage_content or (not self.storage_content.files and not self.storage_content.folders):
             with Middle(), Center():
                 yield Static(NO_DATA_LOGO)
             return
@@ -667,9 +647,7 @@ class StorageContentContainer(Vertical):
                     self.focus_content,
                 )
             for file in self.storage_content.files:
-                yield FileItem(
-                    self.storage, self.path, file, self.focus_content, id=file.uuid
-                )
+                yield FileItem(self.storage, self.path, file, self.focus_content, id=file.uuid)
 
     def focus(self, scroll_visible: bool = True) -> Self:
         try:

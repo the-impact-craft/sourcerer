@@ -157,9 +157,7 @@ class StorageActionProgressScreen(ModalScreen):
 
             with VerticalScroll(id="progress_files"):
                 for key in self.keys:
-                    with Horizontal(
-                        classes="progress_file", id=f"progress_files_{key.uuid}"
-                    ):
+                    with Horizontal(classes="progress_file", id=f"progress_files_{key.uuid}"):
                         yield Label(
                             Text(key.display_name, overflow="ellipsis"),
                             id=f"progress_file_{key.uuid}",
@@ -271,9 +269,7 @@ class StorageActionProgressScreen(ModalScreen):
 
         self.active_executor = None
         if failed_downloads:
-            self.notify(
-                f"Failed to download {len(failed_downloads)} files", severity="error"
-            )
+            self.notify(f"Failed to download {len(failed_downloads)} files", severity="error")
 
     def download_file(self, key, uuid, main_progress_bar):
         """
@@ -300,9 +296,7 @@ class StorageActionProgressScreen(ModalScreen):
                 file_size = self.provider_service.get_file_size(self.storage_name, key)
                 progress_bar.total = file_size
             except Exception as ex:
-                self.notify(
-                    f"Failed to get file size for {key}: {ex}", severity="error"
-                )
+                self.notify(f"Failed to get file size for {key}: {ex}", severity="error")
                 self.log.error(f"Error getting file size: {ex}")
                 return
 
@@ -311,9 +305,7 @@ class StorageActionProgressScreen(ModalScreen):
                 self.provider_service.download_storage_item(
                     self.storage_name,
                     key,
-                    lambda chunk, progress_bar=progress_bar: self.progress_callback(
-                        progress_bar, chunk
-                    ),
+                    lambda chunk, progress_bar=progress_bar: self.progress_callback(progress_bar, chunk),
                     cancel_event=self.cancel_event,
                 )
             except Exception as ex:
@@ -414,9 +406,7 @@ class StorageActionProgressScreen(ModalScreen):
             source_path = Path(key.path)
             if source_path.is_file():
                 try:
-                    progress_bar = self.query_one(
-                        f"#progress_bar_{key.uuid}", ProgressBar
-                    )
+                    progress_bar = self.query_one(f"#progress_bar_{key.uuid}", ProgressBar)
                     progress_bar.total = source_path.stat().st_size
 
                     self.provider_service.upload_storage_item(

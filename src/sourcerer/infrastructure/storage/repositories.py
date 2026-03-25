@@ -63,9 +63,7 @@ class SQLAlchemyStoragesRepository(BaseStoragesRepository):
             uuid (str): The UUID of the storage entity to be deleted
         """
         with self.db() as session:
-            storage = (
-                session.query(DBStorage).filter(DBStorage.uuid == uuid).one_or_none()
-            )
+            storage = session.query(DBStorage).filter(DBStorage.uuid == uuid).one_or_none()
             if storage is None:
                 return
             session.delete(storage)

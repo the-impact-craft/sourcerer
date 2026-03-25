@@ -4,6 +4,7 @@ Implementation of GCP storage provider services.
 This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
+
 import datetime
 import shutil
 import tempfile
@@ -85,8 +86,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
         """
         try:
             return [
-                Storage(StorageProvider.GoogleCloudStorage, i.name, i.time_created)
-                for i in self.client.list_buckets()
+                Storage(StorageProvider.GoogleCloudStorage, i.name, i.time_created) for i in self.client.list_buckets()
             ]
         except Exception as ex:
             raise ListStoragesError(str(ex)) from ex
@@ -115,15 +115,11 @@ class GCPStorageProviderService(BaseStorageProviderService):
                     if member not in result:
                         result[member] = set()
                     result[member].add(role)
-            return [
-                StoragePermissions(member, roles) for member, roles in result.items()
-            ]
+            return [StoragePermissions(member, roles) for member, roles in result.items()]
         except Exception as ex:
             raise StoragePermissionError(str(ex)) from ex
 
-    def list_storage_items(
-        self, storage: str, path: str = "", prefix: str = ""
-    ) -> StorageContent:
+    def list_storage_items(self, storage: str, path: str = "", prefix: str = "") -> StorageContent:
         """
         List items in the specified GCP bucket path with the given prefix.
 
@@ -163,18 +159,13 @@ class GCPStorageProviderService(BaseStorageProviderService):
             ]
 
             folders = [
-                Folder(
-                    key=folder[prefix_folders_len:].strip("/"), parent_path=parent_path
-                )
-                for folder in blobs.prefixes
+                Folder(key=folder[prefix_folders_len:].strip("/"), parent_path=parent_path) for folder in blobs.prefixes
             ]
 
             return StorageContent(files=files, folders=folders)
 
         except Exception as ex:
-            raise ListStorageItemsError(
-                f"Failed to list items in {storage}: {ex}"
-            ) from ex
+            raise ListStorageItemsError(f"Failed to list items in {storage}: {ex}") from ex
 
     def read_storage_item(self, storage: str, key: str) -> str:
         """
@@ -245,9 +236,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
         """
         try:
             bucket = self.client.bucket(storage)
-            storage_path = str(
-                Path(storage_path or "") / (dest_path or source_path.name)
-            )
+            storage_path = str(Path(storage_path or "") / (dest_path or source_path.name))
             blob = bucket.blob(storage_path)
             if source_path.stat().st_size <= self.upload_chunk_size:
                 blob.upload_from_filename(source_path)
@@ -290,8 +279,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
 
             suffix = Path(key).suffix
             download_tmp_path = (
-                Path(user_downloads_dir())
-                / f"{next(tempfile._get_candidate_names())}{suffix}"  # type: ignore
+                Path(user_downloads_dir()) / f"{next(tempfile._get_candidate_names())}{suffix}"  # type: ignore
             )
 
             downloaded = 0
@@ -363,9 +351,7 @@ class GCPStorageProviderService(BaseStorageProviderService):
 
             response = blob.generate_signed_url(
                 version="v4",
-                expiration=datetime.timedelta(
-                    seconds=self.presigned_url_expiration_period
-                ),
+                expiration=datetime.timedelta(seconds=self.presigned_url_expiration_period),
                 method="GET",
             )
         except Exception as ex:

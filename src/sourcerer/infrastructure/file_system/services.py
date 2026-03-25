@@ -112,9 +112,7 @@ class FileSystemService(BaseFileSystemService):
             items = 0
             for entry in entries:
                 if max_items and items > max_items:
-                    raise ListDirError(
-                        f"Too many items, max processable dir size: {max_items}"
-                    )
+                    raise ListDirError(f"Too many items, max processable dir size: {max_items}")
                 items += 1  # noqa SIM103
                 target = files if entry.is_file() else directories
                 target.append(entry.relative_to(path) if relative_paths else entry)

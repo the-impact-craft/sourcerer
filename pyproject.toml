@@ -127,3 +127,6 @@ path = "src/sourcerer/__init__.py"
 [tool.ty.rules]
 unresolved-import = "ignore"
 invalid-assignment = "warn"
+
+[tool.black]
+line-length = 120

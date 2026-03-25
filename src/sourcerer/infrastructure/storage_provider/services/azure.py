@@ -4,6 +4,7 @@ Implementation of Azure storage provider services.
 This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
+
 import asyncio
 import base64
 import os.path
@@ -79,9 +80,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
 
         self._storage_management_client: StorageManagementClient | None = None
         self._blob_service_clients_lock = threading.Lock()
-        self._blob_service_clients: LRUCache[str, BlobServiceClient] = LRUCache(
-            maxsize=self.MAX_CACHE_SIZE
-        )
+        self._blob_service_clients: LRUCache[str, BlobServiceClient] = LRUCache(maxsize=self.MAX_CACHE_SIZE)
 
         self.upload_chunk_size = upload_chunk_size * 1024 * 1024
         self.download_chunk_size = download_chunk_size * 1024 * 1024
@@ -97,9 +96,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
         if self._storage_management_client:
             return self._storage_management_client
 
-        self._storage_management_client = StorageManagementClient(
-            self.credentials, self.subscription_id
-        )
+        self._storage_management_client = StorageManagementClient(self.credentials, self.subscription_id)
         return self._storage_management_client
 
     def get_containers_client(self, storage: str):
@@ -150,9 +147,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
     def get_storage_permissions(self, storage: str) -> list[StoragePermissions]:
         raise NotImplementedError("Not implemented")
 
-    def list_storage_items(
-        self, storage: str, path: str, prefix: str
-    ) -> StorageContent:
+    def list_storage_items(self, storage: str, path: str, prefix: str) -> StorageContent:
         """
         List items in the specified Azure container path with the given prefix.
 
@@ -190,12 +185,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
                 )
                 parent_path = parent_path.rstrip("/") + "/"
 
-                for blob in blobs_client.walk_blobs(
-                    name_starts_with=base_path + prefix, delimiter="/"
-                ):
-                    remaining_path = blob.name[
-                        len(base_path) + len(prefix_dirs) :
-                    ].lstrip("/")
+                for blob in blobs_client.walk_blobs(name_starts_with=base_path + prefix, delimiter="/"):
+                    remaining_path = blob.name[len(base_path) + len(prefix_dirs) :].lstrip("/")
 
                     if "/" in remaining_path:
                         folder_name = remaining_path.split("/")[0]
@@ -279,9 +270,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
         """
         try:
             if not storage_path:
-                raise AzureMissingContainerError(
-                    "Container is required for Azure storage"
-                )
+                raise AzureMissingContainerError("Container is required for Azure storage")
 
             containers_client = self.get_containers_client(storage)
 
@@ -295,9 +284,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             if source_path.stat().st_size <= self.upload_chunk_size:
                 blob_client = containers_client.get_container_client(container)
                 with open(source_path, "rb") as file_handle:
-                    blob_client.upload_blob(
-                        blob_name or source_path.name, file_handle, overwrite=True
-                    )
+                    blob_client.upload_blob(blob_name or source_path.name, file_handle, overwrite=True)
                 if progress_callback:
                     progress_callback(source_path.stat().st_size)
             else:
@@ -340,8 +327,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
             download_path = Path(user_downloads_dir()) / Path(key).name
             suffix = Path(key).suffix
             download_tmp_path = (
-                Path(user_downloads_dir())
-                / f"{next(tempfile._get_candidate_names())}{suffix}"  # type: ignore
+                Path(user_downloads_dir()) / f"{next(tempfile._get_candidate_names())}{suffix}"  # type: ignore
             )
 
             containers_client = self.get_containers_client(storage)
@@ -424,8 +410,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
 
             user_delegation_key = containers_client.get_user_delegation_key(
                 key_start_time=datetime.utcnow(),
-                key_expiry_time=datetime.utcnow()
-                + timedelta(seconds=self.presigned_url_expiration_period),
+                key_expiry_time=datetime.utcnow() + timedelta(seconds=self.presigned_url_expiration_period),
             )
 
             sas_token = generate_blob_sas(
@@ -433,8 +418,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
                 container_name=container,
                 blob_name=blob_name,
                 permission=BlobSasPermissions(read=True),
-                expiry=datetime.utcnow()
-                + timedelta(seconds=self.presigned_url_expiration_period),
+                expiry=datetime.utcnow() + timedelta(seconds=self.presigned_url_expiration_period),
                 user_delegation_key=user_delegation_key,
             )
             url = f"https://{account_name}.blob.core.windows.net/{container}/{blob_name}?{sas_token}"

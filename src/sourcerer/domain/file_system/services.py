@@ -42,9 +42,7 @@ class BaseFileSystemService(metaclass=abc.ABCMeta):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def list_dir(
-        self, path: Path, relative_paths: bool = False, recursively=False
-    ) -> ListDirOutput:
+    def list_dir(self, path: Path, relative_paths: bool = False, recursively=False) -> ListDirOutput:
         """
         List all files and directories within the specified directory.
 

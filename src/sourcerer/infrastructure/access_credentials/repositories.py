@@ -54,9 +54,7 @@ class SQLAlchemyCredentialsRepository(BaseCredentialsRepository):
             uuid (str): Unique identifier for the credentials to delete
         """
         with self.db() as session:
-            credentials = (
-                session.query(DBCredentials).filter(DBCredentials.uuid == uuid).first()
-            )
+            credentials = session.query(DBCredentials).filter(DBCredentials.uuid == uuid).first()
             if credentials is None:
                 # No matching credentials found; return early
                 return
@@ -74,9 +72,7 @@ class SQLAlchemyCredentialsRepository(BaseCredentialsRepository):
             DBCredentials: The credentials object from the database
         """
         with self.db() as session:
-            return (
-                session.query(DBCredentials).filter(DBCredentials.uuid == uuid).first()
-            )
+            return session.query(DBCredentials).filter(DBCredentials.uuid == uuid).first()
 
     def list(self, active_only: bool | None = None) -> list[Credentials]:
         """
@@ -92,9 +88,7 @@ class SQLAlchemyCredentialsRepository(BaseCredentialsRepository):
         with self.db() as session:
             credentials_query = session.query(DBCredentials)
             if active_only:
-                credentials_query = credentials_query.filter(
-                    DBCredentials.active == True  # noqa: E712
-                )
+                credentials_query = credentials_query.filter(DBCredentials.active == True)  # noqa: E712
             return [
                 Credentials(
                     uuid=credential.uuid,
@@ -116,9 +110,7 @@ class SQLAlchemyCredentialsRepository(BaseCredentialsRepository):
             uuid (str): Unique identifier for the credentials to activate
         """
         with self.db() as session:
-            credentials = (
-                session.query(DBCredentials).filter(DBCredentials.uuid == uuid).first()
-            )
+            credentials = session.query(DBCredentials).filter(DBCredentials.uuid == uuid).first()
             credentials.active = True
             session.commit()
 
@@ -130,8 +122,6 @@ class SQLAlchemyCredentialsRepository(BaseCredentialsRepository):
             uuid (str): Unique identifier for the credentials to deactivate
         """
         with self.db() as session:
-            credentials = (
-                session.query(DBCredentials).filter(DBCredentials.uuid == uuid).first()
-            )
+            credentials = session.query(DBCredentials).filter(DBCredentials.uuid == uuid).first()
             credentials.active = False
             session.commit()

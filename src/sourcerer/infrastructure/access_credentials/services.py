@@ -316,9 +316,7 @@ class S3ProfileName(S3AccessCredentialsService):
         ]
 
 
-@access_credentials_method(
-    AccessCredentialsMethod(StorageProvider.GoogleCloudStorage, "Service account")
-)
+@access_credentials_method(AccessCredentialsMethod(StorageProvider.GoogleCloudStorage, "Service account"))
 class GCPCredentialsService(AccessCredentialsService):
     """
     Google Cloud Platform json credentials service.
@@ -413,9 +411,7 @@ class GCPCredentialsService(AccessCredentialsService):
         ]
 
 
-@access_credentials_method(
-    AccessCredentialsMethod(StorageProvider.AzureStorage, "Client Secret Credentials")
-)
+@access_credentials_method(AccessCredentialsMethod(StorageProvider.AzureStorage, "Client Secret Credentials"))
 class AzureClientSecretCredentialsService(AccessCredentialsService):
     def store(self, name, credentials: dict):
         """
@@ -453,9 +449,7 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
             # Parse the outer JSON structure
             parsed_credentials = json.loads(credentials)
             subscription_id = parsed_credentials.get("subscription_id")
-            cloud_suffix = (
-                parsed_credentials.get("cloud_suffix") or "blob.core.windows.net"
-            )
+            cloud_suffix = parsed_credentials.get("cloud_suffix") or "blob.core.windows.net"
 
             client_credentials = ClientSecretCredential(
                 tenant_id=parsed_credentials.get("tenant_id"),
@@ -487,7 +481,5 @@ class AzureClientSecretCredentialsService(AccessCredentialsService):
             AuthField("tenant_id", "Tenant Id", True),
             AuthField("client_id", "Client Id", True),
             AuthField("client_secret", "Client Secret", True),
-            AuthField(
-                "cloud_suffix", "Cloud Suffix (default blob.core.windows.net)", False
-            ),
+            AuthField("cloud_suffix", "Cloud Suffix (default blob.core.windows.net)", False),
         ]

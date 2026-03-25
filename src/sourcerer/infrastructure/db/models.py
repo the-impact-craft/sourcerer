@@ -66,9 +66,7 @@ class Storage(Base):
     id = Column(Integer, primary_key=True)
     uuid = Column(String, unique=True, nullable=False)
     name = Column(String, nullable=False)
-    credentials_id = Column(
-        Integer, ForeignKey("credentials.id", ondelete="CASCADE"), nullable=False
-    )
+    credentials_id = Column(Integer, ForeignKey("credentials.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     credentials = relationship(

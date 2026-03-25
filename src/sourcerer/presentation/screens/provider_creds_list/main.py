@@ -39,17 +39,13 @@ class ProviderCredentialsRow(Horizontal):
         uuid: str
         active: bool
 
-    def __init__(
-        self, row: Credentials, credentials_service: CredentialsService, *args, **kwargs
-    ):
+    def __init__(self, row: Credentials, credentials_service: CredentialsService, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.row = row
         self.credentials_service = credentials_service
 
     def compose(self) -> ComposeResult:
-        yield Checkbox(
-            value=self.row.active, classes="credentials_active", name=self.row.uuid
-        )
+        yield Checkbox(value=self.row.active, classes="credentials_active", name=self.row.uuid)
         yield Label(self.row.name, classes="credentials_name")
         yield Label(self.row.provider, classes="credentials_provider")
         yield Label(self.row.credentials_type, classes="credentials_auth_method")
@@ -83,9 +79,7 @@ class ProviderCredentialsRow(Horizontal):
             _ (Button.Click): The button click event.
         """
         self.app.push_screen(
-            QuestionScreen(
-                f"Are you sure you want to delete {self.row.provider} {self.row.name} credentials?"
-            ),
+            QuestionScreen(f"Are you sure you want to delete {self.row.provider} {self.row.name} credentials?"),
             callback=self.delete_callback,  # type: ignore
         )
 
@@ -123,9 +117,7 @@ class ProviderCredsListScreen(RefreshTriggerableModalScreen):
 
     def __init__(
         self,
-        credentials_service: CredentialsService = Provide[
-            DiContainer.credentials_service
-        ],
+        credentials_service: CredentialsService = Provide[DiContainer.credentials_service],
         *args,
         **kwargs,
     ):
@@ -150,9 +142,7 @@ class ProviderCredsListScreen(RefreshTriggerableModalScreen):
                     yield Label("Auth method", classes="credentials_auth_method")
                     yield Label("Delete", classes="credentials_auth_delete")
                 for row in self.credentials_list:
-                    yield ProviderCredentialsRow(
-                        row, self.credentials_service, classes="credentials_row"
-                    )
+                    yield ProviderCredentialsRow(row, self.credentials_service, classes="credentials_row")
             with Horizontal(id="controls"):
                 yield Button(ControlsEnum.CANCEL.value, name=ControlsEnum.CANCEL.name)
 
@@ -173,9 +163,7 @@ class ProviderCredsListScreen(RefreshTriggerableModalScreen):
     def create_provider_creds_registration(
         self,
         credentials_entry: ProviderCredentialsEntry,
-        credentials_repo: BaseCredentialsRepository = Provide[
-            DiContainer.credentials_repository
-        ],
+        credentials_repo: BaseCredentialsRepository = Provide[DiContainer.credentials_repository],
     ):
         """
         Create a new provider credentials registration.
@@ -188,9 +176,7 @@ class ProviderCredsListScreen(RefreshTriggerableModalScreen):
         """
         if not credentials_entry:
             return
-        service = credentials_entry.cloud_storage_provider_credentials_service(
-            credentials_repo
-        )
+        service = credentials_entry.cloud_storage_provider_credentials_service(credentials_repo)
         service.store(credentials_entry.name, credentials_entry.fields)
         self.refresh_credentials_list()
 

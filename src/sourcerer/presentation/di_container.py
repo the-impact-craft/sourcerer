@@ -45,21 +45,13 @@ class DiContainer(containers.DeclarativeContainer):
     db = providers.Singleton(Database, db_url=DB_URL)
     session_factory = providers.Factory(Database.session_factory, db=db)
 
-    credentials_repository = providers.Factory(
-        SQLAlchemyCredentialsRepository, session_factory
-    )
+    credentials_repository = providers.Factory(SQLAlchemyCredentialsRepository, session_factory)
 
-    storages_repository = providers.Factory(
-        SQLAlchemyStoragesRepository, session_factory
-    )
+    storages_repository = providers.Factory(SQLAlchemyStoragesRepository, session_factory)
 
-    settings_repository = providers.Factory(
-        SQLAlchemySettingsRepository, session_factory
-    )
+    settings_repository = providers.Factory(SQLAlchemySettingsRepository, session_factory)
 
-    credentials_service = providers.Factory(
-        CredentialsService, repository=credentials_repository
-    )
+    credentials_service = providers.Factory(CredentialsService, repository=credentials_repository)
     storages_service = providers.Factory(
         StoragesService,
         repository=storages_repository,

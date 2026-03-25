@@ -82,17 +82,10 @@ class ResizeContainersWatcherMixin:
 
         dimension = "width" if event.orientation == "vertical" else "height"
 
-        previous_component_dimension = (
-            getattr(prev_component.styles, dimension).value + event.delta
-        )
-        next_component_dimension = (
-            getattr(next_component.styles, dimension).value - event.delta
-        )
+        previous_component_dimension = getattr(prev_component.styles, dimension).value + event.delta
+        next_component_dimension = getattr(next_component.styles, dimension).value - event.delta
 
-        if (
-            previous_component_dimension < MIN_SECTION_DIMENSION
-            or next_component_dimension < MIN_SECTION_DIMENSION
-        ):
+        if previous_component_dimension < MIN_SECTION_DIMENSION or next_component_dimension < MIN_SECTION_DIMENSION:
             return
 
         setattr(prev_component.styles, dimension, f"{previous_component_dimension}%")
@@ -115,17 +108,11 @@ class ResizeContainersWatcherMixin:
             return
 
         try:
-            delta = (
-                event.delta_x
-                if self.active_resizing_rule.orientation == "vertical"
-                else event.delta_y
-            )
+            delta = event.delta_x if self.active_resizing_rule.orientation == "vertical" else event.delta_y
         except AttributeError:
             return  # No delta
 
-        self.active_resizing_rule.position = MoveEvent(
-            timestamp=time.time(), delta=delta
-        )
+        self.active_resizing_rule.position = MoveEvent(timestamp=time.time(), delta=delta)
 
     def on_mouse_up(self, _: MouseUp) -> None:
         """

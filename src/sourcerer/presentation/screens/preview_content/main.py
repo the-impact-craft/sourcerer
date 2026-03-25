@@ -73,16 +73,10 @@ class Search(Container):
                 yield Input(placeholder="...")
 
             with Horizontal(id="right"):
-                yield ClickableLabel(
-                    "◀", id="previous", name="previous", classes="search-button"
-                )
+                yield ClickableLabel("◀", id="previous", name="previous", classes="search-button")
                 yield Label(f"{self.current}/{self.total}", id="search-result")
-                yield ClickableLabel(
-                    "▶", id="next", name="next", classes="search-button"
-                )
-                yield ClickableLabel(
-                    "❌", id="hide", name="hide", classes="search-button"
-                )
+                yield ClickableLabel("▶", id="next", name="next", classes="search-button")
+                yield ClickableLabel("❌", id="hide", name="hide", classes="search-button")
         yield Rule()
 
     @on(Input.Submitted)
@@ -106,10 +100,7 @@ class Search(Container):
             (line_n, index)
             for line_n, line in enumerate(lines)
             if search_pattern in line.lower()
-            for index in [
-                match.start()
-                for match in re.finditer(rf"(?i){re.escape(search_pattern)}", line)
-            ]
+            for index in [match.start() for match in re.finditer(rf"(?i){re.escape(search_pattern)}", line)]
         ]
 
         if not self.search_result_lines:
@@ -142,9 +133,7 @@ class Search(Container):
         if not self.search_result_lines:
             return
         line, start = self.search_result_lines[self.current - 1]
-        self.post_message(
-            HighlightResult(line, start=start, end=start + len(self.search_value))
-        )
+        self.post_message(HighlightResult(line, start=start, end=start + len(self.search_value)))
 
 
 class PreviewContentScreen(ExitBoundModalScreen):
@@ -164,9 +153,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
         access_credentials_uuid,
         settings,
         *args,
-        credentials_service: CredentialsService = Provide[
-            DiContainer.credentials_repository
-        ],
+        credentials_service: CredentialsService = Provide[DiContainer.credentials_repository],
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
@@ -203,9 +190,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
             self.notify("Could not read file :(", severity="error")
             return
         try:
-            self.content = provider_service.read_storage_item(
-                self.storage_name, self.key
-            )
+            self.content = provider_service.read_storage_item(self.storage_name, self.key)
             if self.file_size > PREVIEW_LIMIT_SIZE:
                 self.content = self.content[:PREVIEW_LENGTH_LIMIT]
                 self.notify(
@@ -225,11 +210,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
 
         extension = Path(self.key).suffix
 
-        lexer = (
-            "json"
-            if extension == ".tfstate"
-            else Syntax.guess_lexer(self.key, self.content)
-        )
+        lexer = "json" if extension == ".tfstate" else Syntax.guess_lexer(self.key, self.content)
         if lexer in text_log.available_languages:
             text_log.language = lexer
         else:
@@ -259,9 +240,7 @@ class PreviewContentScreen(ExitBoundModalScreen):
         """Handle highlight result events."""
 
         text_area = self.query_one(TextArea)
-        text_area.selection = Selection(
-            start=(event.line, event.start), end=(event.line, event.end)
-        )
+        text_area.selection = Selection(start=(event.line, event.start), end=(event.line, event.end))
 
     def action_find(self):
         self.query_one("#search-bar").add_class("-visible")

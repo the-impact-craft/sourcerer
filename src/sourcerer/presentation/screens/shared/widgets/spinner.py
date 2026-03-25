@@ -35,9 +35,7 @@ class Spinner(Static):
     }
     """
 
-    def __init__(
-        self, spinner: SpinnerType = SpinnerType.dots_1, interval: float = 0.1, **kwargs
-    ):
+    def __init__(self, spinner: SpinnerType = SpinnerType.dots_1, interval: float = 0.1, **kwargs):
         """
         Initialize the Loader widget.
 

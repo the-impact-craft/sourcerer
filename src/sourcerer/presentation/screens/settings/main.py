@@ -80,12 +80,8 @@ class SettingsScreen(ExitBoundModalScreen):
             self.action_cancel_screen()
         elif event.action == "save":
             upload_chunk_size = self.query_one("Input#upload_chunk_size", Input).value
-            download_chunk_size = self.query_one(
-                "Input#download_chunk_size", Input
-            ).value
-            presigned_url_ttl_seconds = self.query_one(
-                "Input#presigned_url_ttl_seconds", Input
-            ).value
+            download_chunk_size = self.query_one("Input#download_chunk_size", Input).value
+            presigned_url_ttl_seconds = self.query_one("Input#presigned_url_ttl_seconds", Input).value
 
             if not upload_chunk_size.isdigit():
                 self.notify("Invalid upload chunk size", severity="error")
@@ -100,14 +96,10 @@ class SettingsScreen(ExitBoundModalScreen):
             self.dismiss(
                 {
                     SettingsFields.theme: self.query_one("Select#theme", Select).value,
-                    SettingsFields.group_by_access_credentials: self.query_one(
-                        Checkbox
-                    ).value,
+                    SettingsFields.group_by_access_credentials: self.query_one(Checkbox).value,
                     SettingsFields.upload_chunk_size: int(upload_chunk_size),
                     SettingsFields.download_chunk_size: int(download_chunk_size),
-                    SettingsFields.presigned_url_ttl_seconds: int(
-                        presigned_url_ttl_seconds
-                    ),
+                    SettingsFields.presigned_url_ttl_seconds: int(presigned_url_ttl_seconds),
                 }
             )
 

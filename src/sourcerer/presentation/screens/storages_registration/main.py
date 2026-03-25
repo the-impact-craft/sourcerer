@@ -36,9 +36,7 @@ class StoragesRegistrationScreen(ExitBoundModalScreen):
 
     def __init__(
         self,
-        credentials_service: CredentialsService = Provide[
-            DiContainer.credentials_repository
-        ],
+        credentials_service: CredentialsService = Provide[DiContainer.credentials_repository],
         *args,
         **kwargs,
     ):
@@ -90,9 +88,7 @@ class StoragesRegistrationScreen(ExitBoundModalScreen):
             if not storage_name:
                 self.notify("Storage name is required", severity="error")
                 return
-            credentials_uuid = self.query_one(
-                f"#{self.CREDENTIALS_SELECTOR_ID}", Select
-            ).value
+            credentials_uuid = self.query_one(f"#{self.CREDENTIALS_SELECTOR_ID}", Select).value
             if not credentials_uuid or credentials_uuid == Select.BLANK:
                 self.notify("Credentials are required", severity="error")
                 return

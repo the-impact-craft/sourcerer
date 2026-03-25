@@ -4,6 +4,7 @@ Base storage provider service interface.
 This module defines the abstract base class for storage provider services,
 providing a common interface for cloud storage operations.
 """
+
 import threading
 from abc import ABC, abstractmethod
 from collections.abc import Callable
@@ -48,9 +49,7 @@ class BaseStorageProviderService(ABC):
         """
 
     @abstractmethod
-    def list_storage_items(
-        self, storage: str, path: str, prefix: str
-    ) -> StorageContent:
+    def list_storage_items(self, storage: str, path: str, prefix: str) -> StorageContent:
         """
         List items in the specified storage path with the given prefix.
 

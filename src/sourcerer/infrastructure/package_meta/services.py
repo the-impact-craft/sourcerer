@@ -11,11 +11,7 @@ from sourcerer.utils import get_last_package_version
 class PackageMetaService(BasePackageMetaService):
     def get_package_meta(self) -> PackageMeta:
         latest_version = get_last_package_version(package_name)
-        has_available_update = (
-            version.parse(latest_version) > version.parse(__version__)
-            if latest_version
-            else False
-        )
+        has_available_update = version.parse(latest_version) > version.parse(__version__) if latest_version else False
 
         return PackageMeta(
             version=__version__,

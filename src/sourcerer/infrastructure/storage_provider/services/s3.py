@@ -4,6 +4,7 @@ Implementation of S3 compatible storage provider services.
 This module provides concrete implementations of the BaseStorageProviderService
 interface for various cloud storage providers.
 """
+
 import shutil
 import tempfile
 import threading
@@ -124,10 +125,7 @@ class S3ProviderService(BaseStorageProviderService):
             response = self.client.list_buckets()
         except Exception as ex:
             raise ListStoragesError(str(ex)) from ex
-        return [
-            Storage(StorageProvider.S3, i.get("Name"), i.get("CreationDate"))
-            for i in response.get("Buckets")
-        ]
+        return [Storage(StorageProvider.S3, i.get("Name"), i.get("CreationDate")) for i in response.get("Buckets")]
 
     def get_storage_permissions(self, storage: str) -> list[StoragePermissions]:
         """
@@ -154,9 +152,7 @@ class S3ProviderService(BaseStorageProviderService):
             )
         ]
 
-    def list_storage_items(
-        self, storage: str, path: str = "", prefix: str = ""
-    ) -> StorageContent:
+    def list_storage_items(self, storage: str, path: str = "", prefix: str = "") -> StorageContent:
         """
         List items in the specified S3 bucket path with the given prefix.
 
@@ -314,13 +310,10 @@ class S3ProviderService(BaseStorageProviderService):
             download_path = Path(user_downloads_dir()) / Path(key).name
             suffix = Path(key).suffix
             download_tmp_path = (
-                Path(user_downloads_dir())
-                / f"{next(tempfile._get_candidate_names())}{suffix}"  # type: ignore
+                Path(user_downloads_dir()) / f"{next(tempfile._get_candidate_names())}{suffix}"  # type: ignore
             )
 
-            self.client.download_file(
-                storage, key, download_tmp_path, Callback=callback
-            )
+            self.client.download_file(storage, key, download_tmp_path, Callback=callback)
             shutil.move(download_tmp_path, download_path)
             return str(download_path)
         except Exception as ex:
@@ -384,9 +377,7 @@ class S3ProviderService(BaseStorageProviderService):
 
             with open(source_path, "rb") as file_handle:
                 # Initiate multipart upload
-                response = self.client.create_multipart_upload(
-                    Bucket=storage, Key=dest_path
-                )
+                response = self.client.create_multipart_upload(Bucket=storage, Key=dest_path)
                 upload_id = response["UploadId"]
 
                 part_number = 1
@@ -429,7 +420,5 @@ class S3ProviderService(BaseStorageProviderService):
         except Exception:
             # Abort multipart if error or cancel
             if upload_id:
-                self.client.abort_multipart_upload(
-                    Bucket=storage, Key=dest_path, UploadId=upload_id
-                )
+                self.client.abort_multipart_upload(Bucket=storage, Key=dest_path, UploadId=upload_id)
             raise

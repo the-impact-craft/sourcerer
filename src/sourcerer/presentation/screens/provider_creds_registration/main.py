@@ -72,10 +72,7 @@ class ProviderCredsRegistrationScreen(ExitBoundModalScreen):
                 )
                 yield Label("* Provider:", classes="form_label")
                 yield Select(
-                    options=(
-                        (provider, provider)
-                        for provider in self.provider_credentials_settings
-                    ),
+                    options=((provider, provider) for provider in self.provider_credentials_settings),
                     name=self.PROVIDERS_NAME,
                     id=self.PROVIDER_SELECTOR_ID,
                 )
@@ -103,9 +100,7 @@ class ProviderCredsRegistrationScreen(ExitBoundModalScreen):
             4. If only one method exists, set it and mount its fields.
         """
         # Remove existing credential type selector
-        await self.query_one(f"#{self.SETTINGS_CONTAINER_ID}").remove_children(
-            f"#{self.CREDENTIALS_TYPE_SELECTOR_ID}"
-        )
+        await self.query_one(f"#{self.SETTINGS_CONTAINER_ID}").remove_children(f"#{self.CREDENTIALS_TYPE_SELECTOR_ID}")
 
         # Retrieve authentication methods for the selected provider
         auth_methods = self.provider_credentials_settings.get(provider)
@@ -160,9 +155,7 @@ class ProviderCredsRegistrationScreen(ExitBoundModalScreen):
             await self._process_selected_provider(str(event.value))
         elif event.control.name == self.AUTH_METHODS_NAME:
             provider = self.query_one(f"#{self.PROVIDER_SELECTOR_ID}", Select).selection
-            await self._process_selected_provider_auth_method(
-                provider, str(event.value)
-            )
+            await self._process_selected_provider_auth_method(provider, str(event.value))
 
     @on(Button.Click)
     def on_control_button_click(self, event: Button.Click):
@@ -213,16 +206,11 @@ class ProviderCredsRegistrationScreen(ExitBoundModalScreen):
 
         fields = {
             input_field.get().name: input_field.get().value
-            for input_field in self.query_one(
-                f"#{self.CREDENTIALS_FIELDS_CONTAINER_ID}"
-            ).children
+            for input_field in self.query_one(f"#{self.CREDENTIALS_FIELDS_CONTAINER_ID}").children
             if isinstance(input_field, LabeledInput) and input_field.get().value
         }
 
-        auth_name = (
-            self.query_one("#auth_name", LabeledInput).get().value
-            or generate_unique_name()
-        )
+        auth_name = self.query_one("#auth_name", LabeledInput).get().value or generate_unique_name()
 
         return ProviderCredentialsEntry(
             name=auth_name,
@@ -250,9 +238,7 @@ class ProviderCredsRegistrationScreen(ExitBoundModalScreen):
             2. Set the authentication class as the current authentication method.
             3. Mount the credential fields for the selected authentication method.
         """
-        provider_auth_class = self.provider_credentials_settings.get(provider, {}).get(
-            method
-        )
+        provider_auth_class = self.provider_credentials_settings.get(provider, {}).get(method)
         if provider_auth_class:
             self.auth_method = provider_auth_class
             await self._mount_credentials_fields(provider_auth_class.auth_fields())
@@ -274,13 +260,8 @@ class ProviderCredsRegistrationScreen(ExitBoundModalScreen):
             3. Set focus on the first input field in the container.
         """
         container = Container(
-            *(
-                LabeledInput(field.key, field.label, field.required, field.multiline)
-                for field in fields
-            ),
+            *(LabeledInput(field.key, field.label, field.required, field.multiline) for field in fields),
             id=self.CREDENTIALS_FIELDS_CONTAINER_ID,
         )
         await self.query_one(f"#{self.SETTINGS_CONTAINER_ID}").mount(container)
-        self.query_one(f"#{self.CREDENTIALS_FIELDS_CONTAINER_ID}").query_one(
-            ".form_input"
-        ).focus()
+        self.query_one(f"#{self.CREDENTIALS_FIELDS_CONTAINER_ID}").query_one(".form_input").focus()

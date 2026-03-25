@@ -18,9 +18,7 @@ class AboutScreen(ExitBoundModalScreen):
 
     def __init__(
         self,
-        package_meta_service: BasePackageMetaService = Provide[
-            DiContainer.package_meta_service
-        ],
+        package_meta_service: BasePackageMetaService = Provide[DiContainer.package_meta_service],
     ) -> None:
         super().__init__()
         self.package_meta_service = package_meta_service
@@ -38,11 +36,7 @@ class AboutScreen(ExitBoundModalScreen):
                     justify="center",
                 )
             )
-            yield Static(
-                Text(
-                    f"Platform: {package_meta.platform}", style="dim", justify="center"
-                )
-            )
+            yield Static(Text(f"Platform: {package_meta.platform}", style="dim", justify="center"))
             yield Static(
                 Text(
                     f"System Version: {package_meta.system_version}",

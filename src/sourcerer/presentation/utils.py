@@ -4,6 +4,7 @@ Utility functions for the presentation layer.
 This module provides helper functions for the presentation layer,
 particularly for retrieving and initializing storage provider services.
 """
+
 from threading import Lock
 
 from cachetools import LRUCache
@@ -24,9 +25,7 @@ _provider_service_cache: LRUCache = LRUCache(maxsize=MAX_CREDENTIALS_CACHE_SIZE)
 _provider_service_cache_lock = Lock()
 
 
-def get_provider_service_by_access_uuid(
-    uuid, credentials_service, settings
-) -> BaseStorageProviderService | None:
+def get_provider_service_by_access_uuid(uuid, credentials_service, settings) -> BaseStorageProviderService | None:
     """
     Retrieves the provider service associated with the given access credentials UUID.
 
@@ -56,9 +55,7 @@ def _provider_service_cache_lru_key(credentials, settings: Settings):
 def get_provider_service_by_access_credentials(
     credentials,
     settings: Settings,
-    credentials_repo: BaseCredentialsRepository = Provide[
-        DiContainer.credentials_repository
-    ],
+    credentials_repo: BaseCredentialsRepository = Provide[DiContainer.credentials_repository],
 ) -> BaseStorageProviderService | None:
     """
     Retrieves a storage provider service instance using the given access credentials.
@@ -94,16 +91,12 @@ def get_provider_service_by_access_credentials(
     if not credentials_service:
         return None
 
-    provider_service_class = storage_provider_registry.get_by_provider(
-        credentials.provider
-    )
+    provider_service_class = storage_provider_registry.get_by_provider(credentials.provider)
     if not provider_service_class:
         return None
 
     try:
-        auth_credentials = credentials_service(credentials_repo).authenticate(
-            credentials.credentials
-        )
+        auth_credentials = credentials_service(credentials_repo).authenticate(credentials.credentials)
     except CredentialsAuthError:
         return None
     service = provider_service_class(

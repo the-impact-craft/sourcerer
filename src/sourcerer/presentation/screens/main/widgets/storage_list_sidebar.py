@@ -101,11 +101,7 @@ class StorageItem(Label):
         if event.key == KeyBindings.ENTER.value:
             self._select_storage()
             return
-        storages = [
-            component
-            for component in self.screen.focus_chain
-            if isinstance(component, StorageItem)
-        ]
+        storages = [component for component in self.screen.focus_chain if isinstance(component, StorageItem)]
         if not storages:
             return
         if event.key == KeyBindings.ARROW_DOWN.value:
@@ -126,11 +122,7 @@ class StorageItem(Label):
         name and access credentials UUID.
 
         """
-        self.post_message(
-            SelectStorageItem(
-                self.storage_name, access_credentials_uuid=self.access_credentials_uuid
-            )
-        )
+        self.post_message(SelectStorageItem(self.storage_name, access_credentials_uuid=self.access_credentials_uuid))
 
 
 class StorageCredentialsDivider(Horizontal):
@@ -148,8 +140,7 @@ class StorageCredentialsDivider(Horizontal):
     def compose(self) -> ComposeResult:
         yield Rule(classes="storage-credentials-rule-left")
         yield Label(
-            renderable=("> " if self.collapsed else "⌄ ")
-            + self.credential_name.upper(),
+            renderable=("> " if self.collapsed else "⌄ ") + self.credential_name.upper(),
             classes="storage-credentials-name",
         )
         yield Rule(classes="storage-credentials-rule-right")
@@ -171,9 +162,7 @@ class StorageListSidebar(Vertical):
     is_loading: reactive[bool] = reactive(False, recompose=True)
     groupby_access_credentials: reactive[bool] = reactive(False, recompose=True)
     storages: reactive[dict[tuple[str, str], list[Storage]]] = reactive({})
-    last_update_timestamp: reactive[float] = reactive(  # ty: ignore[invalid-assignment]
-        0.0, recompose=True
-    )
+    last_update_timestamp: reactive[float] = reactive(0.0, recompose=True)  # ty: ignore[invalid-assignment]
 
     DEFAULT_CSS = """
     StorageListSidebar {
@@ -271,9 +260,7 @@ class StorageListSidebar(Vertical):
         ]
         storages = sorted(storages, key=lambda x: x.storage.storage)
         with ScrollVerticalContainerWithNoBindings():
-            for letter, storages_group in groupby(
-                storages, key=lambda x: x.storage.storage[0]
-            ):
+            for letter, storages_group in groupby(storages, key=lambda x: x.storage.storage[0]):
                 yield Horizontal(
                     Rule(classes="rule-left"),
                     Label(letter.upper(), classes="storage-letter"),
@@ -295,10 +282,7 @@ class StorageListSidebar(Vertical):
                 access_credentials_name,
             ), storages in self.storages.items():
                 storages = sorted(
-                    [
-                        StorageData(access_credentials_uuid, storage)
-                        for storage in storages
-                    ],
+                    [StorageData(access_credentials_uuid, storage) for storage in storages],
                     key=lambda x: x.storage.storage,
                 )
                 yield StorageCredentialsDivider(
@@ -311,9 +295,7 @@ class StorageListSidebar(Vertical):
                     classes="storage-credentials-container -visible",
                     id=f"{access_credentials_uuid}_container",
                 ):
-                    for letter, storages_group in groupby(
-                        storages, key=lambda x: x.storage.storage[0]
-                    ):
+                    for letter, storages_group in groupby(storages, key=lambda x: x.storage.storage[0]):
                         yield Horizontal(
                             Rule(classes="rule-left"),
                             Label(letter.upper(), classes="storage-letter"),
@@ -368,6 +350,5 @@ class StorageListSidebar(Vertical):
         """Handle selection of a storage item."""
         for child in self.query(StorageItem):
             child.selected = (
-                child.storage_name == event.name
-                and child.access_credentials_uuid == event.access_credentials_uuid
+                child.storage_name == event.name and child.access_credentials_uuid == event.access_credentials_uuid
             )
