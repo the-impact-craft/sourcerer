@@ -37,7 +37,7 @@ FILE_ICON = "📄"
 # Action icons
 DOWNLOAD_ICON = "📥"
 UPLOAD_ICON = "📤"
-PREVIEW_ICON = "✨"
+PREVIEW_ICON = " 🔎"
 PRESIGNED_URL_ICON = "🔗"
 
 # Time threshold for detecting double-clicks (in seconds)
