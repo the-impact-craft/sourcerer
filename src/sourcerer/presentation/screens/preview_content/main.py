@@ -152,6 +152,8 @@ class PreviewContentScreen(ExitBoundModalScreen):
 
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding("escape", "cancel", "Close the screen"),
+        Binding("ctrl+a,super+a", "select_all", "Select All", priority=True),
+        Binding("ctrl+f,super+f", "find", "Find", priority=True),
     ]
 
     def __init__(
@@ -265,9 +267,10 @@ class PreviewContentScreen(ExitBoundModalScreen):
         self.query_one("#search-bar").add_class("-visible")
         self.query_one(Input).focus()
 
+    def action_select_all(self):
+        text_area = self.query_one(TextArea)
+        text_area.focus()
+        self.call_after_refresh(text_area.select_all)
+
     def action_cancel(self):
         self.action_cancel_screen()
-
-    def on_key(self, event: events.Key) -> None:
-        if event.key in ("ctrl+f", "super+f"):
-            self.action_find()
