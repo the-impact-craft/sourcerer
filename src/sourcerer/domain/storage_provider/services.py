@@ -8,7 +8,6 @@ import threading
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from pathlib import Path
-from typing import Optional
 
 from sourcerer.domain.storage_provider.entities import (
     Storage,
@@ -93,9 +92,9 @@ class BaseStorageProviderService(ABC):
         storage: str,
         storage_path: str,
         source_path: Path,
-        dest_path: Optional[str] = None,
-        cancel_event: Optional[threading.Event] = None,
-        progress_callback: Optional[Callable] = None,
+        dest_path: str | None = None,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
     ) -> None:
         """
         upload a file to the specified storage path.
@@ -114,8 +113,8 @@ class BaseStorageProviderService(ABC):
         self,
         storage: str,
         key: str,
-        progress_callback: Optional[Callable] = None,
-        cancel_event: Optional[threading.Event] = None,
+        progress_callback: Callable | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> str:
         """
         Download a file from storage to local filesystem.
@@ -156,7 +155,7 @@ class BaseStorageProviderService(ABC):
 
         """
 
-    def _normalize_path(self, path: Optional[str]) -> str:
+    def _normalize_path(self, path: str | None) -> str:
         if path:
             return path.rstrip("/") + "/"
         return ""

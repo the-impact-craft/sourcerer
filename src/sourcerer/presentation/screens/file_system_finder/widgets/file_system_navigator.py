@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 from time import time
-from typing import ClassVar, Literal, Optional
+from typing import ClassVar, Literal
 
 from textual import events, on
 from textual.app import ComposeResult
@@ -96,7 +96,7 @@ class FileSystemWidget(Widget):
         """
         self.entity_name = entity_name
         self.icon = icon
-        self.last_file_click: tuple[float, Optional[Path]] = (
+        self.last_file_click: tuple[float, Path | None] = (
             time() - 2,
             None,
         )
@@ -253,7 +253,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
 
     @dataclass
     class ActivePathChanged(Message):
-        path: Optional[Path]
+        path: Path | None
 
     @dataclass
     class ActivePathFileDoubleClicked(Message):
@@ -440,7 +440,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
             return
         self._focus_first_child(next_dir_column)
 
-    def _get_focused_path_listing_container(self) -> Optional[PathListingContainer]:
+    def _get_focused_path_listing_container(self) -> PathListingContainer | None:
         """
         Retrieve the currently focused path listing container based on the current focus path.
 
@@ -460,7 +460,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
 
     def _get_container_by_uuid(
         self, container_uuid: str
-    ) -> Optional[PathListingContainer]:
+    ) -> PathListingContainer | None:
         """
         Safely retrieve a PathListingContainer by its unique identifier.
 
@@ -481,7 +481,7 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         except NoMatches:
             return None
 
-    def _get_path_listing_container(self, path: Path) -> Optional[PathListingContainer]:
+    def _get_path_listing_container(self, path: Path) -> PathListingContainer | None:
         """
         Create a path listing container for a given directory path.
 
@@ -689,8 +689,8 @@ class FileSystemNavigator(ScrollHorizontalContainerWithNoBindings):
         elements: Sequence[Widget],
         direction: Literal["up", "down"],
         selector: Callable,
-        of_type: Optional[type] = None,
-    ) -> Optional[Widget]:
+        of_type: type | None = None,
+    ) -> Widget | None:
         """
         Determine the next element in a sequence based on navigation direction and selection criteria.
 

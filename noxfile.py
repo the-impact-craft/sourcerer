@@ -1,6 +1,6 @@
 import nox
 
-PYTHONS = ["3.9", "3.10", "3.11", "3.12"]
+PYTHONS = ["3.10", "3.11", "3.12", "3.13"]
 
 
 @nox.session(python=PYTHONS)

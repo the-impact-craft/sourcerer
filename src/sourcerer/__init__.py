@@ -14,4 +14,4 @@ The application is structured using a clean architecture approach with:
 
 name = "sourcerer"
 package_name = "data_sourcerer"
-__version__ = "0.8.2"
+__version__ = "0.9.0"

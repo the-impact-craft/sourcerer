@@ -10,7 +10,7 @@ import threading
 from collections.abc import Callable
 from itertools import groupby
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from platformdirs import user_downloads_dir
 
@@ -248,9 +248,9 @@ class S3ProviderService(BaseStorageProviderService):
         storage: str,
         storage_path: str,
         source_path: Path,
-        dest_path: Optional[str] = None,
-        cancel_event: Optional[threading.Event] = None,
-        progress_callback: Optional[Callable] = None,
+        dest_path: str | None = None,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
     ) -> None:
         """
         Upload a file to the specified S3 bucket path.
@@ -286,8 +286,8 @@ class S3ProviderService(BaseStorageProviderService):
         self,
         storage: str,
         key: str,
-        progress_callback: Optional[Callable] = None,
-        cancel_event: Optional[threading.Event] = None,
+        progress_callback: Callable | None = None,
+        cancel_event: threading.Event | None = None,
     ) -> str:
         """
         Download a file from S3 to local filesystem.
@@ -375,8 +375,8 @@ class S3ProviderService(BaseStorageProviderService):
         storage: str,
         dest_path: str,
         block_size: int,
-        cancel_event: Optional[threading.Event] = None,
-        progress_callback: Optional[Callable] = None,
+        cancel_event: threading.Event | None = None,
+        progress_callback: Callable | None = None,
     ):
         upload_id = None
         try:

@@ -1,7 +1,7 @@
 import datetime
 import uuid
 from enum import Enum
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 from dependency_injector.wiring import Provide
 from textual import on
@@ -165,7 +165,7 @@ class StoragesListScreen(RefreshTriggerableModalScreen):
         if event.action == ControlsEnum.ADD_STORAGE.name:
             self.action_add_storage()
 
-    def create_storage_entry(self, storage: Optional[StorageEntry]):
+    def create_storage_entry(self, storage: StorageEntry | None):
         """
         Create a new storage entry.
 

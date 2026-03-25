@@ -5,7 +5,6 @@ This module provides helper functions for the presentation layer,
 particularly for retrieving and initializing storage provider services.
 """
 from threading import Lock
-from typing import Optional
 
 from cachetools import LRUCache
 from dependency_injector.wiring import Provide
@@ -27,7 +26,7 @@ _provider_service_cache_lock = Lock()
 
 def get_provider_service_by_access_uuid(
     uuid, credentials_service, settings
-) -> Optional[BaseStorageProviderService]:
+) -> BaseStorageProviderService | None:
     """
     Retrieves the provider service associated with the given access credentials UUID.
 
@@ -60,7 +59,7 @@ def get_provider_service_by_access_credentials(
     credentials_repo: BaseCredentialsRepository = Provide[
         DiContainer.credentials_repository
     ],
-) -> Optional[BaseStorageProviderService]:
+) -> BaseStorageProviderService | None:
     """
     Retrieves a storage provider service instance using the given access credentials.
 
