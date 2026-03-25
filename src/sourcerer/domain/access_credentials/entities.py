@@ -5,7 +5,6 @@ This module defines data classes representing access credentials
 used for authentication with various cloud providers.
 """
 from datetime import datetime
-from typing import Optional
 
 import boto3
 from azure.identity import ClientSecretCredential
@@ -35,8 +34,8 @@ class Credentials(Struct):
     credentials_type: str
     credentials: str
     active: bool
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
     storages: list[Storage] = []  # noqa: RUF012
 
 
@@ -51,8 +50,8 @@ class Boto3Credentials(Struct):
     """
 
     session: boto3.Session
-    endpoint_url: Optional[str] = None
-    signature_version: Optional[str] = None
+    endpoint_url: str | None = None
+    signature_version: str | None = None
 
 
 class AzureCredentials(Struct):

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from textual.message import Message
 
@@ -7,7 +6,7 @@ from textual.message import Message
 @dataclass
 class SelectStorageItem(Message):
     name: str
-    path: Optional[str] = None
-    access_credentials_uuid: Optional[str] = None
-    prefix: Optional[str] = None
+    path: str | None = None
+    access_credentials_uuid: str | None = None
+    prefix: str | None = None
     focus_content: bool = False

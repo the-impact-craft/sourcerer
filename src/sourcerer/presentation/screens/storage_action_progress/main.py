@@ -3,7 +3,6 @@ import os
 import threading
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from pathlib import Path
-from typing import Optional
 
 from msgspec._core import Struct
 from rich.text import Text
@@ -106,7 +105,7 @@ class StorageActionProgressScreen(ModalScreen):
         self,
         storage_name: str,
         path: str,
-        provider_service: Optional[BaseStorageProviderService],
+        provider_service: BaseStorageProviderService | None,
         keys: list[UploadKey | DownloadKey | DeleteKey],
         action: str,
         *args,

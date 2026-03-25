@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from textual.message import Message
 
@@ -8,4 +7,4 @@ from textual.message import Message
 class UploadRequest(Message):
     access_credentials_uuid: str
     storage: str
-    path: Optional[str]
+    path: str | None

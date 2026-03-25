@@ -6,7 +6,6 @@ interface for interacting with the local file system.
 """
 
 from pathlib import Path
-from typing import Optional, Union
 
 from sourcerer.domain.file_system.entities import ListDirOutput
 from sourcerer.domain.file_system.services import BaseFileSystemService
@@ -31,7 +30,7 @@ class FileSystemService(BaseFileSystemService):
     FILE_NOT_FOUND_ERROR = "File does not exist"
     MOVING_FILE_ERROR = "Moving file error"
 
-    def __init__(self, work_dir: Union[Path, str]):
+    def __init__(self, work_dir: Path | str):
         """
         Initialize a FileSystemService instance with the specified working directory.
 
@@ -75,7 +74,7 @@ class FileSystemService(BaseFileSystemService):
         path: Path,
         relative_paths: bool = False,
         recursively=False,
-        max_items: Optional[int] = None,
+        max_items: int | None = None,
     ) -> ListDirOutput:
         """
         List all files and directories within the specified directory.

@@ -8,7 +8,7 @@ authentication methods.
 
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository
 
@@ -29,7 +29,7 @@ class AuthField:
     label: str
     required: bool
     multiline: bool = False
-    description: Optional[str] = None
+    description: str | None = None
 
 
 class BaseAccessCredentialsService:

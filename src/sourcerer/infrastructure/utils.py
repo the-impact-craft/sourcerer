@@ -9,7 +9,7 @@ import mimetypes
 import secrets
 import uuid
 from pathlib import Path
-from typing import ClassVar, Union
+from typing import ClassVar
 
 from sourcerer.settings import TEXT_EXTENSIONS
 
@@ -65,7 +65,7 @@ def is_text_file(file_name):
     return bool(is_text_mime(file_name))
 
 
-def custom_sort_key(s: Union[str, Path]):
+def custom_sort_key(s: str | Path):
     """
     Converts a string by replacing '.' with a character '{' (ASCII 123)
     to ensure that strings are sorted in a specific order where '.'

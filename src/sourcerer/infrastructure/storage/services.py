@@ -1,5 +1,3 @@
-from typing import Optional
-
 from sourcerer.domain.storage.entities import Storage
 from sourcerer.domain.storage.repositories import BaseStoragesRepository
 
@@ -20,7 +18,7 @@ class StoragesService:
         """
         self.repository.create(storage)
 
-    def list(self, provider_id: Optional[int] = None) -> list[Storage]:
+    def list(self, provider_id: int | None = None) -> list[Storage]:
         """
         List all storage entities.
 

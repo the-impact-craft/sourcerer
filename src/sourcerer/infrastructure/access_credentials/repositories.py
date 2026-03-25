@@ -5,8 +5,6 @@ This module provides a concrete implementation of the BaseCredentialsRepository
 interface using SQLAlchemy for database access.
 """
 
-from typing import Optional
-
 from sourcerer.domain.access_credentials.entities import Credentials
 from sourcerer.domain.access_credentials.repositories import BaseCredentialsRepository
 from sourcerer.infrastructure.db.models import Credentials as DBCredentials
@@ -80,7 +78,7 @@ class SQLAlchemyCredentialsRepository(BaseCredentialsRepository):
                 session.query(DBCredentials).filter(DBCredentials.uuid == uuid).first()
             )
 
-    def list(self, active_only: Optional[bool] = None) -> list[Credentials]:
+    def list(self, active_only: bool | None = None) -> list[Credentials]:
         """
         List all credentials in the repository.
 
