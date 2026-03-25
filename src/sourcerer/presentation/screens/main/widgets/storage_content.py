@@ -138,6 +138,10 @@ class PathSelector(Label):
 
     can_focus = True
 
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("enter", "select_path", "Select Path"),
+    ]
+
     DEFAULT_CSS = """
     PathSelector {
         &:focus {
@@ -156,10 +160,9 @@ class PathSelector(Label):
         """Handle click events to navigate to the selected path."""
         self._select()
 
-    def on_key(self, event: events.Key) -> None:
-        """Handle key events to navigate to the selected path."""
-        if event.key == KeyBindings.ENTER.value:
-            self._select()
+    def action_select_path(self):
+        """Navigate to the selected path."""
+        self._select()
 
     def _select(self):
         """Select the current path."""
@@ -236,6 +239,10 @@ class FolderItem(StorageContentItem):
     navigation into the folder and visual feedback on hover/selection.
     """
 
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("enter", "open_folder", "Open Folder", priority=True),
+    ]
+
     def __init__(
         self,
         storage,
@@ -275,13 +282,14 @@ class FolderItem(StorageContentItem):
             )
         )
 
+    def action_open_folder(self):
+        """Open the folder."""
+        self._select()
+
     def on_key(self, event: events.Key) -> None:
-        """Handle key events to navigate into the folder."""
+        """Handle key events for navigation."""
         if event.key in (KeyBindings.ARROW_UP.value, KeyBindings.ARROW_DOWN.value):
             event.prevent_default()
-        if event.key == KeyBindings.ENTER.value:
-            self._select()
-            return
         super().on_key(event)
 
 
@@ -332,6 +340,11 @@ class FileItem(StorageContentItem):
 
         name: str
 
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("enter", "toggle_selection", "Select/Unselect", priority=True),
+        Binding("v", "preview", "Preview", priority=True),
+    ]
+
     def __init__(self, storage, parent_path, file, focus_first, *args, **kwargs):
         """Initialize a file item widget.
 
@@ -362,18 +375,23 @@ class FileItem(StorageContentItem):
         if self.file.is_text:
             yield FileActionButton(f"{PREVIEW_ICON}", name="preview", classes="preview")
 
+    def action_toggle_selection(self):
+        """Toggle file selection."""
+        checkbox = self.query_one(UnfocusableCheckbox)
+        checkbox.value = not checkbox.value
+        if checkbox.value:
+            self.post_message(self.Selected(self.file.key))
+        else:
+            self.post_message(self.Unselect(self.file.key))
+
+    def action_preview(self):
+        """Show file preview."""
+        self.post_message(self.Preview(self.file.key, self.file.size))
+
     def on_key(self, event: events.Key) -> None:
-        """Handle key events to toggle file selection."""
+        """Handle key events for navigation."""
         if event.key in (KeyBindings.ARROW_UP.value, KeyBindings.ARROW_DOWN.value):
             event.prevent_default()
-        if event.key == KeyBindings.ENTER.value:
-            checkbox = self.query_one(UnfocusableCheckbox)
-            checkbox.value = not checkbox.value
-            if checkbox.value:
-                self.post_message(self.Selected(self.file.key))
-            else:
-                self.post_message(self.Unselect(self.file.key))
-            return
         super().on_key(event)
 
     def _select(self, widget=None):
