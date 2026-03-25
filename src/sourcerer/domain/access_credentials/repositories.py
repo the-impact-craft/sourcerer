@@ -6,6 +6,7 @@ providing a common interface for different storage implementations.
 """
 
 from abc import ABCMeta, abstractmethod
+from typing import Optional
 
 from sourcerer.domain.access_credentials.entities import Credentials
 
@@ -56,11 +57,11 @@ class BaseCredentialsRepository(metaclass=ABCMeta):
         raise NotImplementedError
 
     @abstractmethod
-    def list(self, active_only: bool | None = None) -> list[Credentials]:
+    def list(self, active_only: Optional[bool] = None) -> list[Credentials]:
         """List all credentials in the repository.
 
         Args:
-            active_only (bool|None, optional): If True, return only active credentials.
+            active_only (Optional[bool], optional): If True, return only active credentials.
                 If False, return all credentials. Defaults to None.
 
         Returns:

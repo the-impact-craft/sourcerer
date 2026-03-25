@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
 from dependency_injector.wiring import Provide
 from textual import on
@@ -37,7 +38,7 @@ class FileSystemNavigationModal(ExitBoundModalScreen):
         file_system_service: FileSystemService = Provide[  # type: ignore
             DiContainer.file_system_service  # type: ignore
         ],
-        validation_rules: list[FileSystemSelectionValidationRule] | None = None,
+        validation_rules: Optional[list[FileSystemSelectionValidationRule]] = None,
         **kwargs,
     ):
         """

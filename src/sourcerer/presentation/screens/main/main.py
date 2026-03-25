@@ -4,7 +4,7 @@ import traceback
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
-from typing import ClassVar
+from typing import ClassVar, Optional
 
 from dependency_injector.wiring import Provide
 from textual import on, work
@@ -150,7 +150,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         )
         self.storage_content = StorageContentContainer(id="storage_content_container")
         self.load_percentage = 0
-        self.active_resizing_rule: ResizingRule | None = None
+        self.active_resizing_rule: Optional[ResizingRule] = None
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="main"):
@@ -264,7 +264,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
     def action_about(self):
         self.push_screen(AboutScreen())
 
-    def settings_callback(self, settings: dict | None):
+    def settings_callback(self, settings: Optional[dict]):
         default_settings = self.settings_service.load_settings()
         if settings is None:
             self.app.theme = default_settings.theme
@@ -296,7 +296,7 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
 
         self.settings = self.settings_service.load_settings()
 
-    def modal_screen_callback(self, requires_storage_refresh: bool | None = True):
+    def modal_screen_callback(self, requires_storage_refresh: Optional[bool] = True):
         """
         Callback for modal screens to refresh the storage list if required.
 

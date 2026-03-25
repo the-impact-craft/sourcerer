@@ -5,6 +5,7 @@ This module defines data classes representing access credentials
 used for authentication with various cloud providers.
 """
 from datetime import datetime
+from typing import Optional
 
 import boto3
 from azure.identity import ClientSecretCredential
@@ -24,8 +25,8 @@ class Credentials(Struct):
         credentials_type (str): Type of credentials (e.g., key_pair).
         credentials (str): Serialized credentials data.
         active (bool): Indicates if the credentials are active.
-        created_at (datetime | None): Timestamp when the credentials were created.
-        updated_at (datetime | None): Timestamp when the credentials were last updated.
+        created_at (Optional[datetime]): Timestamp when the credentials were created.
+        updated_at (Optional[datetime]): Timestamp when the credentials were last updated.
     """
 
     uuid: str
@@ -34,8 +35,8 @@ class Credentials(Struct):
     credentials_type: str
     credentials: str
     active: bool
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
     storages: list[Storage] = []  # noqa: RUF012
 
 
@@ -45,13 +46,13 @@ class Boto3Credentials(Struct):
 
     Attributes:
         session (boto3.Session): The boto3 session object for AWS authentication.
-        endpoint_url (str|None): Optional custom endpoint URL for AWS services.
-        signature_version (str|None): Optional signature version for AWS API requests.
+        endpoint_url (Optional[str]): Optional custom endpoint URL for AWS services.
+        signature_version (Optional[str]): Optional signature version for AWS API requests.
     """
 
     session: boto3.Session
-    endpoint_url: str | None = None
-    signature_version: str | None = None
+    endpoint_url: Optional[str] = None
+    signature_version: Optional[str] = None
 
 
 class AzureCredentials(Struct):

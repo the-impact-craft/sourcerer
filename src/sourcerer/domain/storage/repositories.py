@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+from typing import Optional
 
 from sourcerer.domain.storage.entities import Storage
 
@@ -13,10 +14,10 @@ class BaseStoragesRepository(metaclass=ABCMeta):
         raise NotImplementedError()
 
     @abstractmethod
-    def list(self, provider_id: int | None = None) -> list[Storage]:
+    def list(self, provider_id: Optional[int] = None) -> list[Storage]:
         """List all storage entries in the repository.
         Args:
-            provider_id (int | None): The provider ID to filter by. If None, all entries are returned.
+            provider_id (Optional[int]): The provider ID to filter by. If None, all entries are returned.
         Returns:
             List[Storage]: A list of storage entries
         """
