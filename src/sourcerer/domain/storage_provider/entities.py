@@ -59,7 +59,7 @@ class File(Struct):
         key (str): The path/key identifier for the file
         size (str): Human-readable file size
         is_text (bool): Whether the file is textual
-        date_modified (datetime | None): When the file was last modified, if available
+        date_modified (Optional[datetime]): When the file was last modified, if available
     """
 
     uuid: str

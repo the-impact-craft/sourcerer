@@ -3,6 +3,7 @@ import os
 import threading
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from pathlib import Path
+from typing import Optional
 
 from msgspec._core import Struct
 from rich.text import Text
@@ -105,7 +106,7 @@ class StorageActionProgressScreen(ModalScreen):
         self,
         storage_name: str,
         path: str,
-        provider_service: BaseStorageProviderService | None,
+        provider_service: Optional[BaseStorageProviderService],
         keys: list[UploadKey | DownloadKey | DeleteKey],
         action: str,
         *args,
@@ -117,7 +118,7 @@ class StorageActionProgressScreen(ModalScreen):
         Args:
             storage_name (str): Name of the storage being operated on
             path (str): Path within the storage
-            provider_service (BaseStorageProviderService | None): Service for interacting with the storage provider
+            provider_service (Optional[BaseStorageProviderService]): Service for interacting with the storage provider
             keys (list[Key]): List of keys representing files/folders to process
             action (str): Type of action being performed ('download', 'upload', or 'delete')
             *args: Additional positional arguments to pass to parent class

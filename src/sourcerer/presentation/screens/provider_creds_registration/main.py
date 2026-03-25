@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Optional
 
 from dependency_injector.wiring import Provide
 from textual import on
@@ -201,7 +202,7 @@ class ProviderCredsRegistrationScreen(ExitBoundModalScreen):
 
             self.dismiss(auth_fields)
 
-    def _get_auth_fields(self) -> ProviderCredentialsEntry | None:
+    def _get_auth_fields(self) -> Optional[ProviderCredentialsEntry]:
         """
         Collects authentication fields from the UI and returns a ProviderCredentialsEntry.
 

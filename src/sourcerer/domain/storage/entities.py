@@ -6,6 +6,7 @@ such as storage containers, files, folders, and permissions.
 """
 
 from datetime import datetime
+from typing import Optional
 
 from msgspec._core import Struct
 
@@ -23,5 +24,5 @@ class Storage(Struct):
     name: str
     uuid: str
     date_created: datetime
-    credentials_id: int | None = None
-    credentials_name: str | None = None
+    credentials_id: Optional[int] = None
+    credentials_name: Optional[str] = None

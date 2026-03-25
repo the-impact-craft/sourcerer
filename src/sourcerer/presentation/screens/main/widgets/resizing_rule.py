@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 
 from textual.events import MouseDown, MouseUp
 from textual.reactive import reactive
@@ -19,7 +20,9 @@ class MoveEvent:
 
 class ResizingRule(Rule, can_focus=True):
     dragging: reactive[bool] = reactive(False)
-    position: reactive[MoveEvent | None] = reactive(  # ty: ignore[invalid-assignment]
+    position: reactive[
+        Optional[MoveEvent]
+    ] = reactive(  # ty: ignore[invalid-assignment]
         None
     )
 

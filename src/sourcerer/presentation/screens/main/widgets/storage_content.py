@@ -10,7 +10,7 @@ import os.path
 from abc import abstractmethod
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import ClassVar, Self
+from typing import ClassVar, Optional, Self
 
 import humanize
 from textual import events, on
@@ -426,20 +426,20 @@ class StorageContentContainer(Vertical):
         selected_files_n: Number of selected files
     """
 
-    storage: reactive[str | None] = reactive(  # ty: ignore[invalid-assignment]
+    storage: reactive[Optional[str]] = reactive(  # ty: ignore[invalid-assignment]
         None, recompose=True
     )
-    path: reactive[str | None] = reactive(  # ty: ignore[invalid-assignment]
+    path: reactive[Optional[str]] = reactive(  # ty: ignore[invalid-assignment]
         None, recompose=False
     )
-    search_prefix: reactive[str | None] = reactive(  # ty: ignore[invalid-assignment]
+    search_prefix: reactive[Optional[str]] = reactive(  # ty: ignore[invalid-assignment]
         None, recompose=False
     )
     access_credentials_uuid: reactive[  # ty: ignore[invalid-assignment]
-        str | None
+        Optional[str]
     ] = reactive("", recompose=False)
     storage_content: reactive[  # ty: ignore[invalid-assignment]
-        StorageContent | None
+        Optional[StorageContent]
     ] = reactive(None, recompose=True)
     selected_files: reactive[set] = reactive(set(), recompose=False)
     selected_files_n: reactive[int] = reactive(0, recompose=False)

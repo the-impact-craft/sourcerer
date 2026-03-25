@@ -29,6 +29,7 @@ dependencies = [
     "azure-mgmt-storage>=22.2.0,<23.0.0",
     "msgspec>=0.19.0",
     "packaging>=25.0",
+    "cachetools>=5.5.2",
 ]
 
 [project.scripts]
@@ -51,7 +52,7 @@ dev = [
     "ruff>=0.11.7",
     "textual-dev>=1.7.0",
     "ty>=0.0.1a6",
-    "black>=25.1.0",
+    "nox[pbs]>=2026.2.9",
 ]
 
 [project.optional-dependencies]
@@ -68,6 +69,7 @@ dev = [
     "textual-dev>=1.7.0",
     "ty>=0.0.1a6",
     "black>=25.1.0",
+    "nox[pbs]>=2026.2.9",
 ]
 
 [tool.coverage.run]
@@ -78,7 +80,7 @@ source = [
 
 [tool.ruff]
 line-length = 120
-target-version = "py312"
+target-version = "py39"
 
 # Enable these rules
 select = [

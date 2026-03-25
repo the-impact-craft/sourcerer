@@ -14,7 +14,7 @@ from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from azure.mgmt.storage import StorageManagementClient
 from azure.storage.blob import (
@@ -77,7 +77,7 @@ class AzureStorageProviderService(BaseStorageProviderService):
         self.subscription_id = credentials.subscription_id
         self.cloud_suffix = credentials.cloud_suffix
 
-        self._storage_management_client: StorageManagementClient | None = None
+        self._storage_management_client: Optional[StorageManagementClient] = None
         self._blob_service_clients_lock = threading.Lock()
         self._blob_service_clients: LRUCache[str, BlobServiceClient] = LRUCache(
             maxsize=self.MAX_CACHE_SIZE
@@ -263,9 +263,9 @@ class AzureStorageProviderService(BaseStorageProviderService):
         storage: str,
         storage_path: str,
         source_path: Path,
-        dest_path: str | None = None,
-        cancel_event: threading.Event | None = None,
-        progress_callback: Callable | None = None,
+        dest_path: Optional[str] = None,
+        cancel_event: Optional[threading.Event] = None,
+        progress_callback: Optional[Callable] = None,
     ) -> None:
         """
         Upload a file to the specified Azure container path.
@@ -322,8 +322,8 @@ class AzureStorageProviderService(BaseStorageProviderService):
         self,
         storage: str,
         key: str,
-        progress_callback: Callable | None = None,
-        cancel_event: threading.Event | None = None,
+        progress_callback: Optional[Callable] = None,
+        cancel_event: Optional[threading.Event] = None,
     ) -> str:
         """
         Download a file from Azure to the local filesystem.

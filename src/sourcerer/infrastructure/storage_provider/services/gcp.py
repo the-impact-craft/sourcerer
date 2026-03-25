@@ -10,7 +10,7 @@ import tempfile
 import threading
 from collections.abc import Callable
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 from platformdirs import user_downloads_dir
 
@@ -225,9 +225,9 @@ class GCPStorageProviderService(BaseStorageProviderService):
         storage: str,
         storage_path: str,
         source_path: Path,
-        dest_path: str | None = None,
-        cancel_event: threading.Event | None = None,
-        progress_callback: Callable | None = None,
+        dest_path: Optional[str] = None,
+        cancel_event: Optional[threading.Event] = None,
+        progress_callback: Optional[Callable] = None,
     ) -> None:
         """
         Upload a file to the specified GCP bucket path.
@@ -262,8 +262,8 @@ class GCPStorageProviderService(BaseStorageProviderService):
         self,
         storage: str,
         key: str,
-        progress_callback: Callable | None = None,
-        cancel_event: threading.Event | None = None,
+        progress_callback: Optional[Callable] = None,
+        cancel_event: Optional[threading.Event] = None,
     ) -> str:
         """
         Download a file from GCP to the local filesystem.
@@ -377,8 +377,8 @@ class GCPStorageProviderService(BaseStorageProviderService):
         self,
         blob,
         source_path,
-        cancel_event: threading.Event | None = None,
-        progress_callback: Callable | None = None,
+        cancel_event: Optional[threading.Event] = None,
+        progress_callback: Optional[Callable] = None,
     ):
         """
         Upload a file to the specified GCP bucket path using multipart upload.
@@ -404,9 +404,9 @@ class CancelableFileReader:
     def __init__(
         self,
         file_path,
-        cancel_event: threading.Event | None,
+        cancel_event: Optional[threading.Event],
         chunk_size,
-        progress_callback: Callable | None = None,
+        progress_callback: Optional[Callable] = None,
     ):
         self.file_path = file_path
         self.file = None
