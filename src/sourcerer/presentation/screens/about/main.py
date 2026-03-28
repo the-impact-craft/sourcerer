@@ -27,7 +27,7 @@ class AboutScreen(ExitBoundModalScreen):
         package_meta = self.package_meta_service.get_package_meta()
 
         with Container():
-            yield Static(Text("Sourcerer", style="bold cyan", justify="center"))
+            yield Static(Text("Sourcerer", style="bold", justify="center"))
             yield Static(
                 Text(
                     f"Version: {package_meta.version}"
