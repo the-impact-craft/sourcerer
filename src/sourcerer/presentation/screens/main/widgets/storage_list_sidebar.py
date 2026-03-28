@@ -56,8 +56,8 @@ class StorageItem(Label):
 
     DEFAULT_CSS = """
     StorageItem {
-        width: 90%;
-        padding-left: 1;
+        width: 100%;
+        padding-left: 2;
         height: auto;
         margin:0;
         text-overflow: ellipsis;
@@ -253,6 +253,19 @@ class StorageListSidebar(Vertical):
         self.groupby_access_credentials = groupby_access_credentials
         self._auto_focus_completed = False
 
+    def compose(self) -> ComposeResult:
+        with Horizontal(id="header"):
+            if self.is_loading:
+                yield Spinner()
+            yield GradientWidget(
+                " SOURCERER" if self.is_loading else "  SOURCERER",
+                name="header_click",
+            )
+        if self.groupby_access_credentials:
+            yield from self.render_grouped_by_access_credentials_storages()
+        else:
+            yield from self.render_ungrouped_storages()
+
     def render_ungrouped_storages(self) -> ComposeResult:
         storages = [
             StorageData(access_credentials_uuid, storage)
@@ -320,20 +333,6 @@ class StorageListSidebar(Vertical):
         container = self.query_one(f"#{uuid}_container")
         divider.collapsed = not divider.collapsed
         container.toggle_class("-visible")
-
-    def compose(self) -> ComposeResult:
-        with Horizontal(id="header"):
-            if self.is_loading:
-                yield Spinner()
-            yield GradientWidget(
-                " SOURCERER" if self.is_loading else "🧙SOURCERER",
-                id="left-middle",
-                name="header_click",
-            )
-        if self.groupby_access_credentials:
-            yield from self.render_grouped_by_access_credentials_storages()
-        else:
-            yield from self.render_ungrouped_storages()
 
     def focus(self, scroll_visible: bool = True) -> Self:
         try:

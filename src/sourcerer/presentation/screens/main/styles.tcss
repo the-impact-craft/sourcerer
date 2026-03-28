@@ -31,7 +31,7 @@ StorageContent {
   height: 3;
   width: 100%;
   color: white;
-  padding: 1 1 0 1;
+  padding: 1 1 0 0;
 }
 
 Rule {
