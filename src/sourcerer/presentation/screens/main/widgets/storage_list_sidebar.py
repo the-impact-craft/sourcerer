@@ -251,6 +251,7 @@ class StorageListSidebar(Vertical):
         """Initialize the StorageListSidebar widget."""
         super().__init__(*args, **kwargs)
         self.groupby_access_credentials = groupby_access_credentials
+        self._auto_focus_completed = False
 
     def render_ungrouped_storages(self) -> ComposeResult:
         storages = [
@@ -356,6 +357,11 @@ class StorageListSidebar(Vertical):
                 child.storage_name == event.name and child.access_credentials_uuid == event.access_credentials_uuid
             )
 
+    def watch_storages(self, storages: dict):
+        """Watch for storages being cleared and reset auto-focus flag."""
+        if not storages:
+            self._auto_focus_completed = False
+
     def watch_is_loading(self, old_value, new_value):
         if old_value and not new_value:
             self.call_after_refresh(self.highlight_first_storage)
@@ -363,11 +369,23 @@ class StorageListSidebar(Vertical):
     def highlight_first_storage(self):
         # Try focusing with multiple delays to work around timing issues
         def try_focus():
+            # Stop if auto-focus already completed or user has manually interacted
+            if self._auto_focus_completed:
+                return
+
+            # Check if a StorageItem already has focus (user manually interacted)
+            if isinstance(self.app.focused, StorageItem):
+                self._auto_focus_completed = True
+                return
+
             self.app.action_focus_sidebar()
+
+            # Mark as completed if focus succeeded
+            if isinstance(self.app.focused, StorageItem):
+                self._auto_focus_completed = True
 
         # Immediate attempt
         try_focus()
-        # Retry after delays
+        # Retry after delays only if needed
         self.set_timer(0.5, try_focus)
         self.set_timer(1.0, try_focus)
-        self.set_timer(1.5, try_focus)
