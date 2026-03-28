@@ -43,3 +43,4 @@ class KeyBindings(Enum):
     ENTER = "enter"
     BACKSPACE = "backspace"
     CTRL = "ctrl"
+    SPACE = "space"

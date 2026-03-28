@@ -3,7 +3,7 @@ from enum import Enum
 from typing import ClassVar
 
 from dependency_injector.wiring import Provide
-from textual import on
+from textual import events, on
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal, VerticalScroll
@@ -27,6 +27,7 @@ from sourcerer.presentation.screens.shared.modal_screens import (
     RefreshTriggerableModalScreen,
 )
 from sourcerer.presentation.screens.shared.widgets.button import Button
+from sourcerer.presentation.settings import KeyBindings
 
 
 class ControlsEnum(Enum):
@@ -34,6 +35,28 @@ class ControlsEnum(Enum):
 
 
 class ProviderCredentialsRow(Horizontal):
+
+    can_focus = True
+
+    DEFAULT_CSS = """
+        ProviderCredentialsRow {
+            & > :hover {
+                background: $primary-lighten-2;
+                color: $panel;
+            }
+
+            & > :focus {
+                background: $primary-lighten-2;
+                color: $panel;
+            }
+
+            &.selected {
+                background: $primary;
+                color: $panel;
+            }
+        }
+        """
+
     @dataclass
     class ChangeActiveStatus(Message):
         uuid: str
@@ -95,6 +118,20 @@ class ProviderCredentialsRow(Horizontal):
         self.credentials_service.delete(self.row.uuid)
         self.post_message(ReloadCredentialsRequest())
 
+    def on_key(self, event: events.Key) -> None:
+        """Handle key events to select the storage item."""
+        if event.key == KeyBindings.ARROW_DOWN.value:
+            self.screen.focus_next(ProviderCredentialsRow)
+        elif event.key == KeyBindings.ARROW_UP.value:
+            self.screen.focus_previous(ProviderCredentialsRow)
+        elif event.key == KeyBindings.SPACE.value:
+            self.query_one(Checkbox).toggle()
+        elif event.key == KeyBindings.BACKSPACE.value:
+            self.app.push_screen(
+                QuestionScreen(f"Are you sure you want to delete {self.row.provider} {self.row.name} credentials?"),
+                callback=self.delete_callback,  # type: ignore
+            )
+
 
 class ProviderCredsListScreen(RefreshTriggerableModalScreen):
     CSS_PATH = "styles.tcss"
@@ -123,6 +160,7 @@ class ProviderCredsListScreen(RefreshTriggerableModalScreen):
     ):
         super().__init__(*args, **kwargs)
         self.credentials_service = credentials_service
+        self._auto_focus_completed = False
 
     def compose(self) -> ComposeResult:
         with Container(id=self.MAIN_CONTAINER_ID):
@@ -152,10 +190,47 @@ class ProviderCredsListScreen(RefreshTriggerableModalScreen):
         """
         self.refresh_credentials_list(set_refresh_flag=False)
 
+    def watch_credentials_list(self, credentials_list):
+        """Watch for credentials list changes and auto-focus first row."""
+        if credentials_list and not self._auto_focus_completed:
+            self.call_after_refresh(self._highlight_first_row)
+
+    def _highlight_first_row(self):
+        """Focus the first credentials row with retry logic."""
+
+        def try_focus():
+            # Stop if auto-focus already completed or user has manually interacted
+            if self._auto_focus_completed:
+                return
+
+            # Check if a ProviderCredentialsRow already has focus (user manually interacted)
+            if isinstance(self.app.focused, ProviderCredentialsRow):
+                self._auto_focus_completed = True
+                return
+
+            from textual.css.query import NoMatches
+
+            try:
+                first_row = self.query_one(ProviderCredentialsRow)
+                first_row.focus()
+            except NoMatches:
+                pass
+
+            # Mark as completed if focus succeeded
+            if isinstance(self.app.focused, ProviderCredentialsRow):
+                self._auto_focus_completed = True
+
+        # Immediate attempt
+        try_focus()
+        # Retry after delays only if needed
+        self.set_timer(0.5, try_focus)
+        self.set_timer(1.0, try_focus)
+
     def refresh_credentials_list(self, set_refresh_flag: bool = True):
         """
         Refresh the credentials list by retrieving the latest credentials from the credentials service.
         """
+        self._auto_focus_completed = False
         self.credentials_list = self.credentials_service.list()
         if set_refresh_flag:
             self._requires_storage_refresh = True
