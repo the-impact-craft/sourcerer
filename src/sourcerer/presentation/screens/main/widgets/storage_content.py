@@ -343,9 +343,10 @@ class FileItem(StorageContentItem):
     BINDINGS: ClassVar[list[BindingType]] = [
         Binding("enter", "toggle_selection", "Select/Unselect", priority=True),
         Binding("v", "preview", "Preview", priority=True),
+        Binding("d", "download", "Download", priority=True),
     ]
 
-    def __init__(self, storage, parent_path, file, focus_first, *args, **kwargs):
+    def __init__(self, access_credentials_uuid, storage, parent_path, file, focus_first, *args, **kwargs):
         """Initialize a file item widget.
 
         Args:
@@ -355,6 +356,7 @@ class FileItem(StorageContentItem):
         """
         super().__init__(focus_first, *args, **kwargs)
         self.storage = storage
+        self.access_credentials_uuid = access_credentials_uuid
         self.parent_path = parent_path
         self.file = file
 
@@ -379,6 +381,17 @@ class FileItem(StorageContentItem):
     def action_preview(self):
         """Show file preview."""
         self.post_message(self.Preview(self.file.key, self.file.size))
+
+    def action_download(self):
+        """Show file preview."""
+        self.post_message(
+            DownloadRequest(
+                storage_name=self.storage,
+                path=self.parent_path,
+                access_credentials_uuid=self.access_credentials_uuid,
+                keys=[self.file.key],
+            )
+        )
 
     def on_key(self, event: events.Key) -> None:
         """Handle key events for navigation."""
@@ -647,7 +660,9 @@ class StorageContentContainer(Vertical):
                     self.focus_content,
                 )
             for file in self.storage_content.files:
-                yield FileItem(self.storage, self.path, file, self.focus_content, id=file.uuid)
+                yield FileItem(
+                    self.access_credentials_uuid, self.storage, self.path, file, self.focus_content, id=file.uuid
+                )
 
     def focus(self, scroll_visible: bool = True) -> Self:
         try:

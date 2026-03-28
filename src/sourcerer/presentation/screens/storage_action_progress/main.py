@@ -3,11 +3,13 @@ import os
 import threading
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from pathlib import Path
+from typing import ClassVar
 
 from msgspec._core import Struct
 from rich.text import Text
 from textual import on
 from textual.app import ComposeResult
+from textual.binding import Binding, BindingType
 from textual.color import Gradient
 from textual.containers import Center, Container, Horizontal, VerticalScroll
 from textual.css.query import NoMatches
@@ -98,6 +100,9 @@ class StorageActionProgressScreen(ModalScreen):
     """
 
     CSS_PATH = "styles.tcss"
+    BINDINGS: ClassVar[list[BindingType]] = [
+        Binding("escape", "cancel_screen", "Pop screen"),
+    ]
 
     files_has_been_processed = reactive(False)
 
@@ -210,7 +215,9 @@ class StorageActionProgressScreen(ModalScreen):
         """
         if event.action != "cancel":
             return
+        self.action_cancel_screen()
 
+    def action_cancel_screen(self):
         if self.files_has_been_processed:
             self.dismiss()
             return
