@@ -14,7 +14,7 @@ from textual.containers import Horizontal
 from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.screen import Screen
-from textual.widgets import Footer
+from textual.widgets import Footer, Rule
 
 from sourcerer.domain.package_meta.services import BasePackageMetaService
 from sourcerer.domain.settings.entities import SettingsFields
@@ -50,10 +50,6 @@ from sourcerer.presentation.screens.main.messages.uncheck_files_request import (
     UncheckFilesRequest,
 )
 from sourcerer.presentation.screens.main.messages.upload_request import UploadRequest
-from sourcerer.presentation.screens.main.mixins.resize_containers_watcher_mixin import (
-    ResizeContainersWatcherMixin,
-)
-from sourcerer.presentation.screens.main.widgets.resizing_rule import ResizingRule
 from sourcerer.presentation.screens.main.widgets.storage_content import (
     FileItem,
     StorageContentContainer,
@@ -83,7 +79,7 @@ from sourcerer.presentation.utils import (
 from sourcerer.settings import MAX_PARALLEL_STORAGE_LIST_OPERATIONS
 
 
-class Sourcerer(App, ResizeContainersWatcherMixin):
+class Sourcerer(App):
     """
     A Textual application for managing cloud storage credentials and content.
 
@@ -142,17 +138,14 @@ class Sourcerer(App, ResizeContainersWatcherMixin):
         )
         self.storage_content = StorageContentContainer(id="storage_content_container")
         self.load_percentage = 0
-        self.active_resizing_rule: ResizingRule | None = None
 
     def compose(self) -> ComposeResult:
         with Horizontal(id="main"):
             yield self.storage_list_sidebar
-            yield ResizingRule(
+            yield Rule(
                 id="storage_list_sidebar_container",
                 orientation="vertical",
                 classes="resize-handle",
-                prev_component_id=self.storage_list_sidebar.id,
-                next_component_id=self.storage_content.id,
             )
             yield self.storage_content
         yield Footer()

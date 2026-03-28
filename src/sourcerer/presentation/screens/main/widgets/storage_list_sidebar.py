@@ -124,6 +124,9 @@ class StorageItem(Label):
         """
         self.post_message(SelectStorageItem(self.storage_name, access_credentials_uuid=self.access_credentials_uuid))
 
+    def make_focus(self) -> None:
+        self.focus()
+
 
 class StorageCredentialsDivider(Horizontal):
     @dataclass
@@ -352,3 +355,19 @@ class StorageListSidebar(Vertical):
             child.selected = (
                 child.storage_name == event.name and child.access_credentials_uuid == event.access_credentials_uuid
             )
+
+    def watch_is_loading(self, old_value, new_value):
+        if old_value and not new_value:
+            self.call_after_refresh(self.highlight_first_storage)
+
+    def highlight_first_storage(self):
+        # Try focusing with multiple delays to work around timing issues
+        def try_focus():
+            self.app.action_focus_sidebar()
+
+        # Immediate attempt
+        try_focus()
+        # Retry after delays
+        self.set_timer(0.5, try_focus)
+        self.set_timer(1.0, try_focus)
+        self.set_timer(1.5, try_focus)
