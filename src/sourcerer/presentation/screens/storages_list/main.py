@@ -4,10 +4,11 @@ from enum import Enum
 from typing import ClassVar
 
 from dependency_injector.wiring import Provide
-from textual import on
+from textual import events, on
 from textual.app import ComposeResult
 from textual.binding import Binding, BindingType
 from textual.containers import Container, Horizontal, VerticalScroll
+from textual.css.query import NoMatches
 from textual.reactive import reactive
 from textual.widgets import Label
 
@@ -27,6 +28,7 @@ from sourcerer.presentation.screens.storages_registration.main import (
     StorageEntry,
     StoragesRegistrationScreen,
 )
+from sourcerer.presentation.settings import KeyBindings
 
 
 class ControlsEnum(Enum):
@@ -35,6 +37,22 @@ class ControlsEnum(Enum):
 
 
 class StorageRow(Horizontal):
+    can_focus = True
+
+    DEFAULT_CSS = """
+        StorageRow {
+            &:hover {
+                background: $primary-lighten-2;
+                color: $panel;
+            }
+
+            &:focus {
+                background: $primary-lighten-2;
+                color: $panel;
+            }
+        }
+        """
+
     def __init__(self, storage: Storage, storages_service: StoragesService, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.storage = storage
@@ -75,6 +93,20 @@ class StorageRow(Horizontal):
         self.storages_service.delete(self.storage.uuid)
         self.post_message(ReloadStoragesRequest())
 
+    def on_key(self, event: events.Key) -> None:
+        """Handle key events for navigation."""
+        if event.key == KeyBindings.ARROW_DOWN.value:
+            self.screen.focus_next(StorageRow)
+        elif event.key == KeyBindings.ARROW_UP.value:
+            self.screen.focus_previous(StorageRow)
+        elif event.key == KeyBindings.BACKSPACE.value:
+            self.app.push_screen(
+                QuestionScreen(
+                    f"Are you sure you want to delete {self.storage.credentials_name} {self.storage.name} storage?"
+                ),
+                callback=self.delete_callback,  # type: ignore
+            )
+
 
 class StoragesListScreen(RefreshTriggerableModalScreen):
     CSS_PATH = "styles.tcss"
@@ -99,6 +131,7 @@ class StoragesListScreen(RefreshTriggerableModalScreen):
         super().__init__(*args, **kwargs)
         self.storage_service = storages_service
         self.credentials_service = credentials_service
+        self._auto_focus_completed = False
 
     def compose(self) -> ComposeResult:
         with Container(id=self.MAIN_CONTAINER_ID):
@@ -127,10 +160,45 @@ class StoragesListScreen(RefreshTriggerableModalScreen):
         """
         self.refresh_storages_list(set_refresh_flag=False)
 
+    def watch_storages_list(self, storages_list):
+        """Watch for storages list changes and auto-focus first row."""
+        if storages_list and not self._auto_focus_completed:
+            self.call_after_refresh(self._highlight_first_row)
+
+    def _highlight_first_row(self):
+        """Focus the first storage row with retry logic."""
+
+        def try_focus():
+            # Stop if auto-focus already completed or user has manually interacted
+            if self._auto_focus_completed:
+                return
+
+            # Check if a StorageRow already has focus (user manually interacted)
+            if isinstance(self.app.focused, StorageRow):
+                self._auto_focus_completed = True
+                return
+
+            try:
+                first_row = self.query_one(StorageRow)
+                first_row.focus()
+            except NoMatches:
+                pass
+
+            # Mark as completed if focus succeeded
+            if isinstance(self.app.focused, StorageRow):
+                self._auto_focus_completed = True
+
+        # Immediate attempt
+        try_focus()
+        # Retry after delays only if needed
+        self.set_timer(0.5, try_focus)
+        self.set_timer(1.0, try_focus)
+
     def refresh_storages_list(self, set_refresh_flag: bool = True):
         """
         Refresh the storages list by retrieving the latest storages from the storage service.
         """
+        self._auto_focus_completed = False
         self.storages_list = self.storage_service.list()
         if set_refresh_flag:
             self._requires_storage_refresh = True
